@@ -1,1 +1,34 @@
-<p>home works!</p>
+<section class="rf003">
+  <h2>Minhas Solicitações</h2>
+
+  <div class="table">
+    <div class="row head">
+      <div class="cell when">Data/Hora</div>
+      <div class="cell equip">Equipamento (30)</div>
+      <div class="cell state">Estado</div>
+      <div class="cell actions">Ações</div>
+    </div>
+
+    <div class="row" *ngFor="let item of itens">
+      <div class="cell when">{{ item.dataHoraSolicitacao | date:'short' }}</div>
+      <div class="cell equip" [title]="item.equipamentoDesc30">{{ item.equipamentoDesc30 }}</div>
+      <div class="cell state">
+        <span class="badge">{{ item.estadoSolicitacao }}</span>
+      </div>
+      <div class="cell actions">
+        <button type="button" class="btn" (click)="verSolicitacao(item.solicitacaoId)">
+          Visualizar
+        </button>
+
+        <button
+          *ngIf="item.requiresAction && item.actionType === 'APPROVE_REJECT_BUDGET'"
+          type="button"
+          class="btn primary"
+          (click)="abrirOrcamento(item.solicitacaoId)"
+        >
+          Aprovar / Rejeitar
+        </button>
+      </div>
+    </div>
+  </div>
+</section>

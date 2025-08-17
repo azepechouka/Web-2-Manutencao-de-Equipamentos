@@ -1,0 +1,60 @@
+.rf003 {
+  padding: 16px;
+}
+
+.table {
+  display: grid;
+  gap: 6px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 180px 1fr 180px 220px;
+  align-items: center;
+  background: #1113;
+  border: 1px solid #0002;
+  border-radius: 8px;
+}
+
+.row.head {
+  font-weight: 600;
+  background: transparent;
+  border: none;
+}
+
+.cell {
+  padding: 10px 12px;
+}
+
+.badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  background: #2b6cb0;
+  color: #fff;
+  font-size: 12px;
+}
+
+.btn {
+  padding: 8px 12px;
+  border: 1px solid #444;
+  background: #222;
+  color: #eee;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 8px;
+}
+
+.btn.primary {
+  background: #2b6cb0;
+  border-color: #2b6cb0;
+}
+
+.btn:hover {
+  filter: brightness(1.08);
+}
+
+.equip {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
