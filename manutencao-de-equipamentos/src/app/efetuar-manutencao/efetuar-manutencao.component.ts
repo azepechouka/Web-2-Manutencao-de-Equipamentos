@@ -5,7 +5,7 @@ import { Component } from '@angular/core';
   standalone: true,
   imports: [],
   templateUrl: './efetuar-manutencao.component.html',
-  styleUrl: './efetuar-manutencao.component.css'
+  styleUrls: ['./efetuar-manutencao.component.css']
 })
 export class EfetuarManutencaoComponent {
 

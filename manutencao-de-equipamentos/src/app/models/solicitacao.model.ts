@@ -1,10 +1,10 @@
 export interface Solicitacao {
   id: number;
   clienteId: number;
-  equipamentoId?: number | null;
-  descricaoEquipamento?: string | null;
+  descricaoEquipamento: string;
   descricaoProblema: string;
-  criadoEm: string;      // ISO date
-  statusAtualId: number; // FK para StatusSolicitacao
-  atualizadoEm: string;  // ISO date
+  criadoEm: string;
+  statusAtualId: number;
+  atualizadoEm: string;
+  equipamentoId?: number;
 }
