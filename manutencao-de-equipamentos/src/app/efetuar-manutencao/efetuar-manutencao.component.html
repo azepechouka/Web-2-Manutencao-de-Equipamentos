@@ -1,0 +1,39 @@
+<div class="container">
+    <h2>Efetuar Manutenção</h2>
+  
+    <div class="detalhes-solicitacao">
+      <h4>Dados da Solicitação</h4>
+      <p><strong>Descrição do Equipamento:</strong> {{ solicitacao.descricaoEquipamento }}</p>
+      <p><strong>Categoria do Equipamento:</strong> {{ solicitacao.categoriaEquipamento }}</p>
+      <p><strong>Descrição do Defeito:</strong> {{ solicitacao.descricaoDefeito }}</p>
+      <p><strong>Data da Solicitação:</strong> {{ solicitacao.dataHora }}</p>
+  
+      <h4>Dados do Cliente</h4>
+      <p><strong>Nome do Cliente:</strong> {{ cliente.nome }}</p>
+      <p><strong>Email do Cliente:</strong> {{ cliente.email }}</p>
+      <p><strong>Telefone do Cliente:</strong> {{ cliente.telefone }}</p>
+    </div>
+  
+    <div class="acoes">
+      <button class="btn btn-primary" (click)="iniciarManutencao()">Efetuar Manutenção</button>
+      <button class="btn btn-warning" (click)="redirecionarManutencao()">Redirecionar Manutenção</button>
+    </div>
+    <br>
+    <!-- Campos adicionais para a manutenção, controlados por hidden -->
+    <div [hidden]="!exibirCamposManutencao">
+      <h4>Dados da Manutenção</h4>
+      <div class="form-group">
+        <label for="descricao-manutencao">Descrição da Manutenção:</label>
+        <textarea id="descricao-manutencao" #descricaoManutencao class="form-control" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="orientacoes-cliente">Orientações para o Cliente:</label>
+        <textarea id="orientacoes-cliente" #orientacoesCliente class="form-control" rows="3"></textarea>
+      </div>
+      <button class="btn btn-success" (click)="concluirManutencao(descricaoManutencao.value, orientacoesCliente.value)">Concluir Manutenção</button>
+    </div>
+  
+    <div [hidden]="!mensagem" class="mensagem">
+      <p [innerHTML]="mensagem"></p>
+    </div>
+</div>
