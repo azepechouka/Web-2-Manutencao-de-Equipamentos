@@ -1,0 +1,68 @@
+.container {
+    max-width: 600px;
+    margin: 50px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+  
+h2, h4 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+  
+.detalhes-solicitacao, .form-group {
+    margin-bottom: 20px;
+}
+  
+.acao {
+    margin-bottom: 20px;
+}
+  
+.form-group textarea {
+    width: 100%;
+}
+  
+.acoes {
+    display: flex;
+    justify-content: space-between;
+}
+  
+.btn {
+    padding: 10px 20px;
+    font-size: 16px;
+}
+  
+.btn-primary {
+    background-color: #3490A5;
+    color: white;
+}
+  
+.btn-primary:hover {
+    background-color: #3490A5;
+}
+  
+.btn-warning {
+    background-color: #ffc107;
+    color: white;
+}
+  
+.btn-warning:hover {
+    background-color: #e0a800;
+}
+  
+.btn-success {
+    background-color: #3490A5;
+    color: white;
+}
+  
+.btn-success:hover {
+    background-color: #3490A5;
+}
+  
+.mensagem {
+    text-align: center;
+    margin-top: 20px;
+    color: #000000;
+}
