@@ -1,0 +1,20 @@
+<div *ngIf="solicitacao">
+  <h2>Detalhes da Solicitação</h2>
+  <p><strong>Data/Hora:</strong> {{ solicitacao.dataHora | date:'dd/MM/yyyy HH:mm' }}</p>
+  <p><strong>Equipamento:</strong> {{ solicitacao.equipamento?.descricao }}</p>
+  <p><strong>Categoria:</strong> {{ solicitacao.equipamento?.categoria }}</p>
+  <p><strong>Defeito:</strong> {{ solicitacao.descricaoDefeito }}</p>
+  <p><strong>Estado:</strong> {{ solicitacao.status }}</p>
+
+  <h3>Histórico de Alterações</h3>
+  <ul>
+    <li *ngFor="let h of solicitacao.historicoStatus">
+      <strong>{{ h.dataHora | date:'dd/MM/yyyy HH:mm' }}</strong> - {{ h.status }} por {{ h.funcionario?.nome || 'Sistema' }}
+    </li>
+  </ul>
+  <button type="button" (click)="voltar()">Voltar</button>
+</div>
+<div *ngIf="!solicitacao">
+  <p>Nenhum detalhe da solicitação encontrado.</p>
+  <button type="button" (click)="voltar()">Voltar</button>
+</div>

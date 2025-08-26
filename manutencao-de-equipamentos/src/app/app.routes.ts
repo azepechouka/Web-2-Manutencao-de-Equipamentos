@@ -1,15 +1,24 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './pages/login/login.component';
-import { AutocadastroComponent } from './pages/autocadastro/autocadastro.component';
-import { HomeComponent } from './pages/home/home.component';
-import { EfetuarManutencaoComponent } from './efetuar-manutencao/efetuar-manutencao.component';
-import { SolicitacaoComponent } from './pages/solicitacao/solicitacao.component';
 
 export const routes: Routes = [
-    { path: '', redirectTo: 'login', pathMatch: 'full' },
-    { path: 'login', component: LoginComponent },
-    { path: 'autocadastro', component: AutocadastroComponent },
-    { path: 'home', component: HomeComponent },
-    { path: 'efetuar-manutencao', component: EfetuarManutencaoComponent},
-    { path: 'solicitacao', component: SolicitacaoComponent }
+  {
+    path: '',
+    loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent)
+  },
+  {
+    path: 'login',
+    loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent)
+  },
+  {
+    path: 'autocadastro',
+    loadComponent: () => import('./pages/autocadastro/autocadastro.component').then(m => m.AutocadastroComponent)
+  },
+  {
+    path: 'solicitacao',
+    loadComponent: () => import('./pages/solicitacao/solicitacao.component').then(m => m.SolicitacaoComponent)
+  },
+  {
+    path: 'visualizar-servico/:id',
+    loadComponent: () => import('./pages/visualizar-servico/visualizar-servico.component').then(m => m.VisualizarServicoComponent)
+  }
 ];
