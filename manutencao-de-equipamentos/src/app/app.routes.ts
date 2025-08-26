@@ -4,6 +4,7 @@ import { AutocadastroComponent } from './pages/autocadastro/autocadastro.compone
 import { HomeComponent } from './pages/home/home.component';
 import { EfetuarManutencaoComponent } from './efetuar-manutencao/efetuar-manutencao.component';
 import { SolicitacaoComponent } from './pages/solicitacao/solicitacao.component';
+import { RedirecionarManutencaoComponent } from './redirecionar-manutencao/redirecionar-manutencao.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -11,5 +12,6 @@ export const routes: Routes = [
     { path: 'autocadastro', component: AutocadastroComponent },
     { path: 'home', component: HomeComponent },
     { path: 'efetuar-manutencao', component: EfetuarManutencaoComponent},
-    { path: 'solicitacao', component: SolicitacaoComponent }
+    { path: 'solicitacao', component: SolicitacaoComponent },
+    { path: 'redirecionar-manutencao/:solicitacao', component: RedirecionarManutencaoComponent}
 ];
