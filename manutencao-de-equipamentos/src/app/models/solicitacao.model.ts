@@ -3,7 +3,7 @@ export interface Solicitacao {
   clienteId: number;
   descricaoEquipamento: string;
   descricaoProblema: string;
-  criadoEm: string;
+  criadoEm: Date; // ou string, conforme seu uso
   statusAtualId: number;
   atualizadoEm: string;
   equipamentoId?: number;
