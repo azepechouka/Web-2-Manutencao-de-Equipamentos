@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { RouterModule } from '@angular/router';
+// Adicione o Router
+import { Router, RouterModule } from '@angular/router';
 import { SolicitacoesService, ListItemRF003 } from '../../services/solicitacoes.service';
 
 @Component({
@@ -13,6 +14,8 @@ import { SolicitacoesService, ListItemRF003 } from '../../services/solicitacoes.
 })
 export class HomeComponent implements OnInit {
   private service = inject(SolicitacoesService);
+  // Injete o Router
+  private router = inject(Router);
 
   itens: ListItemRF003[] = [];
   clienteId = 1; // substituir pelo id do cliente autenticado
@@ -22,14 +25,13 @@ export class HomeComponent implements OnInit {
   }
 
   verSolicitacao(id: number) {
-    // Navegar para RF008
-    console.log('Visualizar solicitação', id);
-    // this.router.navigate(['/solicitacoes', id]);
+    // Agora navega para a rota correta
+    this.router.navigate(['/solicitacao', id]);
   }
 
   abrirOrcamento(id: number) {
-    // Navegar para RF005
+    // Futuramente, navegará para RF005
     console.log('Abrir orçamento (aprovar/rejeitar)', id);
-    // this.router.navigate(['/orcamento', id]);
+    this.router.navigate(['/solicitacao', id]); // Por enquanto, leva para a mesma tela de detalhes
   }
 }
