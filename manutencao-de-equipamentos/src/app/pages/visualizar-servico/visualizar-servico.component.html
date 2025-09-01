@@ -1,0 +1,69 @@
+<div class="container mt-4" *ngIf="solicitacao$ | async as s; else loading">
+  <div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h3>Detalhes da Solicitação #{{ s.id }}</h3>
+      <a routerLink="/home" class="btn btn-secondary">Voltar para a Lista</a>
+    </div>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-7">
+          <h5 class="mb-3">Informações do Equipamento</h5>
+          <table class="table table-borderless table-sm">
+            <tbody>
+              <tr>
+                <th scope="row" style="width: 200px;">Data e Hora da Abertura:</th>
+                <td>{{ s.criadoEm | date:'dd/MM/yyyy, HH:mm' }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Status Atual:</th>
+                <td><span class="badge bg-primary">{{ s.statusAtualNome }}</span></td>
+              </tr>
+              <tr>
+                <th scope="row">Descrição do Equipamento:</th>
+                <td>{{ s.descricaoEquipamento }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Descrição do Problema:</th>
+                <td>{{ s.descricaoProblema }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="col-md-5">
+            <h5 class="mb-3">Ações Disponíveis</h5>
+            <div class="d-grid gap-2">
+                <button class="btn btn-success">Aprovar Orçamento</button>
+                <button class="btn btn-danger">Rejeitar Orçamento</button>
+                <button class="btn btn-info">Resgatar Serviço</button>
+                <button class="btn btn-primary">Pagar Serviço</button>
+            </div>
+            <p class="text-muted small mt-3">
+              * Os botões de ação serão habilitados de acordo com o status da solicitação.
+            </p>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <h5 class="mb-3">Histórico de Atualizações</h5>
+      <div class="timeline">
+        <div class="timeline-item" *ngFor="let h of s.historico">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <p class="fw-bold mb-1">{{ h.statusNome }}</p>
+            <p class="mb-1">
+                <span class="text-muted">Por:</span> {{ h.usuarioNome }}
+                <span *ngIf="h.observacao">| <span class="text-muted">Obs:</span> {{ h.observacao }}</span>
+            </p>
+            <p class="text-muted small">{{ h.criadoEm | date:'dd/MM/yyyy, HH:mm' }}</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<ng-template #loading>
+  <p class="text-center mt-5">Carregando detalhes da solicitação...</p>
+</ng-template>

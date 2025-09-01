@@ -1,0 +1,35 @@
+<div class="container">
+    <h2>Redirecionar Manutenção</h2>
+  
+    <div class="detalhes-solicitacao">
+        <h4>Dados da Solicitação</h4>
+        <p><strong>Nome do Cliente:</strong> {{ solicitacao.nomeCliente }}</p>
+        <p><strong>Descrição do Equipamento:</strong> {{ solicitacao?.descricao }}</p>
+        <p><strong>Data da Solicitação:</strong> {{ solicitacao?.dataHora | date: "dd/MM/yyyy, HH:mm" }}</p>
+      </div>
+  
+    <div class="form-group">
+      <label for="funcionario-destino">Selecione o Funcionário Destino:</label>
+      <select id="funcionario-destino" class="form-control" [(ngModel)]="funcionarioDestino">
+        <option *ngFor="let funcionario of funcionarios" [value]="funcionario">
+          {{ funcionario }}
+        </option>
+      </select>
+    </div>
+  
+    <div class="acoes">
+        <button class="btn btn-warning" (click)="redirecionarManutencao()">Redirecionar Manutenção</button>
+        <button class="btn btn-primary" (click)="voltar()">Voltar para a Lista</button>
+    </div>
+  
+    <div *ngIf="mensagem" class="mensagem">
+      <p>{{ mensagem }}</p>
+    </div>
+    <br>
+    <h4>Histórico de Redirecionamentos</h4>
+    <ul>
+      <li *ngFor="let historico of historicoRedirecionamento">
+        Data/Hora: {{ historico.dataHora }} - De: {{ historico.origem }} - Para: {{ historico.destino }}
+      </li>
+    </ul>
+  </div>

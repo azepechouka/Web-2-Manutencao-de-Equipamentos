@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Solicitacao } from '../../models/solicitacao.model';
+import { SolicitacoesService } from '../../services/solicitacoes.service';
+import { Orcamento } from '../../models/orcamento.models';
 
 @Component({
   selector: 'app-solicitacao',
@@ -13,8 +15,12 @@ import { Solicitacao } from '../../models/solicitacao.model';
 export class SolicitacaoComponent {
   solicitacaoForm: FormGroup;
   mensagem: string = '';
+  // Dados da solicitação enviada e orçamento (se disponível)
+  solicitacaoEnviada?: Solicitacao;
+  orcamentoDisponivel?: Orcamento;
+  loading: boolean = false;
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private solicitacoesService: SolicitacoesService) {
     this.solicitacaoForm = this.fb.group({
       descricaoEquipamento: ['', Validators.required],
       descricaoProblema: ['', Validators.required],
@@ -33,16 +39,60 @@ export class SolicitacaoComponent {
         descricaoEquipamento: this.solicitacaoForm.value.descricaoEquipamento,
         descricaoProblema: this.solicitacaoForm.value.descricaoProblema,
         criadoEm: now,
-        statusAtualId: this.solicitacaoForm.value.statusAtualId,
+        statusAtualId: 1,
         atualizadoEm: now,
         equipamentoId: this.solicitacaoForm.value.equipamentoId ?? undefined
       };
 
       console.log(solicitacao);
-      this.mensagem = 'Solicitação registrada com sucesso!';
-      this.solicitacaoForm.reset({ clienteId: 1, statusAtualId: 1, equipamentoId: null });
+      this.solicitacaoEnviada = solicitacao;
+      this.mensagem = 'Solicitação registrada com sucesso! Aguardando orçamento da empresa.';
+      
+      // Simula que após o envio, a empresa já tem um orçamento pronto
+      // Em um cenário real, isso viria de uma API após algum tempo
+      setTimeout(() => {
+        this.simularOrcamentoRecebido(solicitacao.id);
+      }, 2000);
     } else {
       this.mensagem = 'Por favor, preencha todos os campos.';
     }
+  }
+
+  private simularOrcamentoRecebido(solicitacaoId: number) {
+    // Simula recebimento de orçamento da empresa
+    const orcamento: Orcamento = {
+      id: Date.now(),
+      solicitacaoId: solicitacaoId,
+      valorTotal: 780.5,
+      moeda: 'BRL',
+      observacao: 'Substituição do conjunto de roletes e limpeza interna',
+      criadoEm: new Date().toISOString(),
+    };
+    
+    this.orcamentoDisponivel = orcamento;
+    this.solicitacaoEnviada!.statusAtualId = 2; // ORÇADA
+    this.mensagem = 'Orçamento recebido! Revise e aprove ou rejeite o serviço.';
+  }
+
+  aprovarOrcamento() {
+    if (!this.solicitacaoEnviada) return;
+    this.solicitacoesService
+      .aprovarOrcamento(this.solicitacaoEnviada.id)
+      .subscribe((ok) => {
+        this.mensagem = ok
+          ? 'Serviço aprovado com sucesso.'
+          : 'Não foi possível aprovar o serviço.';
+      });
+  }
+
+  rejeitarOrcamento() {
+    if (!this.solicitacaoEnviada) return;
+    this.solicitacoesService
+      .rejeitarOrcamento(this.solicitacaoEnviada.id)
+      .subscribe((ok) => {
+        this.mensagem = ok
+          ? 'Serviço rejeitado com sucesso.'
+          : 'Não foi possível rejeitar o serviço.';
+      });
   }
 }
