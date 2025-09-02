@@ -1,0 +1,87 @@
+<div class="container">
+  <button (click)="voltarPaginaInicial()" class="btn btn-primary mb-3">
+    <i class="bi bi-arrow-left"></i> Voltar à Página Inicial
+  </button>
+
+  <h2 class="mt-4">Visualização de Solicitações</h2>
+
+  <div class="mb-3">
+    <label for="filtro" class="form-label">Selecione um Filtro</label>
+    <select id="filtro" class="form-select" [(ngModel)]="filtroSelecionado" (change)="onFiltroChange()">
+      <option value="TODOS">Todos</option>
+      <option value="HOJE">Hoje</option>
+      <option value="PERIODO">Período</option>
+    </select>
+  </div>
+
+  <div *ngIf="filtroSelecionado === 'PERIODO'" class="mb-3">
+    <label class="form-label">Selecione um período</label>
+    <div class="row g-2">
+      <div class="col-md-6">
+        <input type="date" class="form-control" formControlName="start" [formGroup]="range" placeholder="Data de Início">
+        <div class="text-danger mt-1" *ngIf="range.controls.start.hasError('matStartDateInvalid')">
+          Data de início inválida
+        </div>
+      </div>
+      <div class="col-md-6">
+        <input type="date" class="form-control" formControlName="end" [formGroup]="range" placeholder="Data de Fim">
+        <div class="text-danger mt-1" *ngIf="range.controls.end.hasError('matEndDateInvalid')">
+          Data de fim inválida
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <table class="table table-striped mt-4">
+    <thead>
+      <tr>
+        <th>Data/Hora</th>
+        <th>Nome do Cliente</th>
+        <th>Descrição do Equipamento</th>
+        <th>Estado</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let solicitacao of obterSolicitacoesPorPagina()"
+          [ngClass]="{
+            'estado-aberta': solicitacao.estado === 'ABERTA',
+            'estado-orcada': solicitacao.estado === 'ORÇADA',
+            'estado-rejeitada': solicitacao.estado === 'REJEITADA',
+            'estado-aprovada': solicitacao.estado === 'APROVADA',
+            'estado-redirecionada': solicitacao.estado === 'REDIRECIONADA',
+            'estado-aguardando-pagamento': solicitacao.estado === 'AGUARDANDO PAGAMENTO',
+            'estado-paga': solicitacao.estado === 'PAGA',
+            'estado-finalizada': solicitacao.estado === 'FINALIZADA'
+          }">
+        <td>{{ solicitacao.dataHora | date: 'dd/MM/yyyy, HH:mm' }}</td>
+        <td>{{ solicitacao.nomeCliente || solicitacao.cliente || 'Fulano de Tal' }}</td>
+        <td>
+          {{ solicitacao.descricao.length > 30 ? (solicitacao.descricao | slice: 0:30) + '...' : solicitacao.descricao }}
+        </td>
+        <td>{{ solicitacao.estado }}</td>
+        <td>
+          <ng-container [ngSwitch]="solicitacao.estado">
+            <button *ngSwitchCase="'ABERTA'" class="btn btn-sm btn-success" (click)="efetuarOrcamento(solicitacao)">Efetuar Orçamento</button>
+            <button *ngSwitchCase="'APROVADA'" class="btn btn-sm btn-warning" (click)="efetuarManutencao(solicitacao)">Efetuar Manutenção</button>
+            <button *ngSwitchCase="'REDIRECIONADA'" class="btn btn-sm btn-warning" (click)="efetuarManutencao(solicitacao)">Efetuar Manutenção</button>
+            <button *ngSwitchCase="'PAGA'" class="btn btn-sm btn-primary" (click)="finalizarSolicitacao(solicitacao)">Finalizar Solicitação</button>
+          </ng-container>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="d-flex align-items-center justify-content-center mt-4">
+    <button (click)="paginaAnterior()" class="btn btn-outline-secondary me-3" [disabled]="paginaAtual === 1">
+      <i class="bi bi-chevron-left"></i>
+    </button>
+
+    <span>Página {{ paginaAtual }} de {{ (solicitacoesFiltradas.length + itensPorPagina - 1) / itensPorPagina | number: '1.0-0' }}</span>
+
+    <button (click)="proximaPagina()" class="btn btn-outline-secondary ms-3"
+            [disabled]="paginaAtual * itensPorPagina >= solicitacoesFiltradas.length">
+      <i class="bi bi-chevron-right"></i>
+    </button>
+  </div>
+</div>
