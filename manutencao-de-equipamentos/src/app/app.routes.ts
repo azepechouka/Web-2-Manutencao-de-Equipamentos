@@ -8,14 +8,19 @@ import { EfetuarManutencaoComponent } from './efetuar-manutencao/efetuar-manuten
 import { SolicitacaoComponent } from './pages/solicitacao/solicitacao.component';
 import { RedirecionarManutencaoComponent } from './redirecionar-manutencao/redirecionar-manutencao.component';
 import { VisualizarServicoComponent } from './pages/visualizar-servico/visualizar-servico.component';
+import { HomeFuncionarioComponent } from './pages/home-funcionario/home-funcionario.component';
 
 export const routes: Routes = [
+
     { path: '', redirectTo: 'login', pathMatch: 'full' },
     { path: 'login', component: LoginComponent },
     { path: 'autocadastro', component: AutocadastroComponent },
-    { path: 'home', component: HomeComponent },
-    { path: 'efetuar-manutencao', component: EfetuarManutencaoComponent },
+    { path: 'home', component: HomeComponent }, 
     { path: 'solicitacao', component: SolicitacaoComponent },
-    { path: 'solicitacao/:id', component: VisualizarServicoComponent }, // Rota para visualizar detalhes
+    { path: 'solicitacao/:id', component: VisualizarServicoComponent },
+
+
+    { path: 'funcionario/home', component: HomeFuncionarioComponent },
+    { path: 'efetuar-manutencao', component: EfetuarManutencaoComponent },
     { path: 'redirecionar-manutencao/:solicitacao', component: RedirecionarManutencaoComponent }
 ];
