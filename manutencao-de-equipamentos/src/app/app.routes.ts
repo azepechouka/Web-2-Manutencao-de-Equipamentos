@@ -9,7 +9,6 @@ import { SolicitacaoComponent } from './pages/solicitacao/solicitacao.component'
 import { RedirecionarManutencaoComponent } from './redirecionar-manutencao/redirecionar-manutencao.component';
 import { VisualizarServicoComponent } from './pages/visualizar-servico/visualizar-servico.component';
 import { HomeFuncionarioComponent } from './pages/home-funcionario/home-funcionario.component';
-import { VisualizacaoSolicitacaoFuncionarioComponent } from './visualizacao-solicitacao-funcionario/visualizacao-solicitacao-funcionario.component';
 
 export const routes: Routes = [
 
@@ -23,6 +22,5 @@ export const routes: Routes = [
 
     { path: 'funcionario/home', component: HomeFuncionarioComponent },
     { path: 'efetuar-manutencao', component: EfetuarManutencaoComponent },
-    { path: 'redirecionar-manutencao/:solicitacao', component: RedirecionarManutencaoComponent },
-    { path: 'funcionario/visualizacao-solicitacap', component: VisualizacaoSolicitacaoFuncionarioComponent },
+    { path: 'redirecionar-manutencao/:solicitacao', component: RedirecionarManutencaoComponent }
 ];
