@@ -120,4 +120,51 @@ export class SolicitacoesService {
 
     return of(detalhe);
   }
+
+  // Métodos para aprovar/rejeitar orçamentos
+  aprovarOrcamento(solicitacaoId: ID): Observable<boolean> {
+    // Simula aprovação do orçamento
+    const solicitacao = this.solicitacoes.find(s => s.id === solicitacaoId);
+    if (solicitacao) {
+      solicitacao.statusAtualId = 3; // APROVADA
+      solicitacao.atualizadoEm = new Date().toISOString();
+      
+      // Adiciona ao histórico
+      this.historicos.push({
+        id: Date.now(),
+        solicitacaoId: solicitacaoId,
+        deStatusId: 2,
+        paraStatusId: 3,
+        criadoEm: new Date().toISOString(),
+        usuarioId: 1,
+        observacao: 'Orçamento aprovado pelo cliente'
+      });
+      
+      return of(true);
+    }
+    return of(false);
+  }
+
+  rejeitarOrcamento(solicitacaoId: ID): Observable<boolean> {
+    // Simula rejeição do orçamento
+    const solicitacao = this.solicitacoes.find(s => s.id === solicitacaoId);
+    if (solicitacao) {
+      solicitacao.statusAtualId = 4; // REJEITADA
+      solicitacao.atualizadoEm = new Date().toISOString();
+      
+      // Adiciona ao histórico
+      this.historicos.push({
+        id: Date.now(),
+        solicitacaoId: solicitacaoId,
+        deStatusId: 2,
+        paraStatusId: 4,
+        criadoEm: new Date().toISOString(),
+        usuarioId: 1,
+        observacao: 'Orçamento rejeitado pelo cliente'
+      });
+      
+      return of(true);
+    }
+    return of(false);
+  }
 }
