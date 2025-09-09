@@ -1,74 +1,98 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
-import { SolicitacoesService } from '../../services/solicitacoes.service';
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Solicitacao } from '../../models/solicitacao.model';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { SolicitacoesService } from '../../services/solicitacoes.service';
+import { Orcamento } from '../../models/orcamento.models';
 
 @Component({
   selector: 'app-solicitacao',
   standalone: true,
-  imports: [CommonModule, RouterModule, DatePipe, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './solicitacao.component.html',
-  styleUrls: ['./solicitacao.component.css'],
+  styleUrls: ['./solicitacao.component.css']
 })
-export class SolicitacaoComponent implements OnInit {
-  solicitacaoEnviada!: Solicitacao;
-  formAprovar!: FormGroup;
-  formRejeitar!: FormGroup;
+export class SolicitacaoComponent {
+  solicitacaoForm: FormGroup;
+  mensagem: string = '';
+  // Dados da solicitação enviada e orçamento (se disponível)
+  solicitacaoEnviada?: Solicitacao;
+  orcamentoDisponivel?: Orcamento;
+  loading: boolean = false;
 
-  constructor(
-    private route: ActivatedRoute,
-    private service: SolicitacoesService,
-    private fb: FormBuilder
-  ) {}
+  constructor(private fb: FormBuilder, private solicitacoesService: SolicitacoesService) {
+    this.solicitacaoForm = this.fb.group({
+      descricaoEquipamento: ['', Validators.required],
+      descricaoProblema: ['', Validators.required],
+      clienteId: [1, Validators.required],
+      statusAtualId: [1, Validators.required],
+      equipamentoId: [null]
+    });
+  }
 
-  ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
+  onSubmit() {
+    if (this.solicitacaoForm.valid) {
+      const now = new Date().toISOString();
+      const solicitacao: Solicitacao = {
+        id: Date.now(),
+        clienteId: this.solicitacaoForm.value.clienteId,
+        descricaoEquipamento: this.solicitacaoForm.value.descricaoEquipamento,
+        descricaoProblema: this.solicitacaoForm.value.descricaoProblema,
+        criadoEm: now,
+        statusAtualId: 1,
+        atualizadoEm: now,
+        equipamentoId: this.solicitacaoForm.value.equipamentoId ?? undefined
+      };
+
+      console.log(solicitacao);
+      this.solicitacaoEnviada = solicitacao;
+      this.mensagem = 'Solicitação registrada com sucesso! Aguardando orçamento da empresa.';
+      
+      // Simula que após o envio, a empresa já tem um orçamento pronto
+      // Em um cenário real, isso viria de uma API após algum tempo
+      setTimeout(() => {
+        this.simularOrcamentoRecebido(solicitacao.id);
+      }, 2000);
+    } else {
+      this.mensagem = 'Por favor, preencha todos os campos.';
+    }
+  }
+
+  private simularOrcamentoRecebido(solicitacaoId: number) {
+    // Simula recebimento de orçamento da empresa
+    const orcamento: Orcamento = {
+      id: Date.now(),
+      solicitacaoId: solicitacaoId,
+      valorTotal: 780.5,
+      moeda: 'BRL',
+      observacao: 'Substituição do conjunto de roletes e limpeza interna',
+      criadoEm: new Date().toISOString(),
+    };
     
-    // this.solicitacaoEnviada = this.service.getById(+id!);
-
-    this.formAprovar = this.fb.group({
-     
-    });
-
-    this.formRejeitar = this.fb.group({
-      motivo: ['', Validators.required],
-    });
+    this.orcamentoDisponivel = orcamento;
+    this.solicitacaoEnviada!.statusAtualId = 2; // ORÇADA
+    this.mensagem = 'Orçamento recebido! Revise e aprove ou rejeite o serviço.';
   }
 
-  aprovar() {
-    if (this.formAprovar.valid) {
-      this.service
-        .aprovarOrcamento(this.solicitacaoEnviada.id)
-        .subscribe((ok: boolean) => {
-          if (ok) {
-            console.log('Orçamento aprovado com sucesso.');
-            
-          } else {
-            console.error('Falha ao aprovar orçamento.');
-          }
-        });
-    }
+  aprovarOrcamento() {
+    if (!this.solicitacaoEnviada) return;
+    this.solicitacoesService
+      .aprovarOrcamento(this.solicitacaoEnviada.id)
+      .subscribe((ok) => {
+        this.mensagem = ok
+          ? 'Serviço aprovado com sucesso.'
+          : 'Não foi possível aprovar o serviço.';
+      });
   }
 
-  rejeitar() {
-    if (this.formRejeitar.valid) {
-      const motivo = this.formRejeitar.get('motivo')?.value;
-      this.service
-        .rejeitarOrcamento(this.solicitacaoEnviada.id, motivo) 
-        .subscribe((ok: boolean) => { 
-          if (ok) {
-            console.log('Orçamento rejeitado com sucesso.');
-          } else {
-            console.error('Falha ao rejeitar orçamento.');
-          }
-        });
-    }
+  rejeitarOrcamento() {
+    if (!this.solicitacaoEnviada) return;
+    this.solicitacoesService
+      .rejeitarOrcamento(this.solicitacaoEnviada.id)
+      .subscribe((ok) => {
+        this.mensagem = ok
+          ? 'Serviço rejeitado com sucesso.'
+          : 'Não foi possível rejeitar o serviço.';
+      });
   }
 }
