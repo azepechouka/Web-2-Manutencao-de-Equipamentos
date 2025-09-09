@@ -43,8 +43,11 @@ public class Usuario {
   @Column(nullable = false, length = 20)
   private PerfilUsuario perfil;
 
-  @Column(name = "senha_hash", nullable = false)
+ @Column(name = "senha_hash", nullable = false, length = 512)
   private String senhaHash;
+
+  @Column(name = "senha_salt", nullable = false, length = 256)
+  private String senhaSalt;
 
   @Column(nullable = false)
   private boolean ativo = true;
