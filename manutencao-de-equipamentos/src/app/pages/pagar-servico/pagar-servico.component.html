@@ -1,0 +1,23 @@
+<div class="card-pagamento">
+  <h2>Confirmar Pagamento</h2>
+  <hr>
+
+  <div class="detalhes-solicitacao">
+    <h4>Resumo do Serviço</h4>
+    <p><strong>Protocolo:</strong> {{ solicitacao.protocolo }}</p>
+    <p><strong>Equipamento:</strong> {{ solicitacao.equipamento }}</p>
+    <p><strong>Defeito Reportado:</strong> {{ solicitacao.defeito }}</p>
+  </div>
+
+  <div class="valor-pagar">
+    <p class="valor-pagar-label">Valor total a pagar</p>
+    <p class="valor-destaque">{{ solicitacao.valor | currency:'BRL' }}</p>
+  </div>
+
+  <button class="btn btn-primary btn-confirmar-pagamento" (click)="confirmarPagamento()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-lock-fill" viewBox="0 0 16 16">
+      <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2m3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2"/>
+    </svg>
+    Pagar com Segurança
+  </button>
+</div>
