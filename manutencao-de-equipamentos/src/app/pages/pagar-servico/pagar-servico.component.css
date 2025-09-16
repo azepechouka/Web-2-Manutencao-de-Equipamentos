@@ -1,0 +1,92 @@
+:host {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  background-color: #f4f7f6;
+}
+
+.card-pagamento {
+  width: 100%;
+  max-width: 500px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  padding: 2.5rem;
+  text-align: center;
+  border: 1px solid #e0e0e0;
+}
+
+.card-pagamento h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.card-pagamento hr {
+  border-color: #eee;
+  margin-bottom: 2rem;
+}
+
+.detalhes-solicitacao {
+  text-align: left;
+  margin-bottom: 2rem;
+  color: #555;
+}
+
+.detalhes-solicitacao h4 {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1rem;
+  border-left: 4px solid #007bff;
+  padding-left: 10px;
+}
+
+.detalhes-solicitacao p {
+  margin: 0.75rem 0;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.valor-pagar {
+  margin-bottom: 2.5rem;
+}
+
+.valor-pagar-label {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.valor-destaque {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #28a745; /* Verde para destacar o valor */
+}
+
+.btn-confirmar-pagamento {
+  width: 100%;
+  padding: 0.8rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px; /* Espaço entre o ícone e o texto */
+}
+
+.btn-confirmar-pagamento:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+.btn-confirmar-pagamento:active {
+  transform: translateY(0);
+}

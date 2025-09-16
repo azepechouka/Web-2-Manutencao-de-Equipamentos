@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <div class="container mt-4" *ngIf="solicitacao$ | async as s; else loading">
   <div class="card shadow-sm">
     <div class="card-header d-flex justify-content-between align-items-center">
@@ -107,3 +108,25 @@
 </ng-template>
 
 
+=======
+<div class="modal-overlay" *ngIf="visivel">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h3>Rejeitar Orçamento</h3>
+      <button class="close-button" (click)="cancelar()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p>Por favor, descreva o motivo da rejeição do orçamento. Sua opinião é importante para nós.</p>
+      <textarea
+        [(ngModel)]="motivoRejeicao"
+        placeholder="Ex: O valor ficou acima do esperado, encontrei outra solução, etc."
+        rows="5">
+      </textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="cancelar()">Cancelar</button>
+      <button class="btn btn-danger" (click)="confirmar()">Confirmar Rejeição</button>
+    </div>
+  </div>
+</div>
+>>>>>>> 28878213334368e82283dc2888dbdabf010c9ff6

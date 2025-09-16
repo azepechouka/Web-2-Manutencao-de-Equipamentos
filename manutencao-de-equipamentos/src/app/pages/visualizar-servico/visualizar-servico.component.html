@@ -70,8 +70,8 @@
           <div class="timeline-content">
             <p class="fw-bold mb-1">{{ h.statusNome }}</p>
             <p class="mb-1">
-                <span class="text-muted">Por:</span> {{ h.usuarioNome }}
-                <span *ngIf="h.observacao">| <span class="text-muted">Obs:</span> {{ h.observacao }}</span>
+              <span class="text-muted">Por:</span> {{ h.usuarioNome }}
+              <span *ngIf="h.observacao">| <span class="text-muted">Obs:</span> {{ h.observacao }}</span>
             </p>
             <p class="text-muted small">{{ h.criadoEm | date:'dd/MM/yyyy, HH:mm' }}</p>
           </div>
@@ -85,3 +85,12 @@
 <ng-template #loading>
   <p class="text-center mt-5">Carregando detalhes da solicitação...</p>
 </ng-template>
+<<<<<<< HEAD
+=======
+
+<app-rejeitar-servico
+  [visivel]="mostrarModalRejeicao"
+  (fechar)="fecharModalRejeicao()"
+  (confirmarRejeicao)="onConfirmarRejeicao($event)">
+</app-rejeitar-servico>
+>>>>>>> 28878213334368e82283dc2888dbdabf010c9ff6

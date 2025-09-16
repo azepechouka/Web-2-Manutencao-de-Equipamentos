@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -5,10 +6,16 @@ import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { SolicitacoesService, DetalheSolicitacao } from '../../services/solicitacoes.service';
 import { Orcamento } from '../../models/orcamento.models';
+=======
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms'; // Importe o FormsModule
+>>>>>>> 28878213334368e82283dc2888dbdabf010c9ff6
 
 @Component({
   selector: 'app-rejeitar-servico',
   standalone: true,
+<<<<<<< HEAD
   imports: [CommonModule, RouterModule, FormsModule, DatePipe],
   templateUrl: './rejeitar-servico.component.html',
   styleUrls: ['./rejeitar-servico.component.css']
@@ -67,3 +74,36 @@ export class RejeitarServicoComponent implements OnInit {
     return this.maxLength - this.motivoRejeicao.length;
   }
 }
+=======
+  imports: [CommonModule, FormsModule], // Adicione o FormsModule
+  templateUrl: './rejeitar-servico.component.html',
+  styleUrls: ['./rejeitar-servico.component.css']
+})
+export class RejeitarServicoComponent {
+
+  @Input() visivel: boolean = false;
+  @Output() fechar = new EventEmitter<void>();
+  @Output() confirmarRejeicao = new EventEmitter<string>();
+
+  motivoRejeicao: string = '';
+
+  confirmar(): void {
+    // Validação para garantir que um motivo foi inserido
+    if (this.motivoRejeicao.trim()) {
+      this.confirmarRejeicao.emit(this.motivoRejeicao);
+      this.resetar();
+    } else {
+      alert('Por favor, informe o motivo da rejeição.');
+    }
+  }
+
+  cancelar(): void {
+    this.fechar.emit();
+    this.resetar();
+  }
+
+  private resetar(): void {
+    this.motivoRejeicao = '';
+  }
+}
+>>>>>>> 28878213334368e82283dc2888dbdabf010c9ff6
