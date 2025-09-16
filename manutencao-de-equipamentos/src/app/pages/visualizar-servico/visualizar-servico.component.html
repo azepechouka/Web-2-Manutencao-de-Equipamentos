@@ -31,15 +31,21 @@
         </div>
         <div class="col-md-5">
             <h5 class="mb-3">Ações Disponíveis</h5>
-            <div class="d-grid gap-2">
+            <div *ngIf="s.statusAtualNome === 'ORÇADA'" class="d-grid gap-2">
+                <p class="text-muted small">O orçamento para este serviço está pronto. Você pode aprová-lo para iniciar o conserto ou rejeitá-lo.</p>
                 <button class="btn btn-success">Aprovar Orçamento</button>
-                <button class="btn btn-danger">Rejeitar Orçamento</button>
+                <button class="btn btn-danger" (click)="abrirModalRejeicao()">Rejeitar Orçamento</button>
+            </div>
+
+            <div *ngIf="s.statusAtualNome === 'REJEITADA'" class="d-grid gap-2">
+                 <p class="text-muted small">Você rejeitou este orçamento. Se mudar de ideia, pode resgatar o serviço.</p>
                 <button class="btn btn-info">Resgatar Serviço</button>
+            </div>
+
+            <div *ngIf="s.statusAtualNome === 'ARRUMADA'" class="d-grid gap-2">
+                 <p class="text-muted small">Seu equipamento foi consertado! Efetue o pagamento para prosseguir.</p>
                 <button class="btn btn-primary">Pagar Serviço</button>
             </div>
-            <p class="text-muted small mt-3">
-              * Os botões de ação serão habilitados de acordo com o status da solicitação.
-            </p>
         </div>
       </div>
 
@@ -52,8 +58,8 @@
           <div class="timeline-content">
             <p class="fw-bold mb-1">{{ h.statusNome }}</p>
             <p class="mb-1">
-                <span class="text-muted">Por:</span> {{ h.usuarioNome }}
-                <span *ngIf="h.observacao">| <span class="text-muted">Obs:</span> {{ h.observacao }}</span>
+              <span class="text-muted">Por:</span> {{ h.usuarioNome }}
+              <span *ngIf="h.observacao">| <span class="text-muted">Obs:</span> {{ h.observacao }}</span>
             </p>
             <p class="text-muted small">{{ h.criadoEm | date:'dd/MM/yyyy, HH:mm' }}</p>
           </div>
@@ -67,3 +73,9 @@
 <ng-template #loading>
   <p class="text-center mt-5">Carregando detalhes da solicitação...</p>
 </ng-template>
+
+<app-rejeitar-servico
+  [visivel]="mostrarModalRejeicao"
+  (fechar)="fecharModalRejeicao()"
+  (confirmarRejeicao)="onConfirmarRejeicao($event)">
+</app-rejeitar-servico>
