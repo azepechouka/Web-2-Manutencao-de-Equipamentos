@@ -31,11 +31,29 @@
         </div>
         <div class="col-md-5">
             <h5 class="mb-3">Ações Disponíveis</h5>
-            <div class="d-grid gap-2">
-                <button class="btn btn-success">Aprovar Orçamento</button>
-                <button class="btn btn-danger">Rejeitar Orçamento</button>
-                <button class="btn btn-info">Resgatar Serviço</button>
-                <button class="btn btn-primary">Pagar Serviço</button>
+            <div class="d-grid gap-2" *ngIf="solicitacao$ | async as s">
+                <!-- Botões de Aprovar/Rejeitar - só aparecem se status for ORÇADA -->
+                <div *ngIf="podeAprovarRejeitar(s)" class="d-grid gap-2">
+                    <button 
+                        class="btn btn-success" 
+                        (click)="aprovarServico()"
+                        [disabled]="isProcessing">
+                        <span *ngIf="isProcessing" class="spinner-border spinner-border-sm me-2"></span>
+                        Aprovar Serviço
+                    </button>
+                    <button 
+                        class="btn btn-danger" 
+                        (click)="rejeitarServico()"
+                        [disabled]="isProcessing">
+                        Rejeitar Serviço
+                    </button>
+                </div>
+                
+                <!-- Outros botões para outros status -->
+                <div *ngIf="!podeAprovarRejeitar(s)" class="d-grid gap-2">
+                    <button class="btn btn-info" disabled>Resgatar Serviço</button>
+                    <button class="btn btn-primary" disabled>Pagar Serviço</button>
+                </div>
             </div>
             <p class="text-muted small mt-3">
               * Os botões de ação serão habilitados de acordo com o status da solicitação.

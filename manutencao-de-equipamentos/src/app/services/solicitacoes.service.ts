@@ -55,6 +55,17 @@ export class SolicitacoesService {
     { id: 2, solicitacaoId: 101, deStatusId: 1, paraStatusId: 2, criadoEm: '2025-08-16T10:00:00-03:00', usuarioId: 10, observacao: 'Orçamento: R$ 250,00' },
   ];
 
+  private orcamentos: Orcamento[] = [
+    {
+      id: 1,
+      solicitacaoId: 101,
+      valorTotal: 250.00,
+      moeda: 'BRL',
+      observacao: 'Substituição do conjunto de roletes e limpeza interna',
+      criadoEm: '2025-08-16T10:00:00-03:00'
+    }
+  ];
+
   private findStatus(id: number): StatusSolicitacao {
     const st = this.statusCatalog.find((s) => s.id === id);
     if (!st) throw new Error('Status não encontrado');
@@ -145,7 +156,7 @@ export class SolicitacoesService {
     return of(false);
   }
 
-  rejeitarOrcamento(solicitacaoId: ID): Observable<boolean> {
+  rejeitarOrcamento(solicitacaoId: ID, motivoRejeicao: string): Observable<boolean> {
     // Simula rejeição do orçamento
     const solicitacao = this.solicitacoes.find(s => s.id === solicitacaoId);
     if (solicitacao) {
@@ -160,11 +171,17 @@ export class SolicitacoesService {
         paraStatusId: 4,
         criadoEm: new Date().toISOString(),
         usuarioId: 1,
-        observacao: 'Orçamento rejeitado pelo cliente'
+        observacao: `Orçamento rejeitado pelo cliente. Motivo: ${motivoRejeicao}`
       });
       
       return of(true);
     }
     return of(false);
+  }
+
+  // Método para buscar orçamento de uma solicitação
+  getOrcamentoBySolicitacao(solicitacaoId: ID): Observable<Orcamento | undefined> {
+    const orcamento = this.orcamentos.find(o => o.solicitacaoId === solicitacaoId);
+    return of(orcamento);
   }
 }

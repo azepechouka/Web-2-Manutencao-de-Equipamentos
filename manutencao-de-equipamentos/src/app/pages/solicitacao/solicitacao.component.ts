@@ -87,8 +87,16 @@ export class SolicitacaoComponent {
 
   rejeitarOrcamento() {
     if (!this.solicitacaoEnviada) return;
+    
+    // Solicita o motivo da rejeição
+    const motivo = prompt('Por favor, informe o motivo da rejeição:');
+    if (!motivo || motivo.trim() === '') {
+      this.mensagem = 'Motivo da rejeição é obrigatório.';
+      return;
+    }
+    
     this.solicitacoesService
-      .rejeitarOrcamento(this.solicitacaoEnviada.id)
+      .rejeitarOrcamento(this.solicitacaoEnviada.id, motivo.trim())
       .subscribe((ok) => {
         this.mensagem = ok
           ? 'Serviço rejeitado com sucesso.'
@@ -96,3 +104,4 @@ export class SolicitacaoComponent {
       });
   }
 }
+

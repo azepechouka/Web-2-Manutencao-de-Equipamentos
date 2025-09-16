@@ -1,0 +1,107 @@
+<div class="container mt-4" *ngIf="solicitacao$ | async as s; else loading">
+  <div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h3>Rejeitar Serviço #{{ s.id }}</h3>
+      <a routerLink="/home" class="btn btn-secondary">Voltar para a Lista</a>
+    </div>
+    
+    <div class="card-body">
+      <!-- Informações da Solicitação -->
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <h5 class="mb-3">Informações da Solicitação</h5>
+          <table class="table table-borderless table-sm">
+            <tbody>
+              <tr>
+                <th scope="row" style="width: 200px;">Data e Hora:</th>
+                <td>{{ s.criadoEm | date:'dd/MM/yyyy, HH:mm' }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Equipamento:</th>
+                <td>{{ s.descricaoEquipamento }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Problema:</th>
+                <td>{{ s.descricaoProblema }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="col-md-6" *ngIf="orcamento$ | async as orcamento">
+          <h5 class="mb-3">Orçamento</h5>
+          <div class="alert alert-info">
+            <h6 class="alert-heading">Valor: {{ orcamento.valorTotal | currency:'BRL' }}</h6>
+            <p class="mb-0" *ngIf="orcamento.observacao">{{ orcamento.observacao }}</p>
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <!-- Formulário de Rejeição -->
+      <div class="row">
+        <div class="col-12">
+          <h5 class="mb-3">Motivo da Rejeição</h5>
+          <p class="text-muted mb-3">
+            Por favor, informe o motivo pelo qual você está rejeitando este serviço. 
+            Esta informação será registrada no histórico da solicitação.
+          </p>
+          
+          <div class="mb-3">
+            <label for="motivoRejeicao" class="form-label">Motivo da Rejeição *</label>
+            <textarea 
+              id="motivoRejeicao"
+              class="form-control" 
+              [(ngModel)]="motivoRejeicao" 
+              placeholder="Digite o motivo da rejeição do serviço..."
+              rows="6"
+              [maxlength]="maxLength"
+              [class.is-invalid]="!motivoRejeicao.trim() && isProcessing">
+            </textarea>
+            <div class="form-text">
+              <span [class.text-danger]="caracteresRestantes < 50">
+                {{ caracteresRestantes }} caracteres restantes
+              </span>
+            </div>
+            <div class="invalid-feedback" *ngIf="!motivoRejeicao.trim() && isProcessing">
+              O motivo da rejeição é obrigatório.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botões de Ação -->
+      <div class="row">
+        <div class="col-12">
+          <div class="d-flex gap-2 justify-content-end">
+            <button 
+              type="button" 
+              class="btn btn-secondary" 
+              (click)="cancelar()"
+              [disabled]="isProcessing">
+              Cancelar
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-danger" 
+              (click)="confirmarRejeicao()"
+              [disabled]="isProcessing || !motivoRejeicao.trim()">
+              <span *ngIf="isProcessing" class="spinner-border spinner-border-sm me-2"></span>
+              Confirmar Rejeição
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #loading>
+  <div class="text-center mt-5">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Carregando...</span>
+    </div>
+    <p class="mt-2">Carregando detalhes da solicitação...</p>
+  </div>
+</ng-template>

@@ -30,8 +30,7 @@ export class HomeComponent implements OnInit {
   }
 
   abrirOrcamento(id: number) {
-    // Futuramente, navegará para RF005
-    console.log('Abrir orçamento (aprovar/rejeitar)', id);
-    this.router.navigate(['/solicitacao', id]); // Por enquanto, leva para a mesma tela de detalhes
+    // Navega para a tela de visualizar serviço (RF005)
+    this.router.navigate(['/visualizar-servico', id]);
   }
 }

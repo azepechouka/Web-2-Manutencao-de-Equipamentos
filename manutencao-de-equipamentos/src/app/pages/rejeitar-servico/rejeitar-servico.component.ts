@@ -1,18 +1,19 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { SolicitacoesService, DetalheSolicitacao } from '../../services/solicitacoes.service';
 import { Orcamento } from '../../models/orcamento.models';
 
 @Component({
-  selector: 'app-visualizar-servico',
+  selector: 'app-rejeitar-servico',
   standalone: true,
-  imports: [CommonModule, RouterModule, DatePipe],
-  templateUrl: './visualizar-servico.component.html',
-  styleUrls: ['./visualizar-servico.component.css']
+  imports: [CommonModule, RouterModule, FormsModule, DatePipe],
+  templateUrl: './rejeitar-servico.component.html',
+  styleUrls: ['./rejeitar-servico.component.css']
 })
-export class VisualizarServicoComponent implements OnInit {
+export class RejeitarServicoComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private service = inject(SolicitacoesService);
   private router = inject(Router);
@@ -20,7 +21,10 @@ export class VisualizarServicoComponent implements OnInit {
   solicitacao$?: Observable<DetalheSolicitacao | undefined>;
   orcamento$?: Observable<Orcamento | undefined>;
   solicitacaoId?: number;
+  
+  motivoRejeicao = '';
   isProcessing = false;
+  maxLength = 500;
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -31,37 +35,35 @@ export class VisualizarServicoComponent implements OnInit {
     }
   }
 
-  aprovarServico() {
+  confirmarRejeicao() {
+    if (!this.motivoRejeicao.trim()) {
+      alert('Por favor, informe o motivo da rejeição.');
+      return;
+    }
+
     if (!this.solicitacaoId) return;
     
     this.isProcessing = true;
-    this.service.aprovarOrcamento(this.solicitacaoId).subscribe({
+    this.service.rejeitarOrcamento(this.solicitacaoId, this.motivoRejeicao.trim()).subscribe({
       next: (success) => {
         if (success) {
-          // Busca o valor do orçamento para mostrar na mensagem
-          this.orcamento$?.subscribe(orcamento => {
-            const valor = orcamento ? `R$ ${orcamento.valorTotal.toFixed(2)}` : 'R$ 0,00';
-            alert(`Serviço Aprovado no Valor ${valor}`);
-            this.router.navigate(['/home']); // Redireciona para RF003 (home)
-          });
+          alert('Serviço Rejeitado');
+          this.router.navigate(['/home']); // Redireciona para RF003 (home)
         }
         this.isProcessing = false;
       },
       error: () => {
         this.isProcessing = false;
-        alert('Erro ao aprovar o serviço. Tente novamente.');
+        alert('Erro ao rejeitar o serviço. Tente novamente.');
       }
     });
   }
 
-  rejeitarServico() {
-    if (this.solicitacaoId) {
-      this.router.navigate(['/rejeitar-servico', this.solicitacaoId]);
-    }
+  cancelar() {
+    this.router.navigate(['/home']);
   }
 
-  // Verifica se a solicitação pode ser aprovada/rejeitada
-  podeAprovarRejeitar(solicitacao: DetalheSolicitacao): boolean {
-    return solicitacao.statusAtualId === 2; // Status ORÇADA
+  get caracteresRestantes(): number {
+    return this.maxLength - this.motivoRejeicao.length;
   }
 }

@@ -42,3 +42,9 @@
 .timeline-content {
   padding-left: 15px;
 }
+
+/* Estilos para botões desabilitados */
+.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
