@@ -1,0 +1,69 @@
+<div class="container py-3">
+<div class="d-flex align-items-center justify-content-between mb-3">
+<h4 class="m-0">Funcionários</h4>
+<button class="btn btn-primary" (click)="openCreate()">Novo Funcionário</button>
+</div>
+
+
+<div class="table-responsive">
+<table class="table table-sm table-hover align-middle">
+<thead class="table-light">
+<tr>
+<th>#</th>
+<th>E-mail</th>
+<th>Nome</th>
+<th>Criado em</th>
+<th class="text-end">Ações</th>
+</tr>
+</thead>
+<tbody>
+<tr *ngFor="let f of funcionarios()">
+<td>{{ f.id }}</td>
+<td>{{ f.email }}</td>
+<td>{{ f.nome }}</td>
+<td>{{ f.criadoEm | date:'short' }}</td>
+<td class="text-end">
+<button class="btn btn-outline-secondary btn-sm me-2" (click)="openEdit(f.id)">Editar</button>
+<button class="btn btn-outline-danger btn-sm" (click)="confirmDelete(f.id)" [disabled]="isSelf(f.id) || funcionarios().length===1">Remover</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+<div *ngIf="alertMsg()" class="alert" [class.alert-success]="alertType()==='success'" [class.alert-danger]="alertType()==='danger'">
+{{ alertMsg() }}
+</div>
+
+
+<!-- Modal simplificado -->
+<div *ngIf="modalOpen()" class="modal d-block" tabindex="-1" style="background:rgba(0,0,0,.4);">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h5 class="modal-title">{{ isEditing() ? 'Editar Funcionário' : 'Novo Funcionário' }}</h5>
+<button type="button" class="btn-close" (click)="closeModal()"></button>
+</div>
+<div class="modal-body">
+<form [formGroup]="form" (ngSubmit)="save()" class="row g-2">
+<div class="col-12">
+<label class="form-label">E-mail</label>
+<input type="email" class="form-control" formControlName="email" [class.is-invalid]="invalid('email')">
+<div class="invalid-feedback" *ngIf="invalid('email')">Informe um e-mail válido.</div>
+</div>
+<div class="col-12">
+<label class="form-label">Nome</label>
+<input type="text" class="form-control" formControlName="nome" [class.is-invalid]="invalid('nome')">
+<div class="invalid-feedback" *ngIf="invalid('nome')">Informe o nome.</div>
+</div>
+</form>
+</div>
+<div class="modal-footer">
+<button type="button" class="btn btn-outline-secondary" (click)="closeModal()">Cancelar</button>
+<button type="button" class="btn btn-primary" (click)="save()" [disabled]="form.invalid">Salvar</button>
+</div>
+</div>
+</div>
+</div>
+</div>
