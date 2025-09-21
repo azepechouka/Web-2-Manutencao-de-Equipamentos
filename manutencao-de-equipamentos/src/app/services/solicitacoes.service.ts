@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of, map } from 'rxjs';
 import { Solicitacao } from '../models/solicitacao.model';
-import { Orcamento } from '../models/orcamento.models';
+import { Orcamento } from '../models/orcamento.model';
 import {
   StatusSolicitacao,
   STATUS_SOLICITACOES,
@@ -32,10 +32,64 @@ export class SolicitacoesService {
   private statusCatalog: StatusSolicitacao[] = [...STATUS_SOLICITACOES];
 
   private usuarios: Usuario[] = [
-    { id: 1, nome: 'João Cliente', perfil: 'CLIENTE', ativo: true, criadoEm: '' },
-    { id: 10, nome: 'Maria Funcionária', perfil: 'FUNCIONARIO', ativo: true, criadoEm: '' },
-    { id: 11, nome: 'Mário Funcionário', perfil: 'FUNCIONARIO', ativo: true, criadoEm: '' }
-  ];
+  {
+    id: 1,
+    nome: 'João Cliente',
+    email: 'joao.cliente@empresa.com',
+    cpf: '11111111111',
+    telefone: '(11) 90000-0001',
+    endereco: {
+      cep: '01001000',
+      logradouro: 'Praça da Sé',
+      numero: '100',
+      complemento: 'Ap 12',
+      bairro: 'Sé',
+      localidade: 'São Paulo',
+      uf: 'SP',
+    },
+    perfil: 'CLIENTE',
+    ativo: true,
+    criadoEm: '2025-01-01T09:00:00-03:00',
+  },
+  {
+    id: 10,
+    nome: 'Maria Funcionária',
+    email: 'maria.funcionaria@empresa.com',
+    cpf: '22222222222',
+    telefone: '(11) 90000-0002',
+    endereco: {
+      cep: '01311000',
+      logradouro: 'Av. Paulista',
+      numero: '1578',
+      complemento: 'Conj. 501',
+      bairro: 'Bela Vista',
+      localidade: 'São Paulo',
+      uf: 'SP',
+    },
+    perfil: 'FUNCIONARIO',
+    ativo: true,
+    criadoEm: '2025-01-02T10:00:00-03:00',
+  },
+  {
+    id: 11,
+    nome: 'Mário Funcionário',
+    email: 'mario.funcionario@empresa.com',
+    cpf: '33333333333',
+    telefone: '(11) 90000-0003',
+    endereco: {
+      cep: '04094002',
+      logradouro: 'Av. Ibirapuera',
+      numero: '3000',
+      complemento: null,
+      bairro: 'Moema',
+      localidade: 'São Paulo',
+      uf: 'SP',
+    },
+    perfil: 'FUNCIONARIO',
+    ativo: true,
+    criadoEm: '2025-01-03T11:00:00-03:00',
+  },
+];
 
   private solicitacoes: Solicitacao[] = [
     {

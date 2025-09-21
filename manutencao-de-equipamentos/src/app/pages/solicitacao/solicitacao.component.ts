@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Solicitacao } from '../../models/solicitacao.model';
 import { SolicitacoesService } from '../../services/solicitacoes.service';
-import { Orcamento } from '../../models/orcamento.models';
+import { Orcamento } from '../../models/orcamento.model';
 
 @Component({
   selector: 'app-solicitacao',
