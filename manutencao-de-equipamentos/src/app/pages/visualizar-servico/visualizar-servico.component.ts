@@ -3,7 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { SolicitacoesService, DetalheSolicitacao } from '../../services/solicitacoes.service';
-import { Orcamento } from '../../models/orcamento.models';
+import { Orcamento } from '../../models/orcamento.model';
 
 @Component({
   selector: 'app-visualizar-servico',
