@@ -61,6 +61,7 @@ public class AuthService {
             throw new IllegalArgumentException("Credenciais inválidas");
         }
 
+        // Aqui você poderia emitir um JWT. Por simplicidade, só retornamos os dados básicos.
         return new AuthResponse(
                 user.getId(),
                 user.getNome(),
