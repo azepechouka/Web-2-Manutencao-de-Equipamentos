@@ -1,0 +1,50 @@
+<section class="rf012-func">
+  <div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="m-0">Solicitações Abertas (Ação Imediata)</h5>
+        <span class="badge bg-primary-subtle text-primary-emphasis">
+        {{ itens.length }} pendente(s)
+        </span>
+    </div>
+
+    <div class="card-body p-0">
+      <!-- Tabela em grid (compatível com o estilo da home do usuário) -->
+      <div class="table" style="display:grid; grid-template-columns: 180px 1fr 1fr 240px;">
+        <div class="row head" style="display:contents;">
+          <div class="cell when fw-semibold" style="background:#f7f7f7; border-bottom:1px solid #eaeaea; padding:.6rem .75rem;">Data/Hora</div>
+          <div class="cell client fw-semibold" style="background:#f7f7f7; border-bottom:1px solid #eaeaea; padding:.6rem .75rem;">Cliente</div>
+          <div class="cell equip fw-semibold" style="background:#f7f7f7; border-bottom:1px solid #eaeaea; padding:.6rem .75rem;">Equipamento (30)</div>
+          <div class="cell actions fw-semibold" style="background:#f7f7f7; border-bottom:1px solid #eaeaea; padding:.6rem .75rem; text-align:right;">Ações</div>
+        </div>
+
+        <ng-container *ngIf="itens.length; else vazio">
+          <div class="row" *ngFor="let item of itens; trackBy: trackById" style="display:contents;">
+            <div class="cell when" style="padding:.6rem .75rem; border-bottom:1px solid #f0f0f0;">
+              {{ item.dataHoraSolicitacao | date:'short' }}
+            </div>
+
+            <div class="cell client" style="padding:.6rem .75rem; border-bottom:1px solid #f0f0f0;">
+              {{ item.clienteNome }}
+            </div>
+
+            <div class="cell equip text-truncate" [title]="item.equipamentoDesc30"
+                 style="padding:.6rem .75rem; border-bottom:1px solid #f0f0f0; max-width: 100%;">
+              {{ item.equipamentoDesc30 }}
+            </div>
+            <button type="button" class="btn btn-sm btn-primary me-2"
+                    [routerLink]="['/efetuar-orcamento', item.solicitacaoId]"
+                    title="Efetuar Orçamento (RF012)">
+            Efetuar Orçamento
+            </button>
+          </div>
+        </ng-container>
+      </div>
+
+      <ng-template #vazio>
+        <div class="p-3 text-muted">
+          Nenhuma solicitação ABERTA no momento.
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</section>

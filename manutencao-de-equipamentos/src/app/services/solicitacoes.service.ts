@@ -98,11 +98,92 @@ export class SolicitacoesService {
       descricaoEquipamento: 'Impressora LaserJet Pro 400 MFP M425dn',
       descricaoProblema: 'Não puxa papel e aparece erro 13.20.00 na tela principal. Já tentei reiniciar e o problema persiste.',
       criadoEm: '2025-08-15T08:12:00-03:00',
-      statusAtualId: 2,
+      statusAtualId: 2, // ORÇADA
       atualizadoEm: '2025-08-16T10:00:00-03:00',
     },
-    // ... (outras solicitações que você já tinha)
+    {
+      id: 102,
+      clienteId: 1,
+      descricaoEquipamento: 'Notebook Dell Latitude 5490',
+      descricaoProblema: 'Superaquecendo e desligando sozinho após alguns minutos de uso.',
+      criadoEm: '2025-08-20T14:20:00-03:00',
+      statusAtualId: 1, // CRIADA
+      atualizadoEm: '2025-08-20T14:20:00-03:00',
+    },
+    {
+      id: 103,
+      clienteId: 1,
+      descricaoEquipamento: 'Ar-condicionado Split Samsung 12k BTU',
+      descricaoProblema: 'Não gela. Indicador pisca com código de erro intermitente.',
+      criadoEm: '2025-08-22T09:05:00-03:00',
+      statusAtualId: 2, // ORÇADA
+      atualizadoEm: '2025-08-22T15:30:00-03:00',
+    },
+    {
+      id: 104,
+      clienteId: 1,
+      descricaoEquipamento: 'Notebook Lenovo ThinkPad T480',
+      descricaoProblema: 'Teclas “E” e “R” falhando com frequência, mesmo após limpeza.',
+      criadoEm: '2025-08-25T11:45:00-03:00',
+      statusAtualId: 3, // APROVADA
+      atualizadoEm: '2025-08-26T10:10:00-03:00',
+    },
+    {
+      id: 105,
+      clienteId: 1,
+      descricaoEquipamento: 'Furadeira de Bancada Bosch PBD 40',
+      descricaoProblema: 'Ruído alto no motor e vibração excessiva durante o uso.',
+      criadoEm: '2025-08-28T16:20:00-03:00',
+      statusAtualId: 4, // REJEITADA
+      atualizadoEm: '2025-08-29T09:00:00-03:00',
+    },
+    {
+      id: 106,
+      clienteId: 1,
+      descricaoEquipamento: 'Impressora Epson EcoTank L3150',
+      descricaoProblema: 'Impressões saindo com listras horizontais mesmo após limpeza de cabeçote.',
+      criadoEm: '2025-09-01T08:00:00-03:00',
+      statusAtualId: 5, // EM EXECUÇÃO
+      atualizadoEm: '2025-09-03T14:45:00-03:00',
+    },
+    {
+      id: 107,
+      clienteId: 1,
+      descricaoEquipamento: 'Nobreak APC Back-UPS 1500VA',
+      descricaoProblema: 'Apita constantemente; suspeita de bateria com baixa capacidade.',
+      criadoEm: '2025-09-02T10:30:00-03:00',
+      statusAtualId: 6, // CONCLUÍDA
+      atualizadoEm: '2025-09-10T17:25:00-03:00',
+    },
+    {
+      id: 108,
+      clienteId: 1,
+      descricaoEquipamento: 'Roteador TP-Link Archer C6',
+      descricaoProblema: 'Quedas de conexão Wi-Fi e perda de velocidade ao longo do dia.',
+      criadoEm: '2025-09-12T13:05:00-03:00',
+      statusAtualId: 1, // CRIADA
+      atualizadoEm: '2025-09-12T13:05:00-03:00',
+    },
+    {
+      id: 109,
+      clienteId: 1,
+      descricaoEquipamento: 'Scanner Canon DR-C225',
+      descricaoProblema: 'Puxando papel torto; digitalizações desalinhadas.',
+      criadoEm: '2025-09-15T09:50:00-03:00',
+      statusAtualId: 2, // ORÇADA
+      atualizadoEm: '2025-09-15T12:40:00-03:00',
+    },
+    {
+      id: 110,
+      clienteId: 1,
+      descricaoEquipamento: 'Projetor Epson PowerLite X41',
+      descricaoProblema: 'Sem imagem; lâmpada acende e apaga após alguns segundos.',
+      criadoEm: '2025-10-01T15:12:00-03:00',
+      statusAtualId: 2, // ORÇADA
+      atualizadoEm: '2025-10-02T10:00:00-03:00',
+    },
   ];
+
 
   private historicos: HistoricoStatus[] = [
     { id: 1, solicitacaoId: 101, deStatusId: null, paraStatusId: 1, criadoEm: '2025-08-15T08:12:00-03:00', usuarioId: 1 },
@@ -237,5 +318,89 @@ export class SolicitacoesService {
   getOrcamentoBySolicitacao(solicitacaoId: ID): Observable<Orcamento | undefined> {
     const orcamento = this.orcamentos.find(o => o.solicitacaoId === solicitacaoId);
     return of(orcamento);
+  }
+
+  listParaFuncionarioEmAberto(): Observable<{
+    solicitacaoId: number;
+    dataHoraSolicitacao: string;
+    clienteNome: string;
+    equipamentoDesc30: string;
+  }[]> {
+    // Quais códigos considerar como "em aberto" para o FUNCIONÁRIO
+    const codigosAbertos = new Set(['ABERTA']);
+
+    // Mapeia para IDs existentes no catálogo (tolerante a caixa)
+    const idsAbertos = this.statusCatalog
+      .filter(s => codigosAbertos.has(s.codigo?.toUpperCase?.()))
+      .map(s => s.id);
+
+    // Fallback: se não achar nada (p.ex., não há ABERTA no catálogo), usa o id de CRIADA (id=1 no seu seed)
+    const idsSet = new Set<number>(idsAbertos.length ? idsAbertos : [1]);
+
+    return of(this.solicitacoes).pipe(
+      map(list =>
+        list
+          .filter(s => idsSet.has(s.statusAtualId))
+          // mais recente primeiro
+          .sort((a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime())
+          .map(s => ({
+            solicitacaoId: s.id,
+            dataHoraSolicitacao: s.criadoEm,
+            clienteNome: this.findUsuario(s.clienteId)?.nome ?? `Cliente #${s.clienteId}`,
+            equipamentoDesc30: (s.descricaoEquipamento ?? '').length > 30
+              ? (s.descricaoEquipamento ?? '').slice(0, 30) + '...'
+              : (s.descricaoEquipamento ?? ''),
+          }))
+      )
+    );
+  }
+
+  getClienteById$(id: number) {
+    return of(this.findUsuario(id));
+  }
+
+  /** efetuar orçamento (cria orçamento, move para ORÇADA, registra histórico com funcionário logado) */
+  efetuarOrcamento(params: {
+    solicitacaoId: number;
+    valorTotal: number;
+    funcionarioId: number;
+    observacao?: string;
+    moeda?: string; 
+  }) {
+    const { solicitacaoId, valorTotal, funcionarioId, observacao, moeda = 'BRL' } = params;
+
+    const solicitacao = this.solicitacoes.find(s => s.id === solicitacaoId);
+    if (!solicitacao) throw new Error('Solicitação não encontrada');
+
+    const deStatusId = solicitacao.statusAtualId;
+    const stOrcada = this.statusCatalog.find(s => s.codigo?.toUpperCase() === 'ORCADA');
+    const paraStatusId = stOrcada?.id ?? 2; // fallback para id=2
+
+    const novoId = Math.max(0, ...this.orcamentos.map(o => o.id)) + 1;
+    const agoraIso = new Date().toISOString();
+    const novoOrc: Orcamento = {
+      id: novoId,
+      solicitacaoId,
+      valorTotal,
+      moeda,
+      observacao,
+      criadoEm: agoraIso,
+    };
+    this.orcamentos.push(novoOrc);
+
+    solicitacao.statusAtualId = paraStatusId;
+    solicitacao.atualizadoEm = agoraIso;
+
+    this.historicos.push({
+      id: Date.now(),
+      solicitacaoId,
+      deStatusId,
+      paraStatusId,
+      criadoEm: agoraIso,
+      usuarioId: funcionarioId,
+      observacao: `Orçamento registrado no valor de ${valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: moeda })}${observacao ? ` — ${observacao}` : ''}`,
+    });
+
+    return of(novoOrc);
   }
 }

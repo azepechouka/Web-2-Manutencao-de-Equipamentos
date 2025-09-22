@@ -7,19 +7,32 @@
       <span>Controle de Manutenção</span>
     </a>
   </div>
+
   <ul class="topbar-nav">
-    <li><a routerLink="/home" routerLinkActive="active">Minhas Solicitações</a></li>
-    <li><a routerLink="/solicitacao" routerLinkActive="active">Nova Solicitação</a></li>
-    <li><a routerLink="/crudFuncionario" routerLinkActive="active">Adicionar Funcionario</a></li>
-    <li><a routerLink="/relatorioReceita" routerLinkActive="active">Receitas Mês</a></li>
-    </ul>
+    <ng-container *ngIf="isFuncionario(); else menuUsuario">
+      <li><a routerLink="/home-func" routerLinkActive="active">Home</a></li>
+      <li><a routerLink="/crudFuncionario" routerLinkActive="active">Funcionários</a></li>
+      <li><a routerLink="/relatorioReceita" routerLinkActive="active">Receitas Mês</a></li>
+    </ng-container>
+
+    <ng-template #menuUsuario>
+      <li><a routerLink="/home" routerLinkActive="active">Minhas Solicitações</a></li>
+      <li><a routerLink="/solicitacao" routerLinkActive="active">Nova Solicitação</a></li>
+    </ng-template>
+  </ul>
+
   <div class="topbar-actions">
-    <a routerLink="/login" class="logout-button">
+    <span class="user-name" *ngIf="auth.isAuthenticated()">Olá, {{ usuarioNome() }}</span>
+    <button *ngIf="auth.isAuthenticated(); else entrar"
+            type="button" class="logout-button" (click)="logout()" title="Sair">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-box-arrow-right" viewBox="0 0 16 16">
         <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2.5a.5.5 0 0 0 1 0v-2.5a1.5 1.5 0 0 0-1.5-1.5h-8A1.5 1.5 0 0 0 0 4.5v9A1.5 1.5 0 0 0 1.5 15h8a1.5 1.5 0 0 0 1.5-1.5v-2.5a.5.5 0 0 0-1 0v2.5z"/>
         <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
       </svg>
       Sair
-    </a>
+    </button>
+    <ng-template #entrar>
+      <a routerLink="/login" class="logout-button">Entrar</a>
+    </ng-template>
   </div>
 </nav>
