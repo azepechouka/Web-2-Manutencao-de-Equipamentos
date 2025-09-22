@@ -403,4 +403,30 @@ export class SolicitacoesService {
 
     return of(novoOrc);
   }
+
+  listTodasResumo$(): Observable<{
+    id: number;
+    criadoEm: string;
+    clienteNome: string;
+    equipamentoDesc: string;
+    statusCodigo: string; // ex.: 'CRIADA', 'ORCADA', ...
+    statusNome: string;   // ex.: 'Criada', 'Orçada', ...
+  }[]> {
+    return of(this.solicitacoes).pipe(
+      map(list =>
+        list.map(s => {
+          const st = this.findStatus(s.statusAtualId);
+          const cli = this.findUsuario(s.clienteId);
+          return {
+            id: s.id,
+            criadoEm: s.criadoEm,
+            clienteNome: cli?.nome ?? `Cliente #${s.clienteId}`,
+            equipamentoDesc: s.descricaoEquipamento ?? '',
+            statusCodigo: st.codigo?.toUpperCase?.() ?? 'DESCONHECIDO',
+            statusNome: st.nome ?? 'Desconhecido',
+          };
+        })
+      )
+    );
+  }
 }

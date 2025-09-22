@@ -2,69 +2,109 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { SolicitacoesService } from '../services/solicitacoes.service';
+
+type RedirHist = { dataHora: string; origem: string; destino: string };
 
 @Component({
   selector: 'app-redirecionar-manutencao',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './redirecionar-manutencao.component.html',
-  styleUrl: './redirecionar-manutencao.component.css'
+  styleUrls: ['./redirecionar-manutencao.component.css']
 })
-
 export class RedirecionarManutencaoComponent {
-  solicitacao: any; 
+  // rota esperada: /redirecionar-manutencao/:solicitacao
+  solicitacaoId!: number;
+
+  // dados exibidos
+  solicitacao: any = {};
+  cliente: any = {};
+
+  // estado da tela
   funcionarioOrigem = 'Hermione Granger';
-
   funcionarios = ['Hermione Granger', 'Harry Potter', 'Ronald Weasley'];
+  funcionarioDestino = '';
 
-  funcionarioDestino: string = '';
+  mensagem = '';
+  historicoRedirecionamento: RedirHist[] = [];
 
-  mensagem: string = ''; 
-  historicoRedirecionamento: any[] = []; 
+  loading = false;
+  error: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private svc: SolicitacoesService
   ) {}
 
-  ngOnInit() {
-    this.route.paramMap.subscribe(params => {
-      const solicitacaoData = params.get('solicitacao'); 
-      if (solicitacaoData) {
-        this.solicitacao = JSON.parse(solicitacaoData);
+  ngOnInit(): void {
+    // lê o parâmetro ":solicitacao" como ID numérico
+    const raw = this.route.snapshot.paramMap.get('solicitacao');
+    const id = Number(raw);
+    if (!id) {
+      this.error = 'Solicitação inválida.';
+      return;
+    }
+    this.solicitacaoId = id;
+
+    // carrega dados da solicitação e do cliente
+    this.loading = true;
+    this.svc.getById(this.solicitacaoId).subscribe({
+      next: (det) => {
+        if (!det) {
+          this.error = 'Solicitação não encontrada.';
+          this.loading = false;
+          return;
+        }
+        this.solicitacao = {
+          id: det.id,
+          descricaoEquipamento: det.descricaoEquipamento ?? '—',
+          categoriaEquipamento: (det as any).categoriaEquipamento ?? '—', // opcional, caso tenha no modelo
+          descricaoDefeito: det.descricaoProblema ?? '—',
+          dataHora: det.criadoEm
+        };
+        this.svc.getClienteById$(det.clienteId).subscribe(cli => this.cliente = cli ?? {});
+        this.loading = false;
+      },
+      error: () => {
+        this.error = 'Falha ao carregar os dados.';
+        this.loading = false;
       }
     });
   }
 
-  redirecionarManutencao() {
+  redirecionarManutencao(): void {
+    this.mensagem = '';
+    this.error = null;
+
+    if (!this.funcionarioDestino) {
+      this.mensagem = 'Por favor, selecione um funcionário para redirecionar a manutenção.';
+      return;
+    }
     if (this.funcionarioDestino === this.funcionarioOrigem) {
       this.mensagem = 'Erro: Não é possível redirecionar para o mesmo funcionário.';
       return;
     }
 
-    if (this.funcionarioDestino) {
-      const now = new Date();
-      const dataHoraRedirecionamento = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+    // registra histórico local (pode ser persistido no service se desejar)
+    const now = new Date();
+    const dataHora = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+    this.historicoRedirecionamento.push({
+      dataHora,
+      origem: this.funcionarioOrigem,
+      destino: this.funcionarioDestino
+    });
 
-      // Atualiza o estado da solicitação e registra no histórico
-      this.historicoRedirecionamento.push({
-        dataHora: dataHoraRedirecionamento,
-        origem: this.funcionarioOrigem,
-        destino: this.funcionarioDestino
-      });
+    // atualiza origem
+    this.funcionarioOrigem = this.funcionarioDestino;
+    this.funcionarioDestino = '';
 
-      // Atualiza o funcionário de origem para o novo
-      this.funcionarioOrigem = this.funcionarioDestino;
-      this.mensagem = `Manutenção redirecionada com sucesso para ${this.funcionarioDestino}.`;
-
-      // Limpa o campo de seleção de destino
-      this.funcionarioDestino = '';
-    } else {
-      this.mensagem = 'Por favor, selecione um funcionário para redirecionar a manutenção.';
-    }
+    this.mensagem = 'Manutenção redirecionada com sucesso.';
   }
 
-  voltar(){
-    this.router.navigate(['/visualizacao-solicitacao-funcionario']);
+  voltar(): void {
+    // ajuste a rota de retorno conforme sua navegação
+    this.router.navigate(['/efetuar-manutencao', this.solicitacaoId]);
   }
 }

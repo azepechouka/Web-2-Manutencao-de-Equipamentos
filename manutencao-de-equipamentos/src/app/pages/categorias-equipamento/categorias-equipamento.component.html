@@ -1,0 +1,63 @@
+<div class="container" style="max-width: 860px; margin: 0 auto; padding: 1rem;">
+  <div class="card shadow-sm">
+    <div class="card-header d-flex align-items-center justify-content-between">
+      <h5 class="m-0">Categorias de Equipamento</h5>
+      <span class="text-muted">
+        <ng-container *ngIf="categorias$ | async as cats">{{ cats.length }} item(ns)</ng-container>
+      </span>
+    </div>
+
+    <div class="card-body">
+      <!-- Formulário -->
+      <h6 class="mb-2">{{ tituloForm }}</h6>
+      <form [formGroup]="form" (ngSubmit)="salvar()" class="row g-2 align-items-end">
+        <div class="col-12 col-md-8">
+          <label class="form-label">Descrição</label>
+          <input class="form-control" formControlName="descricao" placeholder="Ex.: Impressora" />
+          <small class="text-danger" *ngIf="form.controls.descricao.touched && form.controls.descricao.invalid">
+            Informe ao menos 2 caracteres.
+          </small>
+        </div>
+        <div class="col-12 col-md-auto">
+          <button class="btn btn-primary" type="submit" [disabled]="form.invalid">
+            {{ editandoId() ? 'Atualizar' : 'Adicionar' }}
+          </button>
+          <button *ngIf="editandoId()" class="btn btn-outline-secondary ms-2" type="button" (click)="cancelar()">
+            Cancelar
+          </button>
+        </div>
+      </form>
+
+      <div class="mt-2" *ngIf="mensagem()" [class.text-success]="mensagem().includes('sucesso') || mensagem().includes('removida')"
+           [class.text-danger]="mensagem().includes('Falha') || mensagem().includes('existe')">
+        {{ mensagem() }}
+      </div>
+
+      <hr class="my-3" />
+
+      <!-- Lista -->
+      <div class="table" style="display:grid; grid-template-columns: 100px 1fr 220px;">
+        <div class="row" style="display:contents;">
+          <div class="cell fw-semibold" style="background:#f7f7f7; padding:.6rem .75rem; border-bottom:1px solid #eee;">ID</div>
+          <div class="cell fw-semibold" style="background:#f7f7f7; padding:.6rem .75rem; border-bottom:1px solid #eee;">Descrição</div>
+          <div class="cell fw-semibold" style="background:#f7f7f7; padding:.6rem .75rem; border-bottom:1px solid #eee; text-align:right;">Ações</div>
+        </div>
+
+        <ng-container *ngIf="categorias$ | async as categorias; else vazio">
+          <div class="row" *ngFor="let c of categorias; trackBy: trackById" style="display:contents;">
+            <div class="cell" style="padding:.6rem .75rem; border-bottom:1px solid #f2f2f2;">{{ c.id }}</div>
+            <div class="cell" style="padding:.6rem .75rem; border-bottom:1px solid #f2f2f2;">{{ c.descricao }}</div>
+            <div class="cell" style="padding:.6rem .75rem; border-bottom:1px solid #f2f2f2; text-align:right;">
+              <button class="btn btn-sm btn-outline-primary me-2" type="button" (click)="editar(c)">Editar</button>
+              <button class="btn btn-sm btn-outline-danger" type="button" (click)="remover(c)">Remover</button>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <ng-template #vazio>
+        <div class="text-muted p-2">Nenhuma categoria cadastrada.</div>
+      </ng-template>
+    </div>
+  </div>
+</div>

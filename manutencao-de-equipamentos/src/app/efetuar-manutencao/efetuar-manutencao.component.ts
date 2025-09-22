@@ -1,56 +1,75 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
+import { SolicitacoesService } from '../services/solicitacoes.service';
 
 @Component({
   selector: 'app-efetuar-manutencao',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './efetuar-manutencao.component.html',
   styleUrls: ['./efetuar-manutencao.component.css']
 })
 export class EfetuarManutencaoComponent {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private svc = inject(SolicitacoesService);
 
-  // Dados fictícios
-  solicitacao = {
-    descricaoEquipamento: 'Impressora',
-    categoriaEquipamento: 'Outro',
-    descricaoDefeito: 'Impressora não imprime',
-    dataHora: '08/09/2024, 14:55'
-  };
-  
-  cliente = {
-    nome: 'João Silva',
-    email: 'joao.silva@email.com',
-    telefone: '1234-5678'
-  };
+  id!: number;
+
+  // Dados exibidos
+  solicitacao: any = {};
+  cliente: any = {};
 
   exibirCamposManutencao = false;
-  mensagem: string = '';
+  mensagem = '';
 
-  // Efetuar Manutenção
+  ngOnInit(): void {
+    this.id = Number(this.route.snapshot.paramMap.get('id'));
+    if (!this.id) {
+      // se entrou sem id, volte para a lista
+      this.router.navigate(['/solicitacoes']);
+      return;
+    }
+
+    // carrega dados reais (se quiser manter os mocks, pode remover este bloco)
+    this.svc.getById(this.id).subscribe(det => {
+      if (!det) {
+        this.router.navigate(['/solicitacoes']);
+        return;
+      }
+      this.solicitacao = {
+        descricaoEquipamento: det.descricaoEquipamento,
+        categoriaEquipamento: det['categoriaEquipamento'] ?? '—',
+        descricaoDefeito: det.descricaoProblema,
+        dataHora: det.criadoEm
+      };
+      this.svc.getClienteById$(det.clienteId).subscribe(cli => {
+        this.cliente = cli ?? {};
+      });
+    });
+  }
+
   iniciarManutencao() {
     this.exibirCamposManutencao = true;
   }
 
-  // Redirecionar a manutenção
   redirecionarManutencao() {
-    this.mensagem = 'Manutenção redirecionada';
-    this.exibirCamposManutencao = false;
+    this.router.navigate(['/redirecionar-manutencao', this.id]);
   }
 
-  // Concluir a manutenção
   concluirManutencao(descricao: string, orientacoes: string) {
     if (descricao && orientacoes) {
       const now = new Date();
-      const dataHoraManutencao = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
-      const funcionario = 'Ana Souza';
-
-      this.mensagem = `Manutenção realizada com sucesso!<br>` +
-                    `Descrição da Manutenção: ${descricao}<br>` +
-                    `Orientações para o Cliente: ${orientacoes}<br>` +
-                    `Data/Hora: ${dataHoraManutencao}<br>` +
-                    `Funcionário: ${funcionario}<br>` +
-                    `Estado: ARRUMADA`;
-      this.exibirCamposManutencao = false; 
+      const funcionario = 'Ana Souza'; // troque para vir do AuthService se desejar
+      this.mensagem =
+        `Manutenção realizada com sucesso!<br>` +
+        `Descrição da Manutenção: ${descricao}<br>` +
+        `Orientações para o Cliente: ${orientacoes}<br>` +
+        `Data/Hora: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}<br>` +
+        `Funcionário: ${funcionario}<br>` +
+        `Estado: ARRUMADA`;
+      this.exibirCamposManutencao = false;
     } else {
       this.mensagem = 'Por favor, preencha todos os campos da manutenção.';
     }

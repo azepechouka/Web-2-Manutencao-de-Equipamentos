@@ -1,3 +1,5 @@
+import { CategoriaEquipamento } from "./categoria-equipamento.model";
+
 export interface Equipamento {
   id: number;
   clienteId: number;

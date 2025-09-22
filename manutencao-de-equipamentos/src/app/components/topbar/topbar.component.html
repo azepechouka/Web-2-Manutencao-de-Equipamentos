@@ -12,7 +12,9 @@
     <ng-container *ngIf="isFuncionario(); else menuUsuario">
       <li><a routerLink="/home-func" routerLinkActive="active">Home</a></li>
       <li><a routerLink="/crudFuncionario" routerLinkActive="active">Funcionários</a></li>
+      <li><a routerLink="/listaSolicitacoes" routerLinkActive="active">Lista Solicitações </a></li>
       <li><a routerLink="/relatorioReceita" routerLinkActive="active">Receitas Mês</a></li>
+      <li><a routerLink="/cadastrarcategoria" routerLinkActive="active">Cadastrar  categoria</a></li>
     </ng-container>
 
     <ng-template #menuUsuario>

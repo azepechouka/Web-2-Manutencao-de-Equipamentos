@@ -1,0 +1,87 @@
+<div class="container" style="max-width: 1080px; margin: 0 auto; padding: 1rem;">
+  <div class="card shadow-sm">
+    <div class="card-header d-flex align-items-center justify-content-between">
+      <h5 class="m-0">Solicitações</h5>
+      <span class="text-muted">{{ itens().length }} resultado(s)</span>
+    </div>
+
+    <div class="card-body">
+      <!-- Filtros -->
+      <form [formGroup]="filtro" (ngSubmit)="buscar()" class="row g-2 align-items-end">
+        <div class="col-12">
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" formControlName="tipo" id="fTodas" value="TODAS">
+            <label class="form-check-label" for="fTodas">Todas</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" formControlName="tipo" id="fHoje" value="HOJE">
+            <label class="form-check-label" for="fHoje">Hoje</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" formControlName="tipo" id="fPeriodo" value="PERIODO">
+            <label class="form-check-label" for="fPeriodo">Período</label>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-3" *ngIf="filtro.value.tipo === 'PERIODO'">
+          <label class="form-label">Data inicial</label>
+          <input type="date" class="form-control" formControlName="ini">
+        </div>
+
+        <div class="col-12 col-md-3" *ngIf="filtro.value.tipo === 'PERIODO'">
+          <label class="form-label">Data final</label>
+          <input type="date" class="form-control" formControlName="fim">
+        </div>
+
+        <div class="col-12 col-md-auto">
+          <button type="submit" class="btn btn-primary" [disabled]="carregando()">
+            Buscar
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="table" style="display:grid; grid-template-columns: 180px 1fr 1fr 160px 220px; border-top:1px solid #eee;">
+      <!-- Cabeçalho -->
+      <div class="row" style="display:contents;">
+        <div class="cell fw-semibold" style="background:#f7f7f7; padding:.6rem .75rem; border-bottom:1px solid #eee;">Data/Hora</div>
+        <div class="cell fw-semibold" style="background:#f7f7f7; padding:.6rem .75rem; border-bottom:1px solid #eee;">Cliente</div>
+        <div class="cell fw-semibold" style="background:#f7f7f7; padding:.6rem .75rem; border-bottom:1px solid #eee;">Equipamento</div>
+        <div class="cell fw-semibold" style="background:#f7f7f7; padding:.6rem .75rem; border-bottom:1px solid #eee;">Estado</div>
+        <div class="cell fw-semibold" style="background:#f7f7f7; padding:.6rem .75rem; border-bottom:1px solid #eee; text-align:right;">Ações</div>
+      </div>
+
+      <!-- Linhas -->
+      <ng-container *ngIf="!carregando() && itens().length; else vazio">
+        <div class="row" *ngFor="let it of itens(); trackBy: trackById" style="display:contents;">
+          <div class="cell" style="padding:.6rem .75rem; border-bottom:1px solid #f2f2f2;">
+            {{ it.criadoEm | date:'short' }}
+          </div>
+          <div class="cell" style="padding:.6rem .75rem; border-bottom:1px solid #f2f2f2;">
+            {{ it.clienteNome }}
+          </div>
+          <div class="cell text-truncate" [title]="it.equipamentoDesc" style="padding:.6rem .75rem; border-bottom:1px solid #f2f2f2;">
+            {{ it.equipamentoDesc }}
+          </div>
+          <div class="cell" style="padding:.6rem .75rem; border-bottom:1px solid #f2f2f2;">
+            <span [ngStyle]="badgeStyle(it.statusCodigo)">{{ it.statusNome }}</span>
+          </div>
+          <div class="cell" style="padding:.6rem .75rem; border-bottom:1px solid #f2f2f2; text-align:right;">
+            <ng-container [ngSwitch]="acao(it) !== null">
+              <a *ngIf="acao(it) as a" [routerLink]="a.link" class="btn btn-sm btn-primary">
+                {{ a.label }}
+              </a>
+              <span *ngIf="!acao(it)" class="text-muted">—</span>
+            </ng-container>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+    <ng-template #vazio>
+      <div class="p-3 text-muted">
+        {{ carregando() ? 'Carregando…' : 'Nenhum resultado encontrado.' }}
+      </div>
+    </ng-template>
+  </div>
+</div>

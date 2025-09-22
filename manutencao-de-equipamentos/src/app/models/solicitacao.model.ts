@@ -1,3 +1,5 @@
+import { CategoriaEquipamento } from "./categoria-equipamento.model";
+
 export interface Solicitacao {
   id: number;
   clienteId: number;
@@ -7,4 +9,5 @@ export interface Solicitacao {
   statusAtualId: number;
   atualizadoEm: string;
   equipamentoId?: number;
+  categoriaEquipamento?: CategoriaEquipamento;
 }

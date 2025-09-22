@@ -13,6 +13,8 @@ import { RejeitarServicoComponent } from './pages/rejeitar-servico/rejeitar-serv
 import { RelatorioReceitaComponent } from './pages/relatorio-receita/relatorio-receita.component';
 import { FuncHomeComponent } from './pages/func-home/func-home.component';
 import { EfetuarOrcamentoComponent } from './pages/efetuar-orcamento/efetuar-orcamento.component';
+import { SolicitacoesListaComponent } from './pages/solicitacoes-lista/solicitacoes-lista.component';
+import { CategoriasEquipamentoComponent } from './pages/categorias-equipamento/categorias-equipamento.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -22,10 +24,12 @@ export const routes: Routes = [
     { path: 'solicitacao', component: SolicitacaoComponent },
     { path: 'solicitacao/:id', component: VisualizarServicoComponent },
     { path: 'rejeitar-servico/:id', component: RejeitarServicoComponent },
-    { path: 'efetuar-manutencao', component: EfetuarManutencaoComponent },
+    { path: 'efetuar-manutencao/:id', component: EfetuarManutencaoComponent },
     { path: 'redirecionar-manutencao/:solicitacao', component: RedirecionarManutencaoComponent },
     { path: 'crudFuncionario', component: CrudFuncionarioComponent },
     { path: 'relatorioReceita', component: RelatorioReceitaComponent },
     { path: 'home-func', component: FuncHomeComponent },
     { path: 'efetuar-orcamento/:id', component: EfetuarOrcamentoComponent },
+    { path: 'listaSolicitacoes', component: SolicitacoesListaComponent },
+    { path: 'cadastrarcategoria', component: CategoriasEquipamentoComponent },
 ];
