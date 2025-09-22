@@ -21,6 +21,15 @@ export type ListItemRF003 = {
   actionType: string;
 };
 
+export interface ReceitaCategoriaItem {
+  categoriaId: number | null;
+  categoriaDescricao: string; // usa lookup se fornecido; senão "Sem categoria" ou "Categoria #id"
+  total: number;              // soma dos orçamentos
+  quantidade: number;         // nº de orçamentos no grupo
+  primeira: string | null;    // primeira data de orçamento (ISO)
+  ultima: string | null;      // última data de orçamento (ISO)
+}
+
 // Novo tipo para os detalhes da solicitação (RF008)
 export type DetalheSolicitacao = Solicitacao & {
   statusAtualNome: string;
@@ -427,6 +436,66 @@ export class SolicitacoesService {
           };
         })
       )
+    );
+  }
+
+  /** Atualiza/define a categoria de uma solicitação (opcional, utilitário) */
+  setCategoriaDaSolicitacao(solicitacaoId: number, categoriaId: number | null): void {
+    const s = this.solicitacoes.find(x => x.id === solicitacaoId);
+    if (!s) throw new Error('Solicitação não encontrada.');
+    (s as any).categoriaEquipamentoId = categoriaId ?? undefined;
+    s.atualizadoEm = new Date().toISOString();
+  }
+
+  /**
+   * Relatório de receita por categoria (desde sempre).
+   * - Soma todos os orçamentos (this.orcamentos)
+   * - Agrupa pela categoria da solicitação (s.categoriaEquipamentoId)
+   * - Ordena por maior receita
+   * - Você pode passar um `lookup` { [id]: 'descrição' } para resolver os nomes das categorias.
+   */
+  relatorioReceitaPorCategoria$(lookup?: Record<number, string>): Observable<ReceitaCategoriaItem[]> {
+    return of(this.orcamentos).pipe(
+      map(orcamentos => {
+        const solById = new Map(this.solicitacoes.map(s => [s.id, s]));
+        const groups = new Map<number | null, { total: number; qtd: number; first: string | null; last: string | null }>();
+
+        for (const o of orcamentos) {
+          const sol = solById.get(o.solicitacaoId);
+          const catId: number | null = (sol as any)?.categoriaEquipamentoId ?? null;
+
+          const g = groups.get(catId) ?? { total: 0, qtd: 0, first: null, last: null };
+          g.total += o.valorTotal ?? 0;
+          g.qtd += 1;
+
+          if (o.criadoEm) {
+            const iso = new Date(o.criadoEm).toISOString();
+            if (!g.first || iso < g.first) g.first = iso;
+            if (!g.last  || iso > g.last)  g.last  = iso;
+          }
+          groups.set(catId, g);
+        }
+
+        // materializa
+        const items: ReceitaCategoriaItem[] = Array.from(groups.entries()).map(([catId, g]) => {
+          const desc =
+            catId == null
+              ? 'Sem categoria'
+              : (lookup?.[catId] ?? `Categoria #${catId}`);
+          return {
+            categoriaId: catId,
+            categoriaDescricao: desc,
+            total: g.total,
+            quantidade: g.qtd,
+            primeira: g.first,
+            ultima: g.last,
+          };
+        });
+
+        // ordena por maior receita
+        items.sort((a, b) => b.total - a.total);
+        return items;
+      })
     );
   }
 }
