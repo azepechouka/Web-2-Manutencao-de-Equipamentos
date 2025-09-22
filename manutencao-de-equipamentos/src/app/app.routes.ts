@@ -10,6 +10,7 @@ import { RedirecionarManutencaoComponent } from './redirecionar-manutencao/redir
 import { CrudFuncionarioComponent } from './crud-funcionario/crud-funcionario.component';
 import { VisualizarServicoComponent } from './pages/visualizar-servico/visualizar-servico.component';
 import { RejeitarServicoComponent } from './pages/rejeitar-servico/rejeitar-servico.component';
+import { RelatorioReceitaComponent } from './pages/relatorio-receita/relatorio-receita.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -22,4 +23,5 @@ export const routes: Routes = [
     { path: 'efetuar-manutencao', component: EfetuarManutencaoComponent },
     { path: 'redirecionar-manutencao/:solicitacao', component: RedirecionarManutencaoComponent },
     { path: 'crudFuncionario', component: CrudFuncionarioComponent },
+    { path: 'relatorioReceita', component: RelatorioReceitaComponent },
 ];

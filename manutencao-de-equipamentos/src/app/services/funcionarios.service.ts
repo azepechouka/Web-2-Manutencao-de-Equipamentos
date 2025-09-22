@@ -117,7 +117,6 @@ export class FuncionariosService {
 
   // ------------ operações ------------
   /**
-   * Aceita payload mínimo (email + nome) e completa o resto com defaults.
    */
   inserir(
     usuario: Pick<Usuario, 'email' | 'nome'> & Partial<Usuario>
