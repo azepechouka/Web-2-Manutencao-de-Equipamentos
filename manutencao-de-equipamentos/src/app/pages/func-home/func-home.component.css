@@ -1,0 +1,91 @@
+
+.rf012-func {
+  padding: 1rem;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+.table {
+  display: grid;
+  grid-template-columns: 180px 1fr 1fr 240px;
+  border-top: 1px solid #eee;
+}
+
+.row.head {
+  display: contents; 
+}
+
+.cell {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+}
+
+.fw-semibold {
+  font-weight: 600;
+  background: #f7f7f7;
+}
+
+.actions {
+  justify-content: flex-end; 
+}
+
+.equip {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+
+@media (max-width: 768px) {
+  .table {
+    display: block; 
+    border-top: none;
+  }
+
+  .row.head {
+    display: none; 
+  }
+
+  .row {
+    display: block; 
+    border: 1px solid #eaeaea;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+  }
+
+  .cell {
+    display: block; 
+    padding: 0.5rem 0;
+    border-bottom: none;
+    text-align: left !important;
+  }
+
+ 
+  .cell::before {
+    content: attr(data-label);
+    font-weight: 600;
+    margin-right: 10px;
+    display: inline-block;
+    min-width: 100px;
+  }
+
+  .cell.actions {
+    justify-content: flex-start; 
+    padding-top: 0.75rem;
+    border-top: 1px solid #f0f0f0;
+    margin-top: 0.5rem;
+  }
+
+  .cell.actions::before {
+    display: none; 
+  }
+}
