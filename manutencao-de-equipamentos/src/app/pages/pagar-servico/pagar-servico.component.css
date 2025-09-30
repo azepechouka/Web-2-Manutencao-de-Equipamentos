@@ -4,6 +4,7 @@
   align-items: center;
   min-height: 80vh;
   background-color: #f4f7f6;
+  padding: 1rem; /* Adicionado para dar espaço em telas pequenas */
 }
 
 .card-pagamento {
@@ -89,4 +90,19 @@
 
 .btn-confirmar-pagamento:active {
   transform: translateY(0);
+}
+
+/* --- ALTERAÇÕES PARA RESPONSIVIDADE --- */
+@media (max-width: 767px) {
+  .card-pagamento {
+    padding: 1.5rem; /* Diminui o padding em telas menores */
+  }
+
+  .card-pagamento h2 {
+    font-size: 1.5rem; /* Diminui o tamanho do título */
+  }
+
+  .valor-destaque {
+    font-size: 2.2rem; /* Diminui o tamanho do valor */
+  }
 }
