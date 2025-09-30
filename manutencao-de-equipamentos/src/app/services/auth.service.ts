@@ -1,4 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { map, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { Endereco } from '../models/endereco.model';
 
 export type Perfil = 'FUNCIONARIO' | 'USUARIO';
 
@@ -7,29 +11,39 @@ export interface UsuarioLogado {
   nome: string;
   email?: string;
   perfis?: Perfil[];
+  token?: string; // armazenamos o JWT aqui também
+}
+
+export interface RegisterRequest {
+  cpf: string;
+  nome: string;
+  email: string;
+  telefone?: string | null;
+  endereco: Endereco;
+  perfil?: 'CLIENTE' | 'FUNCIONARIO';
 }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readonly http = inject(HttpClient);
   private readonly STORAGE_KEY = 'auth.usuario';
+  private readonly API = "http://localhost:8080";
+  private readonly AUTH = `${this.API}/api/auth`;
 
-  /** Login fake: aceita qualquer email/senha não vazios e salva no localStorage */
-  login(email: string, senha: string, perfil: Perfil): UsuarioLogado {
-    // validações mínimas (fake)
-    if (!email || !senha) {
-      throw new Error('E-mail e senha são obrigatórios.');
-    }
+  /**
+   * Faz login na API Java e persiste o usuário + token no localStorage.
+   * @param email
+   * @param senha
+   * @param perfil Opcional (se seu back exigir/envia perfil)
+   */
+  login(email: string, senha: string, perfil?: Perfil) {
+  }
 
-    const mockName = perfil === 'FUNCIONARIO' ? 'Funcionário Teste' : 'Usuário Teste';
-    const usuario: UsuarioLogado = {
-      id: this.generateId(perfil),
-      nome: mockName,
-      email,
-      perfis: [perfil],
-    };
-
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(usuario));
-    return usuario;
+  /**
+   * Registro de usuário via API Java.
+   */
+  registrar(payload: RegisterRequest): Observable<void> {
+    return this.http.post<void>(`${this.AUTH}/register`, payload);
   }
 
   logout(): void {
@@ -37,7 +51,7 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!localStorage.getItem(this.STORAGE_KEY);
+    return !!this.getUsuario()?.token;
   }
 
   getUsuario(): UsuarioLogado | null {
@@ -48,9 +62,8 @@ export class AuthService {
   getUsuarioId(): number | null {
     const usuario = this.getUsuario();
     if (!usuario?.id) return null;
-
-    const parsed = Number(usuario.id.replace(/\D/g, '')); // remove letras e pega só números
-    return isNaN(parsed) ? null : parsed;
+    const parsed = Number(String(usuario.id).replace(/\D/g, ''));
+    return Number.isNaN(parsed) ? null : parsed;
   }
 
   getPerfis(): Perfil[] {
@@ -61,9 +74,11 @@ export class AuthService {
     return this.getPerfis().includes(perfil);
   }
 
-  private generateId(perfil: Perfil): string {
-    const prefix = perfil === 'FUNCIONARIO' ? 'F' : 'U';
-    // id fake só para diferenciar sessões
-    return `${prefix}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+  // ====================== Privados ======================
+
+
+
+  private persist(usuario: UsuarioLogado): void {
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(usuario));
   }
 }
