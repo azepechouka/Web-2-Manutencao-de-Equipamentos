@@ -4,8 +4,10 @@ import com.Manutencao.api.dto.AuthResponse;
 import com.Manutencao.api.dto.LoginRequest;
 import com.Manutencao.api.dto.RegisterRequest;
 import com.Manutencao.models.Endereco;
+import com.Manutencao.models.Perfil;
 import com.Manutencao.models.Usuario;
 import com.Manutencao.repositories.EnderecoRepository;
+import com.Manutencao.repositories.PerfilRepository;
 import com.Manutencao.repositories.UsuarioRepository;
 import com.Manutencao.security.PasswordHasher;
 import jakarta.transaction.Transactional;
@@ -14,17 +16,24 @@ import org.springframework.stereotype.Service;
 import java.security.SecureRandom;
 import java.util.Locale;
 
+import static com.Manutencao.mappers.RequestMapper.toEndereco;
+import static com.Manutencao.mappers.RequestMapper.toUsuario;
+
 @Service
 public class AuthService {
 
     private final UsuarioRepository usuarioRepository;
     private final EnderecoRepository enderecoRepository;
+    private final PerfilRepository perfilRepository;
+
     private static final SecureRandom RNG = new SecureRandom();
 
     public AuthService(UsuarioRepository usuarioRepository,
-                       EnderecoRepository enderecoRepository) {
+                       EnderecoRepository enderecoRepository,
+                       PerfilRepository perfilRepository) {
         this.usuarioRepository = usuarioRepository;
         this.enderecoRepository = enderecoRepository;
+        this.perfilRepository = perfilRepository;
     }
 
     @Transactional
@@ -41,55 +50,40 @@ public class AuthService {
             throw new IllegalArgumentException("Endereço é obrigatório");
         }
 
-        // 1) SEMPRE gerar senha numérica de 4 dígitos (ignora req.senha())
-        String senhaPlano = gerarSenha4Digitos();
+        int perfilId = ("ADMIN".equalsIgnoreCase(req.perfil())) ? 1 : 0;
+        Perfil perfil = perfilRepository.findById(perfilId)
+                .orElseThrow(() -> new IllegalStateException("Perfis base não inicializados (esperado id=0 USER, id=1 ADMIN)"));
 
-        // 2) hash + salt
+        String senhaPlano = String.format("%04d", RNG.nextInt(10000));
+
+        // hash + salt
         String salt = PasswordHasher.generateSalt();
         String hash = PasswordHasher.hash(senhaPlano, salt);
 
-        // 3) criar e salvar usuário
-        Usuario novo = Usuario.builder()
-                .nome(req.nome())
-                .email(emailNorm)
-                .cpf(req.cpf())
-                .telefone(req.telefone())
-                .dataNascimento(req.dataNascimento())
-                .perfil(req.perfil())
-                .senhaSalt(salt)
-                .senhaHash(hash)
-                .ativo(true)
-                .build();
+        Usuario novo = toUsuario(req);
+        novo.setEmail(emailNorm);     
+        novo.setSenhaSalt(salt);
+        novo.setSenhaHash(hash);
+        novo.setPerfil(perfil);  
 
         Usuario salvo = usuarioRepository.save(novo);
 
-        // 4) criar e salvar endereço vinculado ao usuário
-        Endereco end = Endereco.builder()
-                .usuario(salvo)
-                .cep(ns(req.endereco().cep()))
-                .logradouro(ns(req.endereco().logradouro()))
-                .numero(ns(req.endereco().numero()))
-                .complemento(ns(req.endereco().complemento()))
-                .bairro(ns(req.endereco().bairro()))
-                .localidade(ns(req.endereco().localidade()))
-                .uf(ns(req.endereco().uf()))
-                .build();
-
+        Endereco end = toEndereco(req.endereco(), salvo);
         enderecoRepository.save(end);
 
-        // 5) resposta (se quiser, aqui é o ponto para enviar o PIN por e-mail/SMS)
         return new AuthResponse(
                 salvo.getId(),
                 salvo.getNome(),
                 salvo.getEmail(),
-                salvo.getPerfil().name(),
+                salvo.getPerfil() != null ? salvo.getPerfil().getNome() : null,
                 "Usuário cadastrado com sucesso"
         );
     }
 
     public AuthResponse login(LoginRequest req) {
-        Usuario user = usuarioRepository.findByEmail(req.email().toLowerCase(Locale.ROOT).trim())
-                .orElseThrow(() -> new IllegalArgumentException("Credenciais inválidas"));
+        Usuario user = usuarioRepository.findByEmail(
+                req.email().toLowerCase(Locale.ROOT).trim()
+        ).orElseThrow(() -> new IllegalArgumentException("Credenciais inválidas"));
 
         String computed = PasswordHasher.hash(req.senha(), user.getSenhaSalt());
         if (!computed.equals(user.getSenhaHash()) || !user.isAtivo()) {
@@ -100,14 +94,8 @@ public class AuthService {
                 user.getId(),
                 user.getNome(),
                 user.getEmail(),
-                user.getPerfil().name(),
+                user.getPerfil() != null ? user.getPerfil().getNome() : null,
                 "Login efetuado"
         );
-    }
-
-    // ---------- helpers ----------
-    private String ns(String s) { return s == null ? "" : s.trim(); }
-    private String gerarSenha4Digitos() {
-        return String.format("%04d", RNG.nextInt(10000));
     }
 }

@@ -1,11 +1,13 @@
 package com.Manutencao.api.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 public record EnderecoRequest(
-        String cep,
-        String logradouro,
+        @NotBlank String cep,
+        @NotBlank String logradouro,
         String numero,
         String complemento,
-        String bairro,
-        String localidade, // cidade
-        String uf
+        @NotBlank String bairro,
+        @NotBlank String cidade,
+        @NotBlank String uf
 ) {}

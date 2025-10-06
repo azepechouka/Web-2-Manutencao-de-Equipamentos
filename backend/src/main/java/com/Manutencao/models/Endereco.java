@@ -3,39 +3,38 @@ package com.Manutencao.models;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;                
+import org.hibernate.annotations.CreationTimestamp; 
+import org.hibernate.annotations.UpdateTimestamp;   
+
 @Entity
 @Table(name = "enderecos")
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
+@Builder
+@EqualsAndHashCode(of = "id")
 public class Endereco {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  // Se o usuário puder ter vários endereços, mantenha ManyToOne
-  @ManyToOne(optional = false, fetch = FetchType.LAZY)
-  @JoinColumn(name = "usuario_id", nullable = false,
-      foreignKey = @ForeignKey(name = "fk_endereco_usuario"))
-  private Usuario usuario;
+    private String cep;
+    private String logradouro;
+    private String numero;
+    private String complemento;
+    private String bairro;
+    private String cidade;
+    private String uf;
 
-  @Column(nullable = false, length = 8)
-  private String cep;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
 
-  @Column(nullable = false, length = 150)
-  private String logradouro;
+    @CreationTimestamp
+    @Column(name = "criado_em", nullable = false, updatable = false)
+    private LocalDateTime criadoEm;
 
-  @Column(nullable = false, length = 20)
-  private String numero;
-
-  @Column(length = 100)
-  private String complemento;
-
-  @Column(nullable = false, length = 100)
-  private String bairro;
-
-  @Column(name = "localidade", nullable = false, length = 100)
-  private String localidade;
-
-  @Column(nullable = false, length = 2)
-  private String uf;
+    @UpdateTimestamp
+    @Column(name = "atualizado_em", nullable = false)
+    private LocalDateTime atualizadoEm;
 }
