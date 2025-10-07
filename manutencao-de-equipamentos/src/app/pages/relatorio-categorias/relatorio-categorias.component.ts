@@ -8,6 +8,10 @@ import { SolicitacoesService, ReceitaCategoriaItem } from '../../services/solici
 // Opcional: se existir
 import { CategoriaEquipamentoService } from '../../services/categoria-equipamento.service';
 
+// PDF
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
 type VM = {
   itens: ReceitaCategoriaItem[];
   totalGeral: number;
@@ -86,6 +90,46 @@ export class RelatorioCategoriasComponent {
       } as VM;
     })
   );
+
+  exportarPDF(): void {
+    this.vm$.subscribe(vm => {
+      const { itens, totalGeral, qtdGeral } = vm;
+
+      const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+      const marginX = 40;
+
+      // Título
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.text('Relatório de Receita por Categoria', marginX, 40);
+
+      // Resumo
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      const resumo = `${qtdGeral} orçamento(s) — Total: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalGeral)}`;
+      doc.text(resumo, marginX, 60);
+
+      // Tabela
+      const rows = itens.map(item => [
+        item.categoriaDescricao,
+        new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.total),
+        item.quantidade,
+        item.primeira ? new Date(item.primeira).toLocaleDateString('pt-BR') : '-',
+        item.ultima ? new Date(item.ultima).toLocaleDateString('pt-BR') : '-',
+      ]);
+
+      autoTable(doc, {
+        startY: 80,
+        head: [['Categoria', 'Receita (BRL)', 'Qtde. Orçamentos', 'Primeiro Orçamento', 'Último Orçamento']],
+        body: rows,
+        foot: [['Total', new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalGeral), qtdGeral.toString(), '', '']],
+        styles: { fontSize: 9, cellPadding: 6, overflow: 'linebreak' },
+        headStyles: { fillColor: [33, 150, 243] },
+      });
+
+      doc.save('relatorio-receita-por-categoria.pdf');
+    }).unsubscribe();
+  }
 
   trackByCategoria = (_: number, it: ReceitaCategoriaItem) => it.categoriaId ?? -1;
 }
