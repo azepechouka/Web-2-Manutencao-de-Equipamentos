@@ -1,4 +1,4 @@
-<div class="container mt-5" [formGroup]="cadastroForm">
+<div class="container mt-5">
   <div class="row justify-content-center">
     <div class="col-md-8">
       <div class="card">
@@ -7,7 +7,8 @@
         </div>
 
         <div class="card-body">
-          <form (ngSubmit)="onSubmit()">
+          <!-- formGroup deve estar no <form> -->
+          <form [formGroup]="cadastroForm" (ngSubmit)="onSubmit()">
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label for="nome" class="form-label">Nome Completo</label>
@@ -17,14 +18,8 @@
                 <label for="cpf" class="form-label">CPF</label>
                 <input id="cpf" type="text" formControlName="cpf" class="form-control" placeholder="12345678900">
               </div>
-              <div class="col-md-3 mb-3">
-                <label for="perfilId" class="form-label">Perfil</label>
-                <select id="perfilId" class="form-select" formControlName="perfilId">
-                  <!-- Ajuste os values conforme os IDs reais do banco -->
-                  <option [value]="1">USER</option>
-                  <option [value]="2">ADMIN</option>
-                </select>
-              </div>
+              <!-- perfilId fixo, embutido -->
+              <input type="hidden" formControlName="perfilId">
             </div>
 
             <div class="row">
@@ -45,7 +40,6 @@
             <hr>
             <h5>Endereço</h5>
 
-            <!-- Mantemos um único grupo visual de endereço e empacotamos em array no submit -->
             <div class="row" formGroupName="endereco">
               <div class="col-md-4 mb-3">
                 <label for="cep" class="form-label">CEP</label>

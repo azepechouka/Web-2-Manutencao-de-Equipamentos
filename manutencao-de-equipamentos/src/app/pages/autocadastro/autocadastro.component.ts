@@ -7,6 +7,8 @@ import { AuthService } from '../../services/auth.service';
 import { Endereco } from '../../models/endereco.model';
 import { UsuarioCreateDto } from '../../dtos/usuario-create.dto';
 
+const PERFIL_CLIENTE_ID = 1;
+
 @Component({
   selector: 'app-autocadastro',
   standalone: true,
@@ -29,7 +31,7 @@ export class AutocadastroComponent {
       cpf: [''],
       telefone: [''],
       dataNascimento: ['', [this.dataIsoValidator]],
-      perfilId: [null, [Validators.required]],
+      perfilId: [PERFIL_CLIENTE_ID, [Validators.required]],
       endereco: this.fb.group({
         cep: ['', [Validators.required, Validators.pattern(/^\d{5}-?\d{3}$/)]],
         logradouro: ['', [Validators.required]],
@@ -98,7 +100,7 @@ export class AutocadastroComponent {
       cpf: v.cpf || null,
       telefone: v.telefone || null,
       dataNascimento: v.dataNascimento || null,
-      perfilId: Number(v.perfilId),
+      perfilId: PERFIL_CLIENTE_ID,
       enderecos: [endereco]
     };
 

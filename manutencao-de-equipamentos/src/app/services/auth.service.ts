@@ -14,29 +14,83 @@ export interface UsuarioLogado {
   token?: string;
 }
 
+interface AuthResponse {
+  id: number | string;
+  nome: string;
+  email?: string;
+  perfil?: string;     // 'USER' | 'ADMIN'
+  token?: string;
+  mensagem?: string;
+}
+
+interface RegisterRequest {
+  nome: string;
+  email: string;
+  cpf?: string | null;
+  telefone?: string | null;
+  dataNascimento?: string | null;
+  perfil?: 'USER' | 'ADMIN';
+  endereco: {
+    cep: string;
+    logradouro: string;
+    numero: string;
+    complemento?: string | null;
+    bairro: string;
+    cidade: string;
+    uf: string;
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly STORAGE_KEY = 'auth.usuario';
   private readonly API = 'http://localhost:8080';
   private readonly AUTH = `${this.API}/api/auth`;
-  private readonly USERS = `${this.API}/api/usuarios`;
 
-  login(email: string, senha: string, perfil?: Perfil): Observable<UsuarioLogado> {
-    return this.http.post<any>(`${this.AUTH}/login`, { email, senha, perfil }).pipe(
+  login(email: string, senha: string): Observable<UsuarioLogado> {
+    return this.http.post<AuthResponse>(`${this.AUTH}/login`, { email, senha }).pipe(
       map(res => ({
         id: String(res?.id ?? ''),
         nome: String(res?.nome ?? ''),
         email: res?.email ?? undefined,
-        perfis: (res?.perfis ?? []) as Perfil[],
-        token: res?.token ?? undefined
+        perfis: (res?.perfil?.toUpperCase() === 'ADMIN') ? (['FUNCIONARIO'] as Perfil[]) : (['USUARIO'] as Perfil[]),
+        token: res?.token
       })),
       tap(user => this.persist(user))
     );
   }
 
-  registrar(payload: UsuarioCreateDto): Observable<void> {
-    return this.http.post<void>(this.USERS, payload);
+  registrar(dto: UsuarioCreateDto): Observable<UsuarioLogado> {
+    const first = dto.enderecos?.[0];
+    const req: RegisterRequest = {
+      nome: dto.nome,
+      email: dto.email,
+      cpf: dto.cpf ?? null,
+      telefone: dto.telefone ?? null,
+      dataNascimento: dto.dataNascimento ?? null,
+      perfil: 'USER',
+      endereco: {
+        cep: first?.cep ?? '',
+        logradouro: first?.logradouro ?? '',
+        numero: first?.numero ?? '',
+        complemento: first?.complemento ?? null,
+        bairro: first?.bairro ?? '',
+        cidade: first?.cidade ?? '',
+        uf: first?.uf ?? ''
+      }
+    };
+
+    return this.http.post<AuthResponse>(`${this.AUTH}/register`, req).pipe(
+      map(res => ({
+        id: String(res?.id ?? ''),
+        nome: String(res?.nome ?? ''),
+        email: res?.email ?? undefined,
+        perfis: (res?.perfil?.toUpperCase() === 'ADMIN') ? (['FUNCIONARIO'] as Perfil[]) : (['USUARIO'] as Perfil[]),
+        token: res?.token
+      })),
+      tap(user => this.persist(user))
+    );
   }
 
   logout(): void {

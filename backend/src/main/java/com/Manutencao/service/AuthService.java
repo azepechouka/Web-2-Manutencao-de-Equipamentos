@@ -11,8 +11,8 @@ import com.Manutencao.repositories.PerfilRepository;
 import com.Manutencao.repositories.UsuarioRepository;
 import com.Manutencao.security.PasswordHasher;
 import jakarta.mail.MessagingException;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.util.Locale;
@@ -33,11 +33,11 @@ public class AuthService {
     public AuthService(UsuarioRepository usuarioRepository,
                        EnderecoRepository enderecoRepository,
                        PerfilRepository perfilRepository,
-                       EmailService emailService) {              // <-- adicionado
+                       EmailService emailService) {
         this.usuarioRepository = usuarioRepository;
         this.enderecoRepository = enderecoRepository;
         this.perfilRepository = perfilRepository;
-        this.emailService = emailService;                        // <-- inicializa
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -54,22 +54,16 @@ public class AuthService {
             throw new IllegalArgumentException("Endereço é obrigatório");
         }
 
-        // perfil (0 = USER, 1 = ADMIN)
         int perfilId = ("ADMIN".equalsIgnoreCase(req.perfil())) ? 1 : 0;
         Perfil perfil = perfilRepository.findById(perfilId)
                 .orElseThrow(() -> new IllegalStateException(
                         "Perfis base não inicializados (esperado id=0 USER, id=1 ADMIN)")
                 );
 
-        // senha temporária
-        //String senhaPlano = String.format("%04d", RNG.nextInt(10000));
-
         String senhaPlano = "1111";
-        // hash + salt
         String salt = PasswordHasher.generateSalt();
         String hash = PasswordHasher.hash(senhaPlano, salt);
 
-        // usuário
         Usuario novo = toUsuario(req);
         novo.setEmail(emailNorm);
         novo.setSenhaSalt(salt);
@@ -78,17 +72,8 @@ public class AuthService {
 
         Usuario salvo = usuarioRepository.save(novo);
 
-        // endereço
         Endereco end = toEndereco(req.endereco(), salvo);
         enderecoRepository.save(end);
-
-        // e-mail (não deixar erro de e-mail quebrar o cadastro)
-       /* try {
-            emailService.sendTemporaryPassword(salvo.getEmail(), salvo.getNome(), senhaPlano);
-        } catch (MessagingException e) {
-            // logue se tiver logger; aqui só não interrompemos o fluxo
-            System.err.println("Falha ao enviar e-mail de senha: " + e.getMessage());
-        }*/
 
         return new AuthResponse(
                 salvo.getId(),
@@ -99,21 +84,26 @@ public class AuthService {
         );
     }
 
+    @Transactional(readOnly = true)
     public AuthResponse login(LoginRequest req) {
-        Usuario user = usuarioRepository.findByEmail(
-                req.email().toLowerCase(Locale.ROOT).trim()
-        ).orElseThrow(() -> new IllegalArgumentException("Credenciais inválidas"));
+        final String email = req.email().toLowerCase(Locale.ROOT).trim();
+
+        Usuario user = usuarioRepository
+                .findByEmailAndFetchPerfilEagerly(email)
+                .orElseThrow(() -> new IllegalArgumentException("Credenciais inválidas"));
 
         String computed = PasswordHasher.hash(req.senha(), user.getSenhaSalt());
         if (!computed.equals(user.getSenhaHash()) || !user.isAtivo()) {
             throw new IllegalArgumentException("Credenciais inválidas");
         }
 
+        String perfilNome = (user.getPerfil() != null ? user.getPerfil().getNome() : null);
+
         return new AuthResponse(
                 user.getId(),
                 user.getNome(),
                 user.getEmail(),
-                user.getPerfil() != null ? user.getPerfil().getNome() : null,
+                perfilNome,
                 "Login efetuado"
         );
     }
