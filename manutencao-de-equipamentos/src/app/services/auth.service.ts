@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { Endereco } from '../models/endereco.model';
+import { UsuarioCreateDto } from '../dtos/usuario-create.dto';
 
 export type Perfil = 'FUNCIONARIO' | 'USUARIO';
 
@@ -11,39 +11,32 @@ export interface UsuarioLogado {
   nome: string;
   email?: string;
   perfis?: Perfil[];
-  token?: string; // armazenamos o JWT aqui também
-}
-
-export interface RegisterRequest {
-  cpf: string;
-  nome: string;
-  email: string;
-  telefone?: string | null;
-  endereco: Endereco;
-  perfil?: 'CLIENTE' | 'FUNCIONARIO';
+  token?: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly STORAGE_KEY = 'auth.usuario';
-  private readonly API = "http://localhost:8080";
+  private readonly API = 'http://localhost:8080';
   private readonly AUTH = `${this.API}/api/auth`;
+  private readonly USERS = `${this.API}/api/usuarios`;
 
-  /**
-   * Faz login na API Java e persiste o usuário + token no localStorage.
-   * @param email
-   * @param senha
-   * @param perfil Opcional (se seu back exigir/envia perfil)
-   */
-  login(email: string, senha: string, perfil?: Perfil) {
+  login(email: string, senha: string, perfil?: Perfil): Observable<UsuarioLogado> {
+    return this.http.post<any>(`${this.AUTH}/login`, { email, senha, perfil }).pipe(
+      map(res => ({
+        id: String(res?.id ?? ''),
+        nome: String(res?.nome ?? ''),
+        email: res?.email ?? undefined,
+        perfis: (res?.perfis ?? []) as Perfil[],
+        token: res?.token ?? undefined
+      })),
+      tap(user => this.persist(user))
+    );
   }
 
-  /**
-   * Registro de usuário via API Java.
-   */
-  registrar(payload: RegisterRequest): Observable<void> {
-    return this.http.post<void>(`${this.AUTH}/register`, payload);
+  registrar(payload: UsuarioCreateDto): Observable<void> {
+    return this.http.post<void>(this.USERS, payload);
   }
 
   logout(): void {
@@ -73,10 +66,6 @@ export class AuthService {
   hasPerfil(perfil: Perfil): boolean {
     return this.getPerfis().includes(perfil);
   }
-
-  // ====================== Privados ======================
-
-
 
   private persist(usuario: UsuarioLogado): void {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(usuario));

@@ -1,19 +1,18 @@
-import { Endereco } from "./endereco.model";
+import { Endereco } from './endereco.model';
+import { Perfil } from './perfil.model';
 
 export interface Usuario {
   id: number;
-  /** CPF único (somente dígitos) */
-  cpf: string;
   nome: string;
-  /** E-mail único e usado no login */
   email: string;
-  /** Telefone de contato */
-  telefone?: string | null;
-
-  /** Endereço completo armazenado, mesmo vindo do ViaCEP */
-  endereco: Endereco;
-
-  perfil: 'CLIENTE' | 'FUNCIONARIO';
+  cpf?: string;
+  telefone?: string;
+  dataNascimento?: string;
+  perfil: Perfil;
+  senhaSalt: string;
+  senhaHash: string;
   ativo: boolean;
-  criadoEm: string; // ISO date
+  enderecos: Endereco[];
+  criadoEm: string;
+  atualizadoEm: string;
 }

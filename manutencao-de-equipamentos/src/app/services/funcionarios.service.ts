@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { Usuario } from '../models/usuario.model';
 import { Endereco } from '../models/endereco.model';
+import { Perfil } from '../models/perfil.model';
 
 @Injectable({ providedIn: 'root' })
 export class FuncionariosService {
@@ -12,74 +13,17 @@ export class FuncionariosService {
       cep: '',
       logradouro: '',
       numero: '',
-      complemento: null,
+      complemento: undefined,
       bairro: '',
-      localidade: '',
+      cidade: '',
       uf: '',
     };
   }
 
-  private readonly _data$ = new BehaviorSubject<Usuario[]>([
-    {
-      id: 1,
-      nome: 'João da Silva',
-      email: 'joao@empresa.com',
-      cpf: '',
-      telefone: null,
-      endereco: {
-        cep: '',
-        logradouro: '',
-        numero: '',
-        complemento: null,
-        bairro: '',
-        localidade: '',
-        uf: '',
-      },
-      perfil: 'FUNCIONARIO',
-      ativo: true,
-      criadoEm: '2025-01-01T09:00:00-03:00',
-    },
-    {
-      id: 10,
-      nome: 'Maria Souza',
-      email: 'maria@empresa.com',
-      cpf: '',
-      telefone: null,
-      endereco: {
-        cep: '',
-        logradouro: '',
-        numero: '',
-        complemento: null,
-        bairro: '',
-        localidade: '',
-        uf: '',
-      },
-      perfil: 'FUNCIONARIO',
-      ativo: true,
-      criadoEm: '2025-01-02T10:00:00-03:00',
-    },
-    {
-      id: 11,
-      nome: 'Mário Santos',
-      email: 'mario@empresa.com',
-      cpf: '',
-      telefone: null,
-      endereco: {
-        cep: '',
-        logradouro: '',
-        numero: '',
-        complemento: null,
-        bairro: '',
-        localidade: '',
-        uf: '',
-      },
-      perfil: 'FUNCIONARIO',
-      ativo: true,
-      criadoEm: '2025-01-03T11:00:00-03:00',
-    },
-  ]);
+  private readonly perfilFuncionario: Perfil = { id: 2, nome: 'FUNCIONARIO' };
 
-  // ------------ helpers ------------
+  private readonly _data$ = new BehaviorSubject<Usuario[]>([]);
+
   list$(): Observable<Usuario[]> {
     return this._data$.asObservable();
   }
@@ -93,11 +37,11 @@ export class FuncionariosService {
   }
 
   private onlyFuncionarios(arr = this.getAll()): Usuario[] {
-    return arr.filter(u => u.perfil === 'FUNCIONARIO');
+    return arr.filter(u => u.perfil?.nome === 'FUNCIONARIO' || u.perfil?.id === this.perfilFuncionario.id);
   }
 
   private nextId(): number {
-    return Math.max(...this.getAll().map(f => f.id), 0) + 1;
+    return Math.max(...this.getAll().map(f => f.id ?? 0), 0) + 1;
   }
 
   private normalizeEmail(email: string | null | undefined): string {
@@ -115,9 +59,6 @@ export class FuncionariosService {
     );
   }
 
-  // ------------ operações ------------
-  /**
-   */
   inserir(
     usuario: Pick<Usuario, 'email' | 'nome'> & Partial<Usuario>
   ): Observable<Usuario> {
@@ -128,16 +69,21 @@ export class FuncionariosService {
     if (!nome) return throwError(() => new Error('Nome é obrigatório.'));
     if (this.emailExists(email)) return throwError(() => new Error('E-mail já está em uso.'));
 
+    const agora = new Date().toISOString();
+
     const novo: Usuario = {
       id: this.nextId(),
       nome,
       email,
       cpf: usuario.cpf ?? '',
-      telefone: usuario.telefone ?? null,
-      endereco: usuario.endereco ?? this.emptyEndereco(),
-      perfil: 'FUNCIONARIO',
+      telefone: usuario.telefone ?? undefined,
+      enderecos: usuario.enderecos ?? [this.emptyEndereco()],
+      perfil: usuario.perfil ?? this.perfilFuncionario,
       ativo: true,
-      criadoEm: new Date().toISOString(),
+      criadoEm: agora,
+      atualizadoEm: agora,
+      senhaSalt: '',
+      senhaHash: '',
     };
 
     this.setAll([...this.getAll(), novo]);
@@ -164,18 +110,23 @@ export class FuncionariosService {
       patch.nome = nome;
     }
 
-    // proteções
     delete (patch as any).id;
     delete (patch as any).perfil;
     delete (patch as any).criadoEm;
+    delete (patch as any).senhaSalt;
+    delete (patch as any).senhaHash;
 
-    // garante endereco/cpf se vierem faltando (mantém valor atual)
     const atual = { ...arr[idx] } as Usuario;
     const atualizado: Usuario = {
       ...atual,
       ...patch,
       cpf: patch.cpf ?? atual.cpf ?? '',
-      endereco: patch.endereco ?? atual.endereco ?? this.emptyEndereco(),
+      telefone: patch.telefone ?? atual.telefone ?? undefined,
+      enderecos: patch.enderecos ?? atual.enderecos ?? [this.emptyEndereco()],
+      perfil: atual.perfil,
+      atualizadoEm: new Date().toISOString(),
+      senhaSalt: atual.senhaSalt,
+      senhaHash: atual.senhaHash,
     };
 
     const novoArr = [...arr];

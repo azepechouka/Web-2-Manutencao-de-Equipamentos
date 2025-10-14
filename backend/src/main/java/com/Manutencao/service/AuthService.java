@@ -10,6 +10,7 @@ import com.Manutencao.repositories.EnderecoRepository;
 import com.Manutencao.repositories.PerfilRepository;
 import com.Manutencao.repositories.UsuarioRepository;
 import com.Manutencao.security.PasswordHasher;
+import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -25,15 +26,18 @@ public class AuthService {
     private final UsuarioRepository usuarioRepository;
     private final EnderecoRepository enderecoRepository;
     private final PerfilRepository perfilRepository;
+    private final EmailService emailService;
 
     private static final SecureRandom RNG = new SecureRandom();
 
     public AuthService(UsuarioRepository usuarioRepository,
                        EnderecoRepository enderecoRepository,
-                       PerfilRepository perfilRepository) {
+                       PerfilRepository perfilRepository,
+                       EmailService emailService) {              // <-- adicionado
         this.usuarioRepository = usuarioRepository;
         this.enderecoRepository = enderecoRepository;
         this.perfilRepository = perfilRepository;
+        this.emailService = emailService;                        // <-- inicializa
     }
 
     @Transactional
@@ -50,26 +54,41 @@ public class AuthService {
             throw new IllegalArgumentException("Endereço é obrigatório");
         }
 
+        // perfil (0 = USER, 1 = ADMIN)
         int perfilId = ("ADMIN".equalsIgnoreCase(req.perfil())) ? 1 : 0;
         Perfil perfil = perfilRepository.findById(perfilId)
-                .orElseThrow(() -> new IllegalStateException("Perfis base não inicializados (esperado id=0 USER, id=1 ADMIN)"));
+                .orElseThrow(() -> new IllegalStateException(
+                        "Perfis base não inicializados (esperado id=0 USER, id=1 ADMIN)")
+                );
 
-        String senhaPlano = String.format("%04d", RNG.nextInt(10000));
+        // senha temporária
+        //String senhaPlano = String.format("%04d", RNG.nextInt(10000));
 
+        String senhaPlano = "1111";
         // hash + salt
         String salt = PasswordHasher.generateSalt();
         String hash = PasswordHasher.hash(senhaPlano, salt);
 
+        // usuário
         Usuario novo = toUsuario(req);
-        novo.setEmail(emailNorm);     
+        novo.setEmail(emailNorm);
         novo.setSenhaSalt(salt);
         novo.setSenhaHash(hash);
-        novo.setPerfil(perfil);  
+        novo.setPerfil(perfil);
 
         Usuario salvo = usuarioRepository.save(novo);
 
+        // endereço
         Endereco end = toEndereco(req.endereco(), salvo);
         enderecoRepository.save(end);
+
+        // e-mail (não deixar erro de e-mail quebrar o cadastro)
+       /* try {
+            emailService.sendTemporaryPassword(salvo.getEmail(), salvo.getNome(), senhaPlano);
+        } catch (MessagingException e) {
+            // logue se tiver logger; aqui só não interrompemos o fluxo
+            System.err.println("Falha ao enviar e-mail de senha: " + e.getMessage());
+        }*/
 
         return new AuthResponse(
                 salvo.getId(),

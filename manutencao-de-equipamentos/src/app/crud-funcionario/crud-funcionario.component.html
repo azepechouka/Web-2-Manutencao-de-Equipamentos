@@ -6,7 +6,6 @@
     </button>
   </div>
 
-  <!-- Lista de funcionários já adicionados -->
   <div class="table-responsive mb-3">
     <ng-container *ngIf="funcionarios() as list">
       <table class="table table-sm table-hover align-middle" *ngIf="list.length; else empty">
@@ -45,33 +44,33 @@
   >
     {{ alertMsg() }}
   </div>
+
   <div class="row justify-content-center" *ngIf="showForm()">
     <div class="col-12 col-md-8 col-lg-6">
       <div class="card shadow-sm">
         <div class="card-header">Novo Funcionário</div>
         <div class="card-body">
           <form [formGroup]="form" (ngSubmit)="save()" class="row g-2" novalidate>
-            <!-- Dados pessoais -->
             <div class="col-12 col-md-6">
               <label class="form-label">Nome</label>
               <input type="text" class="form-control" formControlName="nome"
-                    [class.is-invalid]="invalid('nome')" autocomplete="name" required />
+                     [class.is-invalid]="invalid('nome')" autocomplete="name" required />
               <div class="invalid-feedback" *ngIf="invalid('nome')">Informe o nome.</div>
             </div>
 
             <div class="col-12 col-md-6">
               <label class="form-label">E-mail</label>
               <input type="email" class="form-control" formControlName="email"
-                    [class.is-invalid]="invalid('email')" placeholder="nome@empresa.com"
-                    autocomplete="email" required />
+                     [class.is-invalid]="invalid('email')" placeholder="nome@empresa.com"
+                     autocomplete="email" required />
               <div class="invalid-feedback" *ngIf="invalid('email')">Informe um e-mail válido.</div>
             </div>
 
             <div class="col-12 col-md-6">
               <label class="form-label">CPF</label>
               <input type="text" class="form-control" formControlName="cpf"
-                    [class.is-invalid]="invalid('cpf')" placeholder="Somente dígitos (11)"
-                    inputmode="numeric" />
+                     [class.is-invalid]="invalid('cpf')" placeholder="Somente dígitos (11)"
+                     inputmode="numeric" />
               <div class="invalid-feedback" *ngIf="invalid('cpf')">Informe um CPF com 11 dígitos.</div>
             </div>
 
@@ -80,40 +79,39 @@
               <input type="tel" class="form-control" formControlName="telefone" placeholder="(xx) xxxxx-xxxx" />
             </div>
 
-            <!-- Endereço -->
             <div class="col-8 col-md-4">
               <label class="form-label">CEP</label>
               <input type="text" class="form-control" formControlName="cep"
-                    [class.is-invalid]="invalid('cep')" placeholder="Somente dígitos (8)"
-                    inputmode="numeric" (blur)="onCepBlur()" />
+                     [class.is-invalid]="invalid('cep')" placeholder="Somente dígitos (8)"
+                     inputmode="numeric" (blur)="onCepBlur()" />
               <div class="invalid-feedback" *ngIf="invalid('cep')">Informe um CEP com 8 dígitos.</div>
             </div>
 
             <div class="col-4 col-md-2">
               <label class="form-label">UF</label>
               <input type="text" class="form-control" formControlName="uf"
-                    [class.is-invalid]="invalid('uf')" maxlength="2" />
+                     [class.is-invalid]="invalid('uf')" maxlength="2" />
               <div class="invalid-feedback" *ngIf="invalid('uf')">UF inválida.</div>
             </div>
 
             <div class="col-12 col-md-6">
               <label class="form-label">Cidade</label>
-              <input type="text" class="form-control" formControlName="localidade"
-                    [class.is-invalid]="invalid('localidade')" />
-              <div class="invalid-feedback" *ngIf="invalid('localidade')">Informe a cidade.</div>
+              <input type="text" class="form-control" formControlName="cidade"
+                     [class.is-invalid]="invalid('cidade')" />
+              <div class="invalid-feedback" *ngIf="invalid('cidade')">Informe a cidade.</div>
             </div>
 
             <div class="col-12">
               <label class="form-label">Logradouro</label>
               <input type="text" class="form-control" formControlName="logradouro"
-                    [class.is-invalid]="invalid('logradouro')" />
+                     [class.is-invalid]="invalid('logradouro')" />
               <div class="invalid-feedback" *ngIf="invalid('logradouro')">Informe o logradouro.</div>
             </div>
 
             <div class="col-6 col-md-4">
               <label class="form-label">Número</label>
               <input type="text" class="form-control" formControlName="numero"
-                    [class.is-invalid]="invalid('numero')" />
+                     [class.is-invalid]="invalid('numero')" />
               <div class="invalid-feedback" *ngIf="invalid('numero')">Informe o número.</div>
             </div>
 
@@ -122,7 +120,6 @@
               <input type="text" class="form-control" formControlName="complemento" />
             </div>
 
-            <!-- Ações -->
             <div class="col-12 mt-2 d-flex justify-content-end gap-2">
               <button type="button" class="btn btn-outline-secondary" (click)="cancelAdd()">Cancelar</button>
               <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Adicionar</button>
