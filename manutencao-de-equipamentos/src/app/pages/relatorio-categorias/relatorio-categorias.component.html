@@ -9,7 +9,6 @@
     </div>
 
     <div class="card-body">
-      <!-- Filtro por categoria -->
       <form class="row g-2 align-items-end mb-2">
         <div class="col-12 col-md-6">
           <label class="form-label">Categoria</label>
@@ -19,6 +18,9 @@
             </ng-container>
           </select>
         </div>
+        <div class="col-12 col-md-auto">
+          <button type="button" class="btn btn-primary" (click)="exportarPDF()">Exportar PDF</button>
+        </div>
       </form>
     </div>
 
@@ -27,7 +29,6 @@
         <ng-container *ngIf="vm.itens.length; else vazio">
           <div class="table"
                style="display:grid; grid-template-columns: 1fr 160px 140px 160px 160px;">
-            <!-- Cabeçalho -->
             <div class="row" style="display:contents;">
               <div class="cell fw-semibold" style="background:#f7f7f7; padding:.6rem .75rem; border-bottom:1px solid #eee;">Categoria</div>
               <div class="cell fw-semibold" style="background:#f7f7f7; padding:.6rem .75rem; border-bottom:1px solid #eee; text-align:right;">Receita (BRL)</div>
@@ -36,7 +37,6 @@
               <div class="cell fw-semibold" style="background:#f7f7f7; padding:.6rem .75rem; border-bottom:1px solid #eee;">Último Orçamento</div>
             </div>
 
-            <!-- Linhas -->
             <div class="row" *ngFor="let it of vm.itens; trackBy: trackByCategoria" style="display:contents;">
               <div class="cell" style="padding:.6rem .75rem; border-bottom:1px solid #f2f2f2;">
                 {{ it.categoriaDescricao }}
