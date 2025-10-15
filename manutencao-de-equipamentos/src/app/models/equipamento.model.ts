@@ -6,5 +6,5 @@ export interface Equipamento {
   descricao: string;
   modelo?: string | null;
   numeroSerie?: string | null;
-  criadoEm: string; // ISO date
+  criadoEm: string;
 }

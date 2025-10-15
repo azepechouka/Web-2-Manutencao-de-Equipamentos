@@ -2,7 +2,7 @@ export interface Orcamento {
   id: number;
   solicitacaoId: number;
   valorTotal: number;
-  moeda: string;             // ex.: 'BRL'
+  moeda: string;
   observacao?: string | null;
-  criadoEm: string;          // ISO date
+  criadoEm: string;
 }

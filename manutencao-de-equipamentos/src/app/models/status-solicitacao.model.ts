@@ -6,7 +6,6 @@ export interface StatusSolicitacao {
   actionType: string;
 }
 
-// Status pré-definidos (hardcoded)
 export const STATUS_SOLICITACOES: StatusSolicitacao[] = [
   {
     id: 1,

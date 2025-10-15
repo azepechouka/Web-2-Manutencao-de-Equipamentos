@@ -3,7 +3,7 @@ export interface HistoricoStatus {
   solicitacaoId: number;
   deStatusId?: number | null;
   paraStatusId: number;
-  usuarioId?: number | null;   // funcionário/cliente que mudou o status
+  usuarioId?: number | null;
   observacao?: string | null;
-  criadoEm: string;            // ISO date
+  criadoEm: string;
 }
