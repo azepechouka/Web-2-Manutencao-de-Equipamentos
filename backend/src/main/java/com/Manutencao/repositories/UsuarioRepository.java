@@ -1,6 +1,7 @@
 package com.Manutencao.repositories;
 
 import com.Manutencao.models.Usuario;
+import java.util.List; 
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,4 +18,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     @EntityGraph(attributePaths = "perfil")
     @Query("select u from Usuario u where lower(u.email) = lower(:email)")
     Optional<Usuario> findByEmailAndFetchPerfilEagerly(@Param("email") String email);
+
+    List<Usuario> findByPerfil_Id(Integer perfilId);
+
 }

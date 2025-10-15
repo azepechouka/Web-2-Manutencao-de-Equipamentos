@@ -50,15 +50,15 @@
       <div class="card shadow-sm">
         <div class="card-header">Novo Funcionário</div>
         <div class="card-body">
-          <form [formGroup]="form" (ngSubmit)="save()" class="row g-2" novalidate>
-            <div class="col-12 col-md-6">
+          <form [formGroup]="form" (ngSubmit)="save()" class="row g-3" novalidate>
+            <div class="col-12">
               <label class="form-label">Nome</label>
               <input type="text" class="form-control" formControlName="nome"
                      [class.is-invalid]="invalid('nome')" autocomplete="name" required />
-              <div class="invalid-feedback" *ngIf="invalid('nome')">Informe o nome.</div>
+              <div class="invalid-feedback" *ngIf="invalid('nome')">Informe o nome (mín. 2 caracteres).</div>
             </div>
 
-            <div class="col-12 col-md-6">
+            <div class="col-12">
               <label class="form-label">E-mail</label>
               <input type="email" class="form-control" formControlName="email"
                      [class.is-invalid]="invalid('email')" placeholder="nome@empresa.com"
@@ -67,57 +67,31 @@
             </div>
 
             <div class="col-12 col-md-6">
-              <label class="form-label">CPF</label>
-              <input type="text" class="form-control" formControlName="cpf"
-                     [class.is-invalid]="invalid('cpf')" placeholder="Somente dígitos (11)"
-                     inputmode="numeric" />
-              <div class="invalid-feedback" *ngIf="invalid('cpf')">Informe um CPF com 11 dígitos.</div>
+              <label class="form-label">Data de nascimento</label>
+              <input type="date" class="form-control" formControlName="dataNascimento"
+                     [class.is-invalid]="invalid('dataNascimento')" required />
+              <div class="invalid-feedback" *ngIf="invalid('dataNascimento')">
+                Informe uma data válida no passado.
+              </div>
             </div>
 
             <div class="col-12 col-md-6">
-              <label class="form-label">Telefone</label>
-              <input type="tel" class="form-control" formControlName="telefone" placeholder="(xx) xxxxx-xxxx" />
-            </div>
-
-            <div class="col-8 col-md-4">
-              <label class="form-label">CEP</label>
-              <input type="text" class="form-control" formControlName="cep"
-                     [class.is-invalid]="invalid('cep')" placeholder="Somente dígitos (8)"
-                     inputmode="numeric" (blur)="onCepBlur()" />
-              <div class="invalid-feedback" *ngIf="invalid('cep')">Informe um CEP com 8 dígitos.</div>
-            </div>
-
-            <div class="col-4 col-md-2">
-              <label class="form-label">UF</label>
-              <input type="text" class="form-control" formControlName="uf"
-                     [class.is-invalid]="invalid('uf')" maxlength="2" />
-              <div class="invalid-feedback" *ngIf="invalid('uf')">UF inválida.</div>
+              <label class="form-label">Senha</label>
+              <input type="password" class="form-control" formControlName="senha"
+                     [class.is-invalid]="invalid('senha')" autocomplete="new-password" required />
+              <div class="invalid-feedback" *ngIf="invalid('senha')">
+                Senha obrigatória (mín. 6 caracteres).
+              </div>
             </div>
 
             <div class="col-12 col-md-6">
-              <label class="form-label">Cidade</label>
-              <input type="text" class="form-control" formControlName="cidade"
-                     [class.is-invalid]="invalid('cidade')" />
-              <div class="invalid-feedback" *ngIf="invalid('cidade')">Informe a cidade.</div>
-            </div>
-
-            <div class="col-12">
-              <label class="form-label">Logradouro</label>
-              <input type="text" class="form-control" formControlName="logradouro"
-                     [class.is-invalid]="invalid('logradouro')" />
-              <div class="invalid-feedback" *ngIf="invalid('logradouro')">Informe o logradouro.</div>
-            </div>
-
-            <div class="col-6 col-md-4">
-              <label class="form-label">Número</label>
-              <input type="text" class="form-control" formControlName="numero"
-                     [class.is-invalid]="invalid('numero')" />
-              <div class="invalid-feedback" *ngIf="invalid('numero')">Informe o número.</div>
-            </div>
-
-            <div class="col-6 col-md-8">
-              <label class="form-label">Complemento</label>
-              <input type="text" class="form-control" formControlName="complemento" />
+              <label class="form-label">Confirmar senha</label>
+              <input type="password" class="form-control" formControlName="confirmarSenha"
+                     [class.is-invalid]="invalid('confirmarSenha') || form.errors?.['passwordMismatch']"
+                     autocomplete="new-password" required />
+              <div class="invalid-feedback" *ngIf="invalid('confirmarSenha') || form.errors?.['passwordMismatch']">
+                As senhas devem coincidir.
+              </div>
             </div>
 
             <div class="col-12 mt-2 d-flex justify-content-end gap-2">
