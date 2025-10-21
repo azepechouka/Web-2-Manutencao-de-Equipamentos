@@ -1,5 +1,5 @@
-import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, signal, OnInit } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { SolicitacoesService } from '../../services/solicitacoes.service';
@@ -15,13 +15,19 @@ type ViewItem = {
 
 type FiltroTipo = 'HOJE' | 'PERIODO' | 'TODAS';
 
+type AcaoDisponivel = {
+    label: string;
+    link?: any[];
+    action?: () => void;
+};
+
 @Component({
   selector: 'app-solicitacoes-lista',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, DatePipe],
   templateUrl: './solicitacoes-lista.component.html',
 })
-export class SolicitacoesListaComponent {
+export class SolicitacoesListaComponent implements OnInit {
   private fb = inject(FormBuilder);
   private svc = inject(SolicitacoesService);
   private router = inject(Router);
@@ -36,7 +42,7 @@ export class SolicitacoesListaComponent {
   });
 
   ngOnInit(): void {
-    this.buscar(); // carrega inicialmente como "TODAS"
+    this.buscar();
   }
 
   buscar(): void {
@@ -45,9 +51,7 @@ export class SolicitacoesListaComponent {
 
     this.svc.listTodasResumo$().subscribe({
       next: (all) => {
-        // Filtra
         const filtrados = all.filter(s => this.matchesFiltro(s, tipo, ini, fim));
-        // Ordena por data/hora ascendente
         filtrados.sort((a, b) => new Date(a.criadoEm).getTime() - new Date(b.criadoEm).getTime());
         this.itens.set(filtrados);
         this.carregando.set(false);
@@ -57,79 +61,108 @@ export class SolicitacoesListaComponent {
   }
 
   private matchesFiltro(s: ViewItem, tipo: FiltroTipo, ini: string | null, fim: string | null): boolean {
-    if (tipo === 'TODAS') return true;
+    if (tipo === 'TODAS') {
+        return true;
+    }
 
-    const dt = new Date(s.criadoEm);
+    const dataSolicitacao = new Date(s.criadoEm);
+
     if (tipo === 'HOJE') {
-      const now = new Date();
-      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-      const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-      return dt >= start && dt <= end;
+      const hoje = new Date();
+      const inicioDoDia = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), 0, 0, 0, 0);
+      const fimDoDia = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), 23, 59, 59, 999);
+      return dataSolicitacao >= inicioDoDia && dataSolicitacao <= fimDoDia;
     }
 
-    // PERIODO
-    if (!ini || !fim) return true; // se faltar datas, não filtra
-    const start = new Date(`${ini}T00:00:00`);
-    const end = new Date(`${fim}T23:59:59.999`);
-    return dt >= start && dt <= end;
+    if (tipo === 'PERIODO') {
+        if (!ini || !fim) return true;
+        const inicioPeriodo = new Date(`${ini}T00:00:00`);
+        const fimPeriodo = new Date(`${fim}T23:59:59.999`);
+        return dataSolicitacao >= inicioPeriodo && dataSolicitacao <= fimPeriodo;
+    }
+
+    return false;
   }
 
-  // Cores por estado (aceita códigos do catálogo atual e os “novos” pedidos)
   badgeStyle(code: string): Record<string, string> {
-    const c = code.toUpperCase();
-    const map: Record<string, string> = {
-      // pedidos
-      'ABERTA':       '#6c757d', // Cinza
-      'ORÇADA':       '#795548', // Marrom
-      'ORCADA':       '#795548', // (catálogo atual)
-      'REJEITADA':    '#dc3545', // Vermelho
-      'APROVADA':     '#ffc107', // Amarelo
-      'REDIRECIONADA':'#6f42c1', // Roxo
-      'ARRUMADA':     '#0d6efd', // Azul
-      'PAGA':         '#fd7e14', // Alaranjado
-      'FINALIZADA':   '#198754', // Verde
-      // catálogo atual “equivalências”
-      'CRIADA':       '#6c757d', // Cinza (ABERTA)
-      'EM_EXEC':      '#6f42c1', // usar Roxo p/ “em execução / redirecionada”
-      'CONCLUIDA':    '#198754', // Verde (FINALIZADA)
+    const upperCaseCode = code.toUpperCase();
+    const colorMap: Record<string, string> = {
+      'ABERTA': '#6c757d',
+      'ORÇADA': '#795548',
+      'ORCADA': '#795548',
+      'REJEITADA': '#dc3545',
+      'APROVADA': '#ffc107',
+      'REDIRECIONADA': '#6f42c1',
+      'ARRUMADA': '#0d6efd',
+      'PAGA': '#fd7e14',
+      'FINALIZADA': '#198754',
+      'CRIADA': '#6c757d',
+      'EM_EXEC': '#6f42c1',
+      'CONCLUIDA': '#198754',
     };
-    const bg = map[c] ?? '#6c757d';
-    const fg = this.contraste(bg);
+
+    const backgroundColor = colorMap[upperCaseCode] ?? '#6c757d';
+    const textColor = this.getContrastingTextColor(backgroundColor);
+
     return {
-      display: 'inline-block',
-      padding: '.2rem .5rem',
-      borderRadius: '999px',
-      background: bg,
-      color: fg,
-      fontSize: '.85rem',
-      fontWeight: '600',
+      'display': 'inline-block',
+      'padding': '.2rem .5rem',
+      'border-radius': '999px',
+      'background-color': backgroundColor,
+      'color': textColor,
+      'font-size': '.85rem',
+      'font-weight': '600',
     };
   }
 
-  private contraste(bgHex: string): string {
-    // contraste simples: luminância do hex
-    const rgb = bgHex.replace('#','');
-    const r = parseInt(rgb.substring(0,2),16);
-    const g = parseInt(rgb.substring(2,4),16);
-    const b = parseInt(rgb.substring(4,6),16);
-    const yiq = (r*299 + g*587 + b*114) / 1000;
-    return yiq >= 128 ? '#111' : '#fff';
+  private getContrastingTextColor(hexColor: string): string {
+    const cleanHex = hexColor.replace('#', '');
+    const r = parseInt(cleanHex.substring(0, 2), 16);
+    const g = parseInt(cleanHex.substring(2, 4), 16);
+    const b = parseInt(cleanHex.substring(4, 6), 16);
+    const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+    return (yiq >= 128) ? '#111' : '#fff';
   }
 
-  // Ações por status
-  acao(item: ViewItem): { label: string; link: any[] } | null {
+  acao(item: ViewItem): AcaoDisponivel | null {
     const code = item.statusCodigo.toUpperCase();
-    if (code === 'CRIADA' || code === 'ABERTA') {
-      return { label: 'Efetuar Orçamento', link: ['/efetuar-orcamento', item.id] }; // RF012
+    switch (code) {
+      case 'CRIADA':
+      case 'ABERTA':
+        return { label: 'Efetuar Orçamento', link: ['/efetuar-orcamento', item.id] };
+      case 'APROVADA':
+      case 'REDIRECIONADA':
+        return { label: 'Efetuar Manutenção', link: ['/efetuar-manutencao', item.id] };
+      case 'PAGA':
+        return { label: 'Finalizar Solicitação', action: () => this.finalizarSolicitacao(item.id) };
+      default:
+        return null;
     }
-    if (code === 'APROVADA' || code === 'REDIRECIONADA') {
-      return { label: 'Efetuar Manutenção', link: ['/efetuar-manutencao', item.id] }; // RF014
-    }
-    if (code === 'PAGA') {
-      return { label: 'Finalizar Solicitação', link: ['/finalizar-solicitacao', item.id] }; // RF016
-    }
-    return null;
   }
 
-  trackById = (_: number, i: ViewItem) => i.id;
+  finalizarSolicitacao(id: number): void {
+    const confirmacao = confirm(`Tem certeza que deseja finalizar a solicitação #${id}?`);
+    if (!confirmacao) {
+      return;
+    }
+
+    this.itens.update(currentItems => {
+      const itemsAtualizados = currentItems.map(item => {
+        if (item.id === id) {
+          return {
+            ...item,
+            statusCodigo: 'FINALIZADA',
+            statusNome: 'Finalizada',
+          };
+        }
+        return item;
+      });
+      return itemsAtualizados;
+    });
+
+    console.log(`Solicitação #${id} foi movida para o estado FINALIZADA no frontend.`);
+    alert(`Solicitação #${id} finalizada com sucesso!`);
+  }
+
+  trackById = (_: number, i: ViewItem): number => i.id;
 }

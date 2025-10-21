@@ -6,7 +6,6 @@
     </div>
 
     <div class="card-body">
-      <!-- Filtros -->
       <form [formGroup]="filtro" (ngSubmit)="buscar()" class="row g-2 align-items-end">
         <div class="col-12">
           <div class="form-check form-check-inline">
@@ -42,7 +41,6 @@
     </div>
 
     <div class="table" style="display:grid; grid-template-columns: 180px 1fr 1fr 160px 220px; border-top:1px solid #eee;">
-      <!-- Cabeçalho -->
       <div class="row" style="display:contents;">
         <div class="cell fw-semibold" style="background:#f7f7f7; padding:.6rem .75rem; border-bottom:1px solid #eee;">Data/Hora</div>
         <div class="cell fw-semibold" style="background:#f7f7f7; padding:.6rem .75rem; border-bottom:1px solid #eee;">Cliente</div>
@@ -51,7 +49,6 @@
         <div class="cell fw-semibold" style="background:#f7f7f7; padding:.6rem .75rem; border-bottom:1px solid #eee; text-align:right;">Ações</div>
       </div>
 
-      <!-- Linhas -->
       <ng-container *ngIf="!carregando() && itens().length; else vazio">
         <div class="row" *ngFor="let it of itens(); trackBy: trackById" style="display:contents;">
           <div class="cell" style="padding:.6rem .75rem; border-bottom:1px solid #f2f2f2;">
@@ -67,12 +64,15 @@
             <span [ngStyle]="badgeStyle(it.statusCodigo)">{{ it.statusNome }}</span>
           </div>
           <div class="cell" style="padding:.6rem .75rem; border-bottom:1px solid #f2f2f2; text-align:right;">
-            <ng-container [ngSwitch]="acao(it) !== null">
-              <a *ngIf="acao(it) as a" [routerLink]="a.link" class="btn btn-sm btn-primary">
-                {{ a.label }}
-              </a>
-              <span *ngIf="!acao(it)" class="text-muted">—</span>
+            <ng-container *ngIf="acao(it) as acaoData">
+                <a *ngIf="acaoData.link" [routerLink]="acaoData.link" class="btn btn-sm btn-primary">
+                  {{ acaoData.label }}
+                </a>
+                <button *ngIf="acaoData.action" (click)="acaoData.action()" class="btn btn-sm btn-primary">
+                  {{ acaoData.label }}
+                </button>
             </ng-container>
+            <span *ngIf="!acao(it)" class="text-muted">—</span>
           </div>
         </div>
       </ng-container>
