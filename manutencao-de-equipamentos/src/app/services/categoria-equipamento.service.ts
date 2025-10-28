@@ -1,90 +1,44 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, map } from 'rxjs';
-import { CategoriaEquipamento } from '../models/categoria-equipamento.model';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { CategoriaRequestDTO, CategoriaResponseDTO } from '../dtos/categoria-dto';
+
+// Ajuste se usar environments:
+const API_BASE = (window as any).__API_BASE__ || '';
+const API = `${API_BASE}/api/categorias`;
 
 @Injectable({ providedIn: 'root' })
-export class CategoriaEquipamentoService {
-  private readonly STORAGE_KEY = 'cat.equipamento';
-  private readonly _data$ = new BehaviorSubject<CategoriaEquipamento[]>(this.load());
+export class CategoriaService {
+  private http = inject(HttpClient);
+  private _items$ = new BehaviorSubject<CategoriaResponseDTO[]>([]);
+  readonly items$ = this._items$.asObservable();
 
-  list$(): Observable<CategoriaEquipamento[]> {
-    // ordena por descrição ascendente
-    return this._data$.pipe(
-      map(list => [...list].sort((a, b) => a.descricao.localeCompare(b.descricao, 'pt-BR')))
+  refresh(): Observable<CategoriaResponseDTO[]> {
+    return this.http.get<CategoriaResponseDTO[]>(API).pipe(
+      tap(items => this._items$.next(items))
     );
   }
 
-  getAll(): CategoriaEquipamento[] {
-    return this._data$.getValue();
-  }
-
-  getById(id: number): CategoriaEquipamento | undefined {
-    return this.getAll().find(c => c.id === id);
-  }
-
-  add(descricao: string): CategoriaEquipamento {
-    const desc = (descricao ?? '').trim();
-    if (!desc) throw new Error('Descrição obrigatória.');
-    this.assertUnique(desc);
-
-    const nextId = Math.max(0, ...this.getAll().map(c => c.id)) + 1;
-    const novo: CategoriaEquipamento = { id: nextId, descricao: desc };
-    const updated = [...this.getAll(), novo];
-    this.commit(updated);
-    return novo;
-  }
-
-  update(id: number, descricao: string): CategoriaEquipamento {
-    const desc = (descricao ?? '').trim();
-    if (!desc) throw new Error('Descrição obrigatória.');
-    this.assertUnique(desc, id);
-
-    const list = this.getAll();
-    const idx = list.findIndex(c => c.id === id);
-    if (idx < 0) throw new Error('Categoria não encontrada.');
-
-    const updated = [...list];
-    updated[idx] = { ...updated[idx], descricao: desc };
-    this.commit(updated);
-    return updated[idx];
-  }
-
-  remove(id: number): void {
-    const updated = this.getAll().filter(c => c.id !== id);
-    this.commit(updated);
-  }
-
-  // ——— Helpers ———
-  private commit(data: CategoriaEquipamento[]) {
-    this.save(data);
-    this._data$.next(data);
-  }
-
-  private assertUnique(descricao: string, exceptId?: number) {
-    const exists = this.getAll().some(
-      c => c.descricao.toLocaleLowerCase() === descricao.toLocaleLowerCase() && c.id !== exceptId
+  create(req: CategoriaRequestDTO): Observable<CategoriaResponseDTO> {
+    return this.http.post<CategoriaResponseDTO>(API, req).pipe(
+      tap(created => this._items$.next([created, ...this._items$.value]))
     );
-    if (exists) throw new Error('Já existe uma categoria com esta descrição.');
   }
 
-  private load(): CategoriaEquipamento[] {
-    try {
-      const raw = localStorage.getItem(this.STORAGE_KEY);
-      if (raw) return JSON.parse(raw) as CategoriaEquipamento[];
-    } catch {}
-    // seed inicial
-    const seed: CategoriaEquipamento[] = [
-      { id: 1, descricao: 'Impressora' },
-      { id: 2, descricao: 'Notebook' },
-      { id: 3, descricao: 'Desktop' },
-      { id: 4, descricao: 'Roteador' },
-      { id: 5, descricao: 'Scanner' },
-    ];
-    this.save(seed);
-    return seed;
+  update(id: number, req: CategoriaRequestDTO): Observable<CategoriaResponseDTO> {
+    return this.http.put<CategoriaResponseDTO>(`${API}/${id}`, req).pipe(
+      tap(updated => {
+        const arr = this._items$.value.map(i => (i.id === id ? updated : i));
+        this._items$.next(arr);
+      })
+    );
   }
 
-  private save(data: CategoriaEquipamento[]) {
-    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+  remove(id: number): Observable<void> {
+    // Troque para DELETE quando o endpoint existir no backend:
+    return new Observable<void>(subscriber => {
+      this._items$.next(this._items$.value.filter(i => i.id !== id));
+      subscriber.next(); subscriber.complete();
+    });
   }
 }
