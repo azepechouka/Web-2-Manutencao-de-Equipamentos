@@ -15,11 +15,8 @@ public class EstadoSolicitacao {
 
   @Id
   @Column(length = 20)
-  private String codigo; // ABERTA, ORCADA, ...
+  private String id; 
 
   @Column(nullable = false, length = 40)
-  private String nome;
-
-  @Column(name = "cor_hex", nullable = false, length = 7)
-  private String corHex;
+  private String descricao;
 }
