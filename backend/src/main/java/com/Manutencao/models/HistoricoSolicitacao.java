@@ -31,10 +31,9 @@ public class HistoricoSolicitacao {
               foreignKey = @ForeignKey(name = "fk_hist_para_estado"))
   private EstadoSolicitacao paraEstado;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "ator_id",
-              foreignKey = @ForeignKey(name = "fk_hist_ator_usuario"))
-  private Usuario ator; // opcional (quando SISTEMA)
+  @ManyToOne
+  @JoinColumn(name = "usuario_id")
+  private Usuario usuario;
 
   @Column(columnDefinition = "text")
   private String observacao;
