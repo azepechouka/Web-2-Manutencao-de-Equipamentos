@@ -3,6 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { SolicitacoesService } from '../../services/solicitacoes.service';
+import { Solicitacao } from '../../models/solicitacao.model';
 
 type ViewItem = {
   id: number;
@@ -16,9 +17,9 @@ type ViewItem = {
 type FiltroTipo = 'HOJE' | 'PERIODO' | 'TODAS';
 
 type AcaoDisponivel = {
-    label: string;
-    link?: any[];
-    action?: () => void;
+  label: string;
+  link?: any[];
+  action?: () => void;
 };
 
 @Component({
@@ -49,10 +50,21 @@ export class SolicitacoesListaComponent implements OnInit {
     const { tipo, ini, fim } = this.filtro.value as { tipo: FiltroTipo; ini: string | null; fim: string | null };
     this.carregando.set(true);
 
-    this.svc.listTodasResumo$().subscribe({
-      next: (all) => {
-        const filtrados = all.filter(s => this.matchesFiltro(s, tipo, ini, fim));
-        filtrados.sort((a, b) => new Date(a.criadoEm).getTime() - new Date(b.criadoEm).getTime());
+    this.svc.listTodas().subscribe({
+      next: (solicitacoes: Solicitacao[]) => {
+        // converte para ViewItem
+        const viewItems: ViewItem[] = solicitacoes.map((s) => ({
+          id: s.id,
+          criadoEm: s.criadoEm,
+          clienteNome: `Cliente #${s.clienteId}`,
+          equipamentoDesc: s.descricaoEquipamento ?? '',
+          statusCodigo: this.mapStatusCodigo(s.statusAtualId),
+          statusNome: this.mapStatusNome(s.statusAtualId),
+        }));
+
+        const filtrados = viewItems.filter((s) => this.matchesFiltro(s, tipo, ini, fim));
+        filtrados.sort((a, b) => new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime());
+
         this.itens.set(filtrados);
         this.carregando.set(false);
       },
@@ -60,10 +72,36 @@ export class SolicitacoesListaComponent implements OnInit {
     });
   }
 
+  private mapStatusCodigo(statusId: number): string {
+    const map: Record<number, string> = {
+      1: 'ABERTA',
+      2: 'ORCADA',
+      3: 'APROVADA',
+      4: 'REJEITADA',
+      5: 'REDIRECIONADA',
+      6: 'ARRUMADA',
+      7: 'PAGA',
+      8: 'FINALIZADA',
+    };
+    return map[statusId] ?? 'DESCONHECIDO';
+  }
+
+  private mapStatusNome(statusId: number): string {
+    const map: Record<number, string> = {
+      1: 'Aberta',
+      2: 'Orçada',
+      3: 'Aprovada',
+      4: 'Rejeitada',
+      5: 'Redirecionada',
+      6: 'Arrumada',
+      7: 'Paga',
+      8: 'Finalizada',
+    };
+    return map[statusId] ?? 'Desconhecido';
+  }
+
   private matchesFiltro(s: ViewItem, tipo: FiltroTipo, ini: string | null, fim: string | null): boolean {
-    if (tipo === 'TODAS') {
-        return true;
-    }
+    if (tipo === 'TODAS') return true;
 
     const dataSolicitacao = new Date(s.criadoEm);
 
@@ -75,20 +113,19 @@ export class SolicitacoesListaComponent implements OnInit {
     }
 
     if (tipo === 'PERIODO') {
-        if (!ini || !fim) return true;
-        const inicioPeriodo = new Date(`${ini}T00:00:00`);
-        const fimPeriodo = new Date(`${fim}T23:59:59.999`);
-        return dataSolicitacao >= inicioPeriodo && dataSolicitacao <= fimPeriodo;
+      if (!ini || !fim) return true;
+      const inicioPeriodo = new Date(`${ini}T00:00:00`);
+      const fimPeriodo = new Date(`${fim}T23:59:59.999`);
+      return dataSolicitacao >= inicioPeriodo && dataSolicitacao <= fimPeriodo;
     }
 
     return false;
   }
 
   badgeStyle(code: string): Record<string, string> {
-    const upperCaseCode = code.toUpperCase();
+    const upper = code.toUpperCase();
     const colorMap: Record<string, string> = {
       'ABERTA': '#6c757d',
-      'ORÇADA': '#795548',
       'ORCADA': '#795548',
       'REJEITADA': '#dc3545',
       'APROVADA': '#ffc107',
@@ -96,38 +133,32 @@ export class SolicitacoesListaComponent implements OnInit {
       'ARRUMADA': '#0d6efd',
       'PAGA': '#fd7e14',
       'FINALIZADA': '#198754',
-      'CRIADA': '#6c757d',
-      'EM_EXEC': '#6f42c1',
-      'CONCLUIDA': '#198754',
     };
-
-    const backgroundColor = colorMap[upperCaseCode] ?? '#6c757d';
-    const textColor = this.getContrastingTextColor(backgroundColor);
-
+    const bg = colorMap[upper] ?? '#6c757d';
+    const fg = this.getContrastingTextColor(bg);
     return {
-      'display': 'inline-block',
-      'padding': '.2rem .5rem',
-      'border-radius': '999px',
-      'background-color': backgroundColor,
-      'color': textColor,
-      'font-size': '.85rem',
-      'font-weight': '600',
+      display: 'inline-block',
+      padding: '.2rem .5rem',
+      borderRadius: '999px',
+      backgroundColor: bg,
+      color: fg,
+      fontSize: '.85rem',
+      fontWeight: '600',
     };
   }
 
   private getContrastingTextColor(hexColor: string): string {
-    const cleanHex = hexColor.replace('#', '');
-    const r = parseInt(cleanHex.substring(0, 2), 16);
-    const g = parseInt(cleanHex.substring(2, 4), 16);
-    const b = parseInt(cleanHex.substring(4, 6), 16);
-    const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-    return (yiq >= 128) ? '#111' : '#fff';
+    const c = hexColor.replace('#', '');
+    const r = parseInt(c.substring(0, 2), 16);
+    const g = parseInt(c.substring(2, 4), 16);
+    const b = parseInt(c.substring(4, 6), 16);
+    const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+    return yiq >= 128 ? '#111' : '#fff';
   }
 
   acao(item: ViewItem): AcaoDisponivel | null {
     const code = item.statusCodigo.toUpperCase();
     switch (code) {
-      case 'CRIADA':
       case 'ABERTA':
         return { label: 'Efetuar Orçamento', link: ['/efetuar-orcamento', item.id] };
       case 'APROVADA':
@@ -141,26 +172,16 @@ export class SolicitacoesListaComponent implements OnInit {
   }
 
   finalizarSolicitacao(id: number): void {
-    const confirmacao = confirm(`Tem certeza que deseja finalizar a solicitação #${id}?`);
-    if (!confirmacao) {
-      return;
-    }
+    if (!confirm(`Tem certeza que deseja finalizar a solicitação #${id}?`)) return;
 
-    this.itens.update(currentItems => {
-      const itemsAtualizados = currentItems.map(item => {
-        if (item.id === id) {
-          return {
-            ...item,
-            statusCodigo: 'FINALIZADA',
-            statusNome: 'Finalizada',
-          };
-        }
-        return item;
-      });
-      return itemsAtualizados;
-    });
+    this.itens.update((atual) =>
+      atual.map((item) =>
+        item.id === id
+          ? { ...item, statusCodigo: 'FINALIZADA', statusNome: 'Finalizada' }
+          : item
+      )
+    );
 
-    console.log(`Solicitação #${id} foi movida para o estado FINALIZADA no frontend.`);
     alert(`Solicitação #${id} finalizada com sucesso!`);
   }
 

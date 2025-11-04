@@ -1,25 +1,61 @@
 <section class="rf003">
   <h2>Minhas Solicitações</h2>
 
-  <div class="table">
+  <div *ngIf="carregando">
+    <p>Carregando solicitações...</p>
+  </div>
+
+  <div *ngIf="erro">
+    <p class="text-danger">{{ erro }}</p>
+  </div>
+
+  <div class="table" *ngIf="!carregando && !erro && itens.length > 0; else vazio">
+    <!-- Cabeçalho -->
     <div class="row head">
       <div class="cell when">Data/Hora</div>
-      <div class="cell equip">Equipamento (30)</div>
-      <div class="cell state">Estado</div>
+      <div class="cell equip">Equipamento</div>
+      <div class="cell state">Status</div>
       <div class="cell actions">Ações</div>
     </div>
 
+    <!-- Linhas -->
     <div class="row" *ngFor="let item of itens">
-      <div class="cell when">{{ item.dataHoraSolicitacao | date:'short' }}</div>
-      <div class="cell equip" [title]="item.equipamentoDesc30">{{ item.equipamentoDesc30 }}</div>
-      <div class="cell state">
-        <span class="badge">{{ item.estadoSolicitacao }}</span>
+      <div class="cell when">
+        {{ item.criadoEm | date:'dd/MM/yyyy, HH:mm' }}
       </div>
+
+      <div
+        class="cell equip"
+        [title]="item.descricaoEquipamento"
+      >
+        {{ item.descricaoEquipamento.length > 30 ? (item.descricaoEquipamento | slice:0:30) + '…' : item.descricaoEquipamento }}
+      </div>
+
+      <div class="cell state">
+        <span class="badge bg-secondary">{{ statusNome(item.statusAtualId) }}</span>
+      </div>
+
       <div class="cell actions">
-        <button type="button" class="btn" (click)="verSolicitacao(item.solicitacaoId)">
+        <button
+          type="button"
+          class="btn btn-sm btn-primary me-2"
+          (click)="verSolicitacao(item.id)"
+        >
           Visualizar
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-sm btn-success"
+          (click)="abrirOrcamento(item.id)"
+        >
+          Abrir Orçamento
         </button>
       </div>
     </div>
   </div>
+
+  <ng-template #vazio>
+    <p class="text-muted">Nenhuma solicitação encontrada.</p>
+  </ng-template>
 </section>

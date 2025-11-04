@@ -3,10 +3,9 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
-import { SolicitacoesService, DetalheSolicitacao } from '../../services/solicitacoes.service';
+import { SolicitacoesService } from '../../services/solicitacoes.service';
+import { Solicitacao } from '../../models/solicitacao.model';
 import { Orcamento } from '../../models/orcamento.model';
-import {  EventEmitter, Input, Output } from '@angular/core';
-
 
 @Component({
   selector: 'app-rejeitar-servico',
@@ -16,14 +15,17 @@ import {  EventEmitter, Input, Output } from '@angular/core';
   styleUrls: ['./rejeitar-servico.component.css']
 })
 export class RejeitarServicoComponent implements OnInit {
-  private route = inject(ActivatedRoute);
-  private service = inject(SolicitacoesService);
-  private router = inject(Router);
+  // Injeções de dependência
+  private readonly route = inject(ActivatedRoute);
+  private readonly service = inject(SolicitacoesService);
+  private readonly router = inject(Router);
 
-  solicitacao$?: Observable<DetalheSolicitacao | undefined>;
-  orcamento$?: Observable<Orcamento | undefined>;
+  // Observables e IDs
+  solicitacao$?: Observable<Solicitacao>;
+  orcamento$?: Observable<Orcamento>;
   solicitacaoId?: number;
-  
+
+  // Estado do formulário
   motivoRejeicao = '';
   isProcessing = false;
   maxLength = 500;
@@ -37,31 +39,38 @@ export class RejeitarServicoComponent implements OnInit {
     }
   }
 
-  confirmarRejeicao() {
+  confirmarRejeicao(): void {
     if (!this.motivoRejeicao.trim()) {
       alert('Por favor, informe o motivo da rejeição.');
       return;
     }
 
-    if (!this.solicitacaoId) return;
-    
+    if (!this.solicitacaoId) {
+      alert('Solicitação inválida.');
+      return;
+    }
+
     this.isProcessing = true;
+
     this.service.rejeitarOrcamento(this.solicitacaoId, this.motivoRejeicao.trim()).subscribe({
-      next: (success) => {
-        if (success) {
-          alert('Serviço Rejeitado');
-          this.router.navigate(['/home']); // Redireciona para RF003 (home)
-        }
+      next: (success: boolean) => {
         this.isProcessing = false;
+        if (success) {
+          alert('Serviço rejeitado com sucesso.');
+          this.router.navigate(['/home']);
+        } else {
+          alert('Não foi possível rejeitar o serviço.');
+        }
       },
-      error: () => {
+      error: (err: unknown) => {
+        console.error('Erro ao rejeitar serviço:', err);
         this.isProcessing = false;
         alert('Erro ao rejeitar o serviço. Tente novamente.');
       }
     });
   }
 
-  cancelar() {
+  cancelar(): void {
     this.router.navigate(['/home']);
   }
 

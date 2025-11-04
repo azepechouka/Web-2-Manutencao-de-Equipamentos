@@ -2,7 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
-import { SolicitacoesService, DetalheSolicitacao } from '../../services/solicitacoes.service';
+import { SolicitacoesService } from '../../services/solicitacoes.service';
+import { Solicitacao } from '../../models/solicitacao.model';
 import { Orcamento } from '../../models/orcamento.model';
 
 @Component({
@@ -17,8 +18,8 @@ export class VisualizarServicoComponent implements OnInit {
   private service = inject(SolicitacoesService);
   private router = inject(Router);
 
-  solicitacao$?: Observable<DetalheSolicitacao | undefined>;
-  orcamento$?: Observable<Orcamento | undefined>;
+  solicitacao$?: Observable<Solicitacao>;
+  orcamento$?: Observable<Orcamento>;
   solicitacaoId?: number;
   isProcessing = false;
 
@@ -61,7 +62,22 @@ export class VisualizarServicoComponent implements OnInit {
   }
 
   // Verifica se a solicitação pode ser aprovada/rejeitada
-  podeAprovarRejeitar(solicitacao: DetalheSolicitacao): boolean {
+  podeAprovarRejeitar(solicitacao: Solicitacao): boolean {
     return solicitacao.statusAtualId === 2; // Status ORÇADA
   }
+
+  statusNome(statusId: number): string {
+  const map: Record<number, string> = {
+    1: 'Aberta',
+    2: 'Orçada',
+    3: 'Aprovada',
+    4: 'Rejeitada',
+    5: 'Redirecionada',
+    6: 'Arrumada',
+    7: 'Paga',
+    8: 'Finalizada',
+  };
+  return map[statusId] ?? 'Desconhecido';
+}
+
 }

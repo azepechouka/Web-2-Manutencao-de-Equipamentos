@@ -4,8 +4,10 @@
       <h3>Detalhes da Solicitação #{{ s.id }}</h3>
       <a routerLink="/home" class="btn btn-secondary">Voltar para a Lista</a>
     </div>
+
     <div class="card-body">
       <div class="row">
+        <!-- Informações do Equipamento -->
         <div class="col-md-7">
           <h5 class="mb-3">Informações do Equipamento</h5>
           <table class="table table-borderless table-sm">
@@ -16,7 +18,11 @@
               </tr>
               <tr>
                 <th scope="row">Status Atual:</th>
-                <td><span class="badge bg-primary">{{ s.statusAtualNome }}</span></td>
+                <td>
+                  <span class="badge bg-primary">
+                    {{ statusNome(s.statusAtualId) }}
+                  </span>
+                </td>
               </tr>
               <tr>
                 <th scope="row">Descrição do Equipamento:</th>
@@ -29,55 +35,71 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Ações -->
         <div class="col-md-5">
-            <h5 class="mb-3">Ações Disponíveis</h5>
-            <div class="d-grid gap-2" *ngIf="solicitacao$ | async as s">
-                <!-- Botões de Aprovar/Rejeitar - só aparecem se status for ORÇADA -->
-                <div *ngIf="podeAprovarRejeitar(s)" class="d-grid gap-2">
-                    <button 
-                        class="btn btn-success" 
-                        (click)="aprovarServico()"
-                        [disabled]="isProcessing">
-                        <span *ngIf="isProcessing" class="spinner-border spinner-border-sm me-2"></span>
-                        Aprovar Serviço
-                    </button>
-                    <button 
-                        class="btn btn-danger" 
-                        (click)="rejeitarServico()"
-                        [disabled]="isProcessing">
-                        Rejeitar Serviço
-                    </button>
-                </div>
-                
-                <!-- Outros botões para outros status -->
-                <div *ngIf="!podeAprovarRejeitar(s)" class="d-grid gap-2">
-                    <button class="btn btn-info" disabled>Resgatar Serviço</button>
-                    <button class="btn btn-primary" disabled>Pagar Serviço</button>
-                </div>
+          <h5 class="mb-3">Ações Disponíveis</h5>
+
+          <!-- Se pode aprovar ou rejeitar -->
+          <div *ngIf="podeAprovarRejeitar(s); else outrasAcoes" class="d-grid gap-2">
+            <button
+              class="btn btn-success"
+              (click)="aprovarServico()"
+              [disabled]="isProcessing">
+              <span *ngIf="isProcessing" class="spinner-border spinner-border-sm me-2"></span>
+              Aprovar Serviço
+            </button>
+            <button
+              class="btn btn-danger"
+              (click)="rejeitarServico()"
+              [disabled]="isProcessing">
+              Rejeitar Serviço
+            </button>
+          </div>
+
+          <!-- Outras ações -->
+          <ng-template #outrasAcoes>
+            <div class="d-grid gap-2">
+              <button class="btn btn-info" disabled>Resgatar Serviço</button>
+              <button class="btn btn-primary" disabled>Pagar Serviço</button>
             </div>
-            <p class="text-muted small mt-3">
-              * Os botões de ação serão habilitados de acordo com o status da solicitação.
-            </p>
+          </ng-template>
+
+          <p class="text-muted small mt-3">
+            * Os botões de ação serão habilitados de acordo com o status da solicitação.
+          </p>
         </div>
       </div>
 
       <hr class="my-4">
 
+      <!-- Histórico de Atualizações -->
       <h5 class="mb-3">Histórico de Atualizações</h5>
+
+      <!-- Histórico de Atualizações -->
+<h5 class="mb-3">Histórico de Atualizações</h5>
+
+    <ng-container *ngIf="$any(s).historico?.length > 0; else semHistorico">
       <div class="timeline">
-        <div class="timeline-item" *ngFor="let h of s.historico">
+        <div class="timeline-item" *ngFor="let h of $any(s).historico">
           <div class="timeline-marker"></div>
           <div class="timeline-content">
             <p class="fw-bold mb-1">{{ h.statusNome }}</p>
             <p class="mb-1">
-              <span class="text-muted">Por:</span> {{ h.usuarioNome }}
-              <span *ngIf="h.observacao">| <span class="text-muted">Obs:</span> {{ h.observacao }}</span>
+              <span class="text-muted">Por:</span> {{ h.usuarioNome || 'Sistema' }}
+              <span *ngIf="h.observacao">
+                | <span class="text-muted">Obs:</span> {{ h.observacao }}
+              </span>
             </p>
             <p class="text-muted small">{{ h.criadoEm | date:'dd/MM/yyyy, HH:mm' }}</p>
           </div>
         </div>
       </div>
+    </ng-container>
 
+    <ng-template #semHistorico>
+      <p class="text-muted">Sem histórico disponível para esta solicitação.</p>
+    </ng-template>
     </div>
   </div>
 </div>

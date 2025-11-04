@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { SolicitacoesService } from '../../services/solicitacoes.service';
+import { Solicitacao } from '../../models/solicitacao.model';
 
 type ItemFunc = {
   solicitacaoId: number;
@@ -18,8 +19,8 @@ type ItemFunc = {
   styleUrls: ['./func-home.component.css']
 })
 export class FuncHomeComponent implements OnInit {
-  private service = inject(SolicitacoesService);
-  private router = inject(Router);
+  private readonly service = inject(SolicitacoesService);
+  private readonly router = inject(Router);
 
   itens: ItemFunc[] = [];
   carregando = signal(false);
@@ -31,15 +32,23 @@ export class FuncHomeComponent implements OnInit {
 
   private carregar(): void {
     this.carregando.set(true);
-    this.service.listParaFuncionarioEmAberto().subscribe({
-      next: (data) => {
-        this.itens = data;
+    this.service.listEmAberto().subscribe({
+      next: (data: Solicitacao[]) => {
+        // Converte a lista de solicitações em formato de exibição do funcionário
+        this.itens = data.map((s) => ({
+          solicitacaoId: s.id,
+          dataHoraSolicitacao: s.criadoEm,
+          clienteNome: `Cliente #${s.clienteId}`,
+          equipamentoDesc30: s.descricaoEquipamento.length > 30
+            ? s.descricaoEquipamento.slice(0, 30) + '...'
+            : s.descricaoEquipamento,
+        }));
         this.erro.set(null);
         this.carregando.set(false);
-        console.log('Solicitações em aberto (funcionário):', data);
+        console.log('Solicitações em aberto (funcionário):', this.itens);
       },
-      error: (err) => {
-        console.error(err);
+      error: (err: unknown) => {
+        console.error('Erro ao carregar solicitações em aberto:', err);
         this.erro.set('Falha ao carregar solicitações.');
         this.carregando.set(false);
       },
@@ -54,5 +63,5 @@ export class FuncHomeComponent implements OnInit {
     this.router.navigate(['/solicitacao', id]);
   }
 
-  trackById = (_: number, item: ItemFunc) => item.solicitacaoId;
+  trackById = (_: number, item: ItemFunc): number => item.solicitacaoId;
 }

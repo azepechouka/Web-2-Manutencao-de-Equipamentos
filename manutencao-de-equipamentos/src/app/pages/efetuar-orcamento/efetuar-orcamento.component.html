@@ -1,66 +1,115 @@
 <div class="container" style="max-width: 980px; margin: 0 auto; padding: 1rem;">
-  <div *ngIf="carregando()" class="text-muted">Carregando…</div>
-  <div *ngIf="erro()" class="text-danger">{{ erro() }}</div>
+  <!-- Carregando -->
+  <div *ngIf="carregando()" class="text-muted mb-2">Carregando…</div>
 
+  <!-- Erro -->
+  <div *ngIf="erro()" class="alert alert-danger mb-3">
+    {{ erro() }}
+  </div>
+
+  <!-- Conteúdo -->
   <ng-container *ngIf="!carregando() && detalhe() as d">
-    <div class="card" style="margin-bottom: 1rem; border:1px solid #e5e5e5; border-radius:8px;">
-      <div class="card-header" style="padding:.75rem 1rem; background:#f7f7f7;">
-        <strong>Dados da Solicitação</strong>
-      </div>
-      <div class="card-body" style="padding: .75rem 1rem;">
-        <div><strong>ID:</strong> {{ d.id }}</div>
-        <div><strong>Aberta em:</strong> {{ d.criadoEm | date:'short' }}</div>
-        <div><strong>Status atual:</strong> {{ d.statusAtualNome }}</div>
-        <div style="margin-top:.5rem;">
-          <strong>Equipamento:</strong> {{ d.descricaoEquipamento }}
-        </div>
-        <div style="margin-top:.25rem; white-space: pre-line;">
+    <!-- =======================
+         DADOS DA SOLICITAÇÃO
+    ======================== -->
+    <div class="card mb-3 border rounded">
+      <div class="card-header bg-light fw-bold">Dados da Solicitação</div>
+      <div class="card-body">
+        <p><strong>ID:</strong> {{ d.id }}</p>
+        <p><strong>Aberta em:</strong> {{ d.criadoEm | date:'dd/MM/yyyy, HH:mm' }}</p>
+        <p><strong>Status atual:</strong> {{ d.statusAtualNome }}</p>
+        <p><strong>Equipamento:</strong> {{ d.descricaoEquipamento }}</p>
+        <p class="mb-0" style="white-space: pre-line;">
           <strong>Problema relatado:</strong> {{ d.descricaoProblema }}
-        </div>
+        </p>
       </div>
     </div>
 
-    <div class="card" style="margin-bottom: 1rem; border:1px solid #e5e5e5; border-radius:8px;">
-      <div class="card-header" style="padding:.75rem 1rem; background:#f7f7f7;">
-        <strong>Dados do Cliente</strong>
-      </div>
-      <div class="card-body" style="padding: .75rem 1rem;" *ngIf="cliente() as c; else semCliente">
-        <div><strong>Nome:</strong> {{ c.nome }}</div>
-        <div><strong>E-mail:</strong> {{ c.email }}</div>
-        <div><strong>Telefone:</strong> {{ c.telefone }}</div>
-        <div *ngIf="c.endereco">
-          <strong>Endereço:</strong>
-          {{ c.endereco.logradouro }}, {{ c.endereco.numero }}
-          <span *ngIf="c.endereco.complemento"> - {{ c.endereco.complemento }}</span>,
-          {{ c.endereco.bairro }} - {{ c.endereco.localidade }}/{{ c.endereco.uf }}
-          — CEP: {{ c.endereco.cep }}
+    <!-- =======================
+         DADOS DO CLIENTE
+    ======================== -->
+    <div class="card mb-3 border rounded">
+      <div class="card-header bg-light fw-bold">Dados do Cliente</div>
+
+      <ng-container *ngIf="cliente() as c; else semCliente">
+        <div class="card-body">
+          <p><strong>Nome:</strong> {{ c.nome }}</p>
+          <p><strong>E-mail:</strong> {{ c.email }}</p>
+          <p><strong>Telefone:</strong> {{ c.telefone }}</p>
+          <div *ngIf="c.endereco">
+            <strong>Endereço:</strong>
+            {{ c.endereco.logradouro }}, {{ c.endereco.numero }}
+            <span *ngIf="c.endereco.complemento">
+              - {{ c.endereco.complemento }}
+            </span>,
+            {{ c.endereco.bairro }} -
+            {{ c.endereco.localidade }}/{{ c.endereco.uf }}
+            — CEP: {{ c.endereco.cep }}
+          </div>
         </div>
-      </div>
+      </ng-container>
+
       <ng-template #semCliente>
-        <div class="card-body text-muted" style="padding: .75rem 1rem;">Cliente não encontrado.</div>
+        <div class="card-body text-muted">
+          Cliente não encontrado.
+        </div>
       </ng-template>
     </div>
 
-    <div class="card" style="border:1px solid #e5e5e5; border-radius:8px;">
-      <div class="card-header" style="padding:.75rem 1rem; background:#f7f7f7;">
-        <strong>Efetuar Orçamento (RF012)</strong>
-      </div>
-      <div class="card-body" style="padding: .75rem 1rem;">
-        <form [formGroup]="form" (ngSubmit)="salvar()" class="row" style="display:grid; grid-template-columns: 240px 1fr auto; gap: .75rem 1rem; align-items:end;">
+    <!-- =======================
+         EFETUAR ORÇAMENTO
+    ======================== -->
+    <div class="card border rounded">
+      <div class="card-header bg-light fw-bold">Efetuar Orçamento (RF012)</div>
+      <div class="card-body">
+        <form
+          [formGroup]="form"
+          (ngSubmit)="salvar()"
+          class="row g-3 align-items-end"
+          style="display: grid; grid-template-columns: 240px 1fr auto; gap: .75rem 1rem;"
+        >
+          <!-- Valor -->
           <div>
-            <label class="form-label" for="valorTotal">Valor</label>
-            <input id="valorTotal" type="number" min="0.01" step="0.01" formControlName="valorTotal" class="form-control" placeholder="0,00" />
-            <small class="text-danger" *ngIf="form.controls.valorTotal.touched && form.controls.valorTotal.invalid">
+            <label for="valorTotal" class="form-label">Valor</label>
+            <input
+              id="valorTotal"
+              type="number"
+              min="0.01"
+              step="0.01"
+              formControlName="valorTotal"
+              class="form-control"
+              placeholder="0,00"
+            />
+            <small
+              class="text-danger"
+              *ngIf="form.controls.valorTotal.touched && form.controls.valorTotal.invalid"
+            >
               Informe um valor maior que zero.
             </small>
           </div>
 
+          <!-- Observação -->
           <div>
-            <label class="form-label" for="observacao">Observação (opcional)</label>
-            <input id="observacao" type="text" formControlName="observacao" class="form-control" placeholder="Ex.: peças incluídas, mão de obra, etc." />
+            <label for="observacao" class="form-label">Observação (opcional)</label>
+            <input
+              id="observacao"
+              type="text"
+              formControlName="observacao"
+              class="form-control"
+              placeholder="Ex.: peças incluídas, mão de obra, etc."
+            />
           </div>
 
-          <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Registrar Orçamento</button>
+          <!-- Botão -->
+          <div class="text-end">
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="form.invalid"
+            >
+              Registrar Orçamento
+            </button>
+          </div>
         </form>
       </div>
     </div>
