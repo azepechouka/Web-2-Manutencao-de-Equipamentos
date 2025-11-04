@@ -17,7 +17,7 @@ export class HomeComponent implements OnInit {
   private readonly router = inject(Router);
 
   itens: Solicitacao[] = [];
-  clienteId = 1; // futuramente substituir pelo id do cliente autenticado
+  clienteId = 1;
   carregando = true;
   erro: string | null = null;
 

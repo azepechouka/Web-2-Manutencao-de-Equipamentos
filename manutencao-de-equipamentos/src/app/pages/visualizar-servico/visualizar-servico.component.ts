@@ -43,7 +43,7 @@ export class VisualizarServicoComponent implements OnInit {
           this.orcamento$?.subscribe(orcamento => {
             const valor = orcamento ? `R$ ${orcamento.valorTotal.toFixed(2)}` : 'R$ 0,00';
             alert(`Serviço Aprovado no Valor ${valor}`);
-            this.router.navigate(['/home']); // Redireciona para RF003 (home)
+            this.router.navigate(['/home']); 
           });
         }
         this.isProcessing = false;
@@ -61,7 +61,6 @@ export class VisualizarServicoComponent implements OnInit {
     }
   }
 
-  // Verifica se a solicitação pode ser aprovada/rejeitada
   podeAprovarRejeitar(solicitacao: Solicitacao): boolean {
     return solicitacao.statusAtualId === 2; // Status ORÇADA
   }

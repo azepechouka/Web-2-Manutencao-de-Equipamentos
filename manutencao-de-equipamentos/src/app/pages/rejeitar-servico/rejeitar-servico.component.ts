@@ -15,17 +15,14 @@ import { Orcamento } from '../../models/orcamento.model';
   styleUrls: ['./rejeitar-servico.component.css']
 })
 export class RejeitarServicoComponent implements OnInit {
-  // Injeções de dependência
   private readonly route = inject(ActivatedRoute);
   private readonly service = inject(SolicitacoesService);
   private readonly router = inject(Router);
 
-  // Observables e IDs
   solicitacao$?: Observable<Solicitacao>;
   orcamento$?: Observable<Orcamento>;
   solicitacaoId?: number;
 
-  // Estado do formulário
   motivoRejeicao = '';
   isProcessing = false;
   maxLength = 500;

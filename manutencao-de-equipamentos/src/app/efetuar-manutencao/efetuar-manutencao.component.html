@@ -1,11 +1,9 @@
 <div class="container mt-4">
   <h2 class="mb-4">Efetuar Manutenção</h2>
 
-  <!-- Carregando ou erro -->
   <div *ngIf="carregando" class="text-muted">Carregando dados...</div>
   <div *ngIf="erro" class="alert alert-danger">{{ erro }}</div>
 
-  <!-- Detalhes da solicitação -->
   <div *ngIf="!carregando && solicitacao" class="detalhes-solicitacao mb-4">
     <h4 class="mb-3">Dados da Solicitação</h4>
 
@@ -25,13 +23,11 @@
     <p><strong>Telefone do Cliente:</strong> {{ cliente?.telefone || '—' }}</p>
   </div>
 
-  <!-- Ações principais -->
   <div class="acoes mb-4" *ngIf="!carregando && solicitacao">
     <button class="btn btn-primary me-2" (click)="iniciarManutencao()">Efetuar Manutenção</button>
     <button class="btn btn-warning" (click)="redirecionarManutencao()">Redirecionar Manutenção</button>
   </div>
 
-  <!-- Campos da manutenção -->
   <div *ngIf="exibirCamposManutencao" class="mt-4">
     <h4 class="mb-3">Dados da Manutenção</h4>
 
@@ -53,6 +49,5 @@
     </button>
   </div>
 
-  <!-- Mensagem final -->
   <div *ngIf="mensagem" class="alert alert-info mt-4" [innerHTML]="mensagem"></div>
 </div>

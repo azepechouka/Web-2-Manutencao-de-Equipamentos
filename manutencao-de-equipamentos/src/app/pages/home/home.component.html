@@ -10,7 +10,6 @@
   </div>
 
   <div class="table" *ngIf="!carregando && !erro && itens.length > 0; else vazio">
-    <!-- Cabeçalho -->
     <div class="row head">
       <div class="cell when">Data/Hora</div>
       <div class="cell equip">Equipamento</div>
@@ -18,7 +17,6 @@
       <div class="cell actions">Ações</div>
     </div>
 
-    <!-- Linhas -->
     <div class="row" *ngFor="let item of itens">
       <div class="cell when">
         {{ item.criadoEm | date:'dd/MM/yyyy, HH:mm' }}

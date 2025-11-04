@@ -8,9 +8,6 @@ import autoTable from 'jspdf-autotable';
 import { SolicitacoesService } from '../../services/solicitacoes.service';
 import { CategoriaEquipamentoService } from '../../services/categoria-equipamento.service';
 
-// =====================
-// Tipos auxiliares
-// =====================
 export interface ReceitaCategoriaItem {
   categoriaId: number | null;
   categoriaDescricao: string;
@@ -29,9 +26,6 @@ type VM = {
 type FiltroCatValue = 'ALL' | 'NULL' | number;
 type CategoriaOption = { value: FiltroCatValue; label: string };
 
-// =====================
-// Componente
-// =====================
 @Component({
   selector: 'app-relatorio-categorias',
   standalone: true,
@@ -42,7 +36,6 @@ export class RelatorioCategoriasComponent {
   private readonly svc = inject(SolicitacoesService);
   private readonly catSvc = inject(CategoriaEquipamentoService, { optional: true });
 
-  // 🔹 Lookup (id → descrição)
   private readonly categoriasLookup$ = this.catSvc
     ? this.catSvc.list$().pipe(
         map((arr) =>
@@ -57,11 +50,6 @@ export class RelatorioCategoriasComponent {
       )
     : of({} as Record<number, string>);
 
-  // ===================================================
-  // 🔹 MOCK / Placeholder de relatorioReceitaPorCategoria$
-  // ===================================================
-  // 👉 Enquanto o endpoint real não existir no service,
-  // simulamos dados agregados a partir das solicitações
   private readonly relatorioReceitaPorCategoria$ = (lookup: Record<number, string>) =>
     this.svc.listTodas().pipe(
       map((solics): ReceitaCategoriaItem[] => {
@@ -80,8 +68,7 @@ export class RelatorioCategoriasComponent {
               ultima: s.criadoEm,
             } as ReceitaCategoriaItem);
 
-          // incrementa totals
-          item.total += Math.random() * 500; // mock: total aleatório até API real
+          item.total += Math.random() * 500;
           item.quantidade += 1;
           item.ultima = s.criadoEm;
           mapCategorias.set(categoriaId, item);
@@ -91,9 +78,6 @@ export class RelatorioCategoriasComponent {
       })
     );
 
-  // ===================================================
-  // 🔹 Base (sem filtro)
-  // ===================================================
   private readonly vmBase$ = this.categoriasLookup$.pipe(
     switchMap((lookup: Record<number, string>) => this.relatorioReceitaPorCategoria$(lookup)),
     map((itens: ReceitaCategoriaItem[]): VM => ({
@@ -103,9 +87,6 @@ export class RelatorioCategoriasComponent {
     }))
   );
 
-  // ===================================================
-  // 🔹 Opções do select de categorias
-  // ===================================================
   readonly opcoes$ = this.vmBase$.pipe(
     map((vm: VM) => {
       const opts: CategoriaOption[] = [{ value: 'ALL', label: 'Todas as categorias' }];
@@ -128,14 +109,8 @@ export class RelatorioCategoriasComponent {
     })
   );
 
-  // ===================================================
-  // 🔹 Filtro reativo
-  // ===================================================
   readonly filtroCtrl = new FormControl<FiltroCatValue>('ALL', { nonNullable: true });
 
-  // ===================================================
-  // 🔹 ViewModel final (com filtro aplicado)
-  // ===================================================
   readonly vm$ = combineLatest([
     this.vmBase$,
     this.filtroCtrl.valueChanges.pipe(startWith(this.filtroCtrl.value)),
@@ -156,9 +131,6 @@ export class RelatorioCategoriasComponent {
     })
   );
 
-  // ===================================================
-  // 🔹 Exportação PDF
-  // ===================================================
   exportarPDF(): void {
     const subscription = this.vm$.subscribe((vm) => {
       const { itens, totalGeral, qtdGeral } = vm;
@@ -211,8 +183,5 @@ export class RelatorioCategoriasComponent {
     });
   }
 
-  // ===================================================
-  // 🔹 TrackBy
-  // ===================================================
   trackByCategoria = (_: number, it: ReceitaCategoriaItem): number => it.categoriaId ?? -1;
 }

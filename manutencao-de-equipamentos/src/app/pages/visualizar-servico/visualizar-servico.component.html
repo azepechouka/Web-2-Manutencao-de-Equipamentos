@@ -36,11 +36,9 @@
           </table>
         </div>
 
-        <!-- Ações -->
         <div class="col-md-5">
           <h5 class="mb-3">Ações Disponíveis</h5>
 
-          <!-- Se pode aprovar ou rejeitar -->
           <div *ngIf="podeAprovarRejeitar(s); else outrasAcoes" class="d-grid gap-2">
             <button
               class="btn btn-success"
@@ -57,7 +55,6 @@
             </button>
           </div>
 
-          <!-- Outras ações -->
           <ng-template #outrasAcoes>
             <div class="d-grid gap-2">
               <button class="btn btn-info" disabled>Resgatar Serviço</button>
@@ -73,10 +70,8 @@
 
       <hr class="my-4">
 
-      <!-- Histórico de Atualizações -->
       <h5 class="mb-3">Histórico de Atualizações</h5>
 
-      <!-- Histórico de Atualizações -->
 <h5 class="mb-3">Histórico de Atualizações</h5>
 
     <ng-container *ngIf="$any(s).historico?.length > 0; else semHistorico">

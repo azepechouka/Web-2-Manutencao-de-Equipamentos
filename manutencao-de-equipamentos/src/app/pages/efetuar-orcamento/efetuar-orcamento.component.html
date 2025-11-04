@@ -2,16 +2,11 @@
   <!-- Carregando -->
   <div *ngIf="carregando()" class="text-muted mb-2">Carregando…</div>
 
-  <!-- Erro -->
   <div *ngIf="erro()" class="alert alert-danger mb-3">
     {{ erro() }}
   </div>
 
-  <!-- Conteúdo -->
   <ng-container *ngIf="!carregando() && detalhe() as d">
-    <!-- =======================
-         DADOS DA SOLICITAÇÃO
-    ======================== -->
     <div class="card mb-3 border rounded">
       <div class="card-header bg-light fw-bold">Dados da Solicitação</div>
       <div class="card-body">
@@ -25,9 +20,6 @@
       </div>
     </div>
 
-    <!-- =======================
-         DADOS DO CLIENTE
-    ======================== -->
     <div class="card mb-3 border rounded">
       <div class="card-header bg-light fw-bold">Dados do Cliente</div>
 
@@ -56,9 +48,6 @@
       </ng-template>
     </div>
 
-    <!-- =======================
-         EFETUAR ORÇAMENTO
-    ======================== -->
     <div class="card border rounded">
       <div class="card-header bg-light fw-bold">Efetuar Orçamento (RF012)</div>
       <div class="card-body">
@@ -68,7 +57,6 @@
           class="row g-3 align-items-end"
           style="display: grid; grid-template-columns: 240px 1fr auto; gap: .75rem 1rem;"
         >
-          <!-- Valor -->
           <div>
             <label for="valorTotal" class="form-label">Valor</label>
             <input
@@ -88,7 +76,6 @@
             </small>
           </div>
 
-          <!-- Observação -->
           <div>
             <label for="observacao" class="form-label">Observação (opcional)</label>
             <input
@@ -100,7 +87,6 @@
             />
           </div>
 
-          <!-- Botão -->
           <div class="text-end">
             <button
               type="submit"

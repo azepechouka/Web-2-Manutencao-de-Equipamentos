@@ -34,7 +34,6 @@ export class FuncHomeComponent implements OnInit {
     this.carregando.set(true);
     this.service.listEmAberto().subscribe({
       next: (data: Solicitacao[]) => {
-        // Converte a lista de solicitações em formato de exibição do funcionário
         this.itens = data.map((s) => ({
           solicitacaoId: s.id,
           dataHoraSolicitacao: s.criadoEm,

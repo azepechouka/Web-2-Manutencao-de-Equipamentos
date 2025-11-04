@@ -18,11 +18,9 @@ export class EfetuarManutencaoComponent implements OnInit {
 
   id!: number;
 
-  // Dados exibidos
   solicitacao: Solicitacao | null = null;
-  cliente: any = null; // 👈 declaração adicionada
+  cliente: any = null;
 
-  // Estado da tela
   exibirCamposManutencao = false;
   mensagem = '';
   carregando = true;
@@ -51,10 +49,6 @@ export class EfetuarManutencaoComponent implements OnInit {
         }
 
         this.solicitacao = det;
-
-        // se quiser buscar o cliente no futuro:
-        // this.svc.getClienteById(det.clienteId).subscribe(cli => this.cliente = cli);
-
         this.carregando = false;
       },
       error: (err: unknown) => {
@@ -81,10 +75,10 @@ export class EfetuarManutencaoComponent implements OnInit {
     }
 
     const now = new Date();
-    const funcionario = 'Ana Souza'; // Pode vir do AuthService no futuro
+    const funcionario = 'Ana Souza';
 
     this.mensagem = `
-      ✅ <strong>Manutenção realizada com sucesso!</strong><br>
+      <strong>Manutenção realizada com sucesso!</strong><br>
       <b>Descrição da Manutenção:</b> ${descricao}<br>
       <b>Orientações para o Cliente:</b> ${orientacoes}<br>
       <b>Data/Hora:</b> ${now.toLocaleDateString()} ${now.toLocaleTimeString()}<br>
