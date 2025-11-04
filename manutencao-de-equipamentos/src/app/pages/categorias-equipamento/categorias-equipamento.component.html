@@ -8,6 +8,7 @@
     </div>
 
     <div class="card-body">
+      <!-- Formulário -->
       <h6 class="mb-2">{{ tituloForm }}</h6>
       <form [formGroup]="form" (ngSubmit)="salvar()" class="row g-2 align-items-end">
         <div class="col-12 col-md-8">
@@ -34,19 +35,18 @@
 
       <hr class="my-3" />
 
+      <!-- Lista -->
       <div class="table" style="display:grid; grid-template-columns: 100px 1fr 220px;">
         <div class="row" style="display:contents;">
           <div class="cell fw-semibold" style="background:#f7f7f7; padding:.6rem .75rem; border-bottom:1px solid #eee;">ID</div>
-          <div class="cell fw-semibold" style="background:#f7f7f7; padding:.6rem .75rem; border-bottom:1px solid #eee;">Nome</div>
+          <div class="cell fw-semibold" style="background:#f7f7f7; padding:.6rem .75rem; border-bottom:1px solid #eee;">Descrição</div>
           <div class="cell fw-semibold" style="background:#f7f7f7; padding:.6rem .75rem; border-bottom:1px solid #eee; text-align:right;">Ações</div>
         </div>
 
         <ng-container *ngIf="categorias$ | async as categorias; else vazio">
           <div class="row" *ngFor="let c of categorias; trackBy: trackById" style="display:contents;">
             <div class="cell" style="padding:.6rem .75rem; border-bottom:1px solid #f2f2f2;">{{ c.id }}</div>
-            <div class="cell" style="padding:.6rem .75rem; border-bottom:1px solid #f2f2f2;">
-              {{ c.nome || c.descricao }}
-            </div>
+            <div class="cell" style="padding:.6rem .75rem; border-bottom:1px solid #f2f2f2;">{{ c.descricao }}</div>
             <div class="cell" style="padding:.6rem .75rem; border-bottom:1px solid #f2f2f2; text-align:right;">
               <button class="btn btn-sm btn-outline-primary me-2" type="button" (click)="editar(c)">Editar</button>
               <button class="btn btn-sm btn-outline-danger" type="button" (click)="remover(c)">Remover</button>
