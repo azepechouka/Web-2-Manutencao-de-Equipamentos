@@ -235,4 +235,3 @@ ABERTA → ORCADA → APROVADA/REJEITADA → REDIRECIONADA → ARRUMADA → PAGA
 **Data**: Dezembro 2024  
 **Autor**: Equipe de Desenvolvimento  
 **Status**: Documentação Atualizada
-
