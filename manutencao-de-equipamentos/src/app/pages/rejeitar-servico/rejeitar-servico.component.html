@@ -1,14 +1,15 @@
 <div class="container mt-4" *ngIf="solicitacao$ | async as s; else loading">
   <div class="card shadow-sm">
-    <div class="card-header d-flex justify-content-between align-items-center">
+    
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
       <h3>Rejeitar Serviço #{{ s.id }}</h3>
       <a routerLink="/home" class="btn btn-secondary">Voltar para a Lista</a>
     </div>
     
     <div class="card-body">
-      <!-- Informações da Solicitação -->
       <div class="row mb-4">
-        <div class="col-md-6">
+        
+        <div class="col-md-6 mb-4 mb-md-0">
           <h5 class="mb-3">Informações da Solicitação</h5>
           <table class="table table-borderless table-sm">
             <tbody>
@@ -39,7 +40,6 @@
 
       <hr class="my-4">
 
-      <!-- Formulário de Rejeição -->
       <div class="row">
         <div class="col-12">
           <h5 class="mb-3">Motivo da Rejeição</h5>
@@ -71,10 +71,10 @@
         </div>
       </div>
 
-      <!-- Botões de Ação -->
       <div class="row">
         <div class="col-12">
-          <div class="d-flex gap-2 justify-content-end">
+          
+          <div class="d-grid gap-2 d-sm-flex justify-content-sm-end">
             <button 
               type="button" 
               class="btn btn-secondary" 
@@ -105,5 +105,3 @@
     <p class="mt-2">Carregando detalhes da solicitação...</p>
   </div>
 </ng-template>
-
-
