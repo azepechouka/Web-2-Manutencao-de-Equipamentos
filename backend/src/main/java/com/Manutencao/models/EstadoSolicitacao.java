@@ -10,13 +10,20 @@ import java.time.Instant;
 
 @Entity
 @Table(name = "estados_solicitacao")
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class EstadoSolicitacao {
 
-  @Id
-  @Column(length = 20)
-  private String id; 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Column(nullable = false, length = 40)
-  private String descricao;
+    @Column(nullable = false, unique = true, length = 50)
+    private String nome;
+
+    @Column(length = 255)
+    private String descricao;
 }
+

@@ -10,17 +10,17 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HistoricoRequest {
-    
-    @NotNull
+
+    @NotNull(message = "O ID da solicitação é obrigatório.")
     private Long solicitacaoId;
-    
+
     private Long deStatusId;
-    
-    @NotNull
+
+    @NotNull(message = "O novo status (paraStatusId) é obrigatório.")
     private Long paraStatusId;
-    
+
     private Long usuarioId;
-    
-    @Size(max = 1000)
+
+    @Size(max = 1000, message = "A observação pode ter no máximo 1000 caracteres.")
     private String observacao;
 }

@@ -22,11 +22,11 @@ public class Pagamento {
               foreignKey = @ForeignKey(name = "fk_pag_solic"))
   private Solicitacao solicitacao;
 
-  @Column(name = "valor_centavos", nullable = false)
-  private Long valorCentavos;
+  @Column(name = "valor_total", nullable = false)
+  private Long valorTotal;
 
   @Column(name = "forma_pagamento", length = 30)
-  private String formaPagamento; // PIX, CARTAO, DINHEIRO
+  private String formaPagamento;
 
   @CreationTimestamp
   @Column(name = "confirmado_em", nullable = false, updatable = false)

@@ -2,10 +2,8 @@ package com.Manutencao.service;
 
 import com.Manutencao.dto.HistoricoRequest;
 import com.Manutencao.dto.HistoricoResponse;
-import com.Manutencao.models.HistoricoSolicitacao;
-import com.Manutencao.models.Usuario;
-import com.Manutencao.repositories.HistoricoSolicitacaoRepository;
-import com.Manutencao.repositories.UsuarioRepository;
+import com.Manutencao.models.*;
+import com.Manutencao.repositories.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,72 +14,79 @@ import java.util.stream.Collectors;
 @Service
 public class HistoricoService {
 
-    private final HistoricoSolicitacaoRepository repo;
+    private final HistoricoSolicitacaoRepository historicoRepo;
+    private final SolicitacaoRepository solicitacaoRepo;
+    private final EstadoSolicitacaoRepository estadoRepo;
     private final UsuarioRepository usuarioRepo;
 
-    public HistoricoService(HistoricoSolicitacaoRepository repo, UsuarioRepository usuarioRepo) {
-        this.repo = repo;
+    public HistoricoService(HistoricoSolicitacaoRepository historicoRepo,
+                            SolicitacaoRepository solicitacaoRepo,
+                            EstadoSolicitacaoRepository estadoRepo,
+                            UsuarioRepository usuarioRepo) {
+        this.historicoRepo = historicoRepo;
+        this.solicitacaoRepo = solicitacaoRepo;
+        this.estadoRepo = estadoRepo;
         this.usuarioRepo = usuarioRepo;
     }
 
     @Transactional(readOnly = true)
     public List<HistoricoResponse> listarPorSolicitacao(Long solicitacaoId) {
-        return repo.findBySolicitacaoIdOrderByCriadoEmDesc(solicitacaoId).stream()
-                .map(this::toResponseWithDetails)
+        return historicoRepo.findBySolicitacaoIdOrderByCriadoEmDesc(solicitacaoId)
+                .stream()
+                .map(this::toResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<HistoricoResponse> listarPorUsuario(Long usuarioId) {
-        return repo.findByUsuarioIdOrderByCriadoEmDesc(usuarioId).stream()
-                .map(this::toResponseWithDetails)
+        return historicoRepo.findByUsuarioIdOrderByCriadoEmDesc(usuarioId)
+                .stream()
+                .map(this::toResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public HistoricoResponse criar(HistoricoRequest request) {
-        HistoricoSolicitacao entity = new HistoricoSolicitacao();
-        entity.setSolicitacaoId(request.getSolicitacaoId());
-        entity.setDeStatusId(request.getDeStatusId());
-        entity.setParaStatusId(request.getParaStatusId());
-        entity.setUsuarioId(request.getUsuarioId());
-        entity.setObservacao(request.getObservacao());
-        entity.setCriadoEm(LocalDateTime.now());
-        
-        entity = repo.save(entity);
-        return toResponseWithDetails(entity);
+    public HistoricoResponse criar(HistoricoRequest req) {
+        Solicitacao solicitacao = solicitacaoRepo.findById(req.getSolicitacaoId())
+                .orElseThrow(() -> new IllegalArgumentException("Solicitação não encontrada"));
+
+        EstadoSolicitacao deStatus = req.getDeStatusId() != null
+                ? estadoRepo.findById(req.getDeStatusId()).orElse(null)
+                : null;
+
+        EstadoSolicitacao paraStatus = req.getParaStatusId() != null
+                ? estadoRepo.findById(req.getParaStatusId()).orElse(null)
+                : null;
+
+        Usuario usuario = req.getUsuarioId() != null
+                ? usuarioRepo.findById(req.getUsuarioId()).orElse(null)
+                : null;
+
+        HistoricoSolicitacao entity = HistoricoSolicitacao.builder()
+                .solicitacao(solicitacao)
+                .deStatus(deStatus)
+                .paraStatus(paraStatus)
+                .usuario(usuario)
+                .observacao(req.getObservacao())
+                .criadoEm(LocalDateTime.now())
+                .build();
+
+        entity = historicoRepo.save(entity);
+        return toResponse(entity);
     }
 
-    private HistoricoResponse toResponseWithDetails(HistoricoSolicitacao historico) {
-        Usuario usuario = historico.getUsuarioId() != null ? 
-            usuarioRepo.findById(historico.getUsuarioId()).orElse(null) : null;
-        
-        HistoricoResponse response = new HistoricoResponse();
-        response.setId(historico.getId());
-        response.setSolicitacaoId(historico.getSolicitacaoId());
-        response.setDeStatusId(historico.getDeStatusId());
-        response.setDeStatusNome(getStatusNome(historico.getDeStatusId()));
-        response.setParaStatusId(historico.getParaStatusId());
-        response.setParaStatusNome(getStatusNome(historico.getParaStatusId()));
-        response.setUsuarioId(historico.getUsuarioId());
-        response.setUsuarioNome(usuario != null ? usuario.getNome() : "Sistema");
-        response.setObservacao(historico.getObservacao());
-        response.setCriadoEm(historico.getCriadoEm());
-        
-        return response;
-    }
-
-    private String getStatusNome(Long statusId) {
-        if (statusId == null) return null;
-        
-        return switch (statusId.intValue()) {
-            case 1 -> "Criada";
-            case 2 -> "Orçada";
-            case 3 -> "Aprovada";
-            case 4 -> "Rejeitada";
-            case 5 -> "Em execução";
-            case 6 -> "Concluída";
-            default -> "Desconhecido";
-        };
+    private HistoricoResponse toResponse(HistoricoSolicitacao h) {
+        return HistoricoResponse.builder()
+                .id(h.getId())
+                .solicitacaoId(h.getSolicitacao().getId())
+                .deStatusId(h.getDeStatus() != null ? h.getDeStatus().getId() : null)
+                .deStatusNome(h.getDeStatus() != null ? h.getDeStatus().getNome() : null)
+                .paraStatusId(h.getParaStatus() != null ? h.getParaStatus().getId() : null)
+                .paraStatusNome(h.getParaStatus() != null ? h.getParaStatus().getNome() : null)
+                .usuarioId(h.getUsuario() != null ? h.getUsuario().getId() : null)
+                .usuarioNome(h.getUsuario() != null ? h.getUsuario().getNome() : "Sistema")
+                .observacao(h.getObservacao())
+                .criadoEm(h.getCriadoEm())
+                .build();
     }
 }
