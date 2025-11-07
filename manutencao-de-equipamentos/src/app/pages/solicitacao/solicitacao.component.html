@@ -6,7 +6,6 @@
           <h3 class="mb-0">Solicitação de Manutenção</h3>
         </div>
         <div class="card-body">
-          <!-- Formulário de Solicitação -->
           <form [formGroup]="solicitacaoForm" (ngSubmit)="onSubmit()" *ngIf="!solicitacaoEnviada">
             <div class="mb-3">
               <label for="descricaoEquipamento" class="form-label">Descrição do Equipamento</label>
@@ -23,15 +22,15 @@
             </div>
 
             <div class="mb-3">
-              <label for="descricaoProblema" class="form-label">Descrição do Problema</label>
+              <label for="descricaoDefeito" class="form-label">Descrição do Problema</label>
               <textarea
                 class="form-control"
-                id="descricaoProblema"
-                formControlName="descricaoProblema"
+                id="descricaoDefeito"
+                formControlName="descricaoDefeito"
                 rows="4"
                 placeholder="Descreva detalhadamente o problema encontrado..."
               ></textarea>
-              <div class="invalid-feedback" *ngIf="solicitacaoForm.get('descricaoProblema')?.invalid && solicitacaoForm.get('descricaoProblema')?.touched">
+              <div class="invalid-feedback" *ngIf="solicitacaoForm.get('descricaoDefeito')?.invalid && solicitacaoForm.get('descricaoDefeito')?.touched">
                 Descrição do problema é obrigatória.
               </div>
             </div>
@@ -59,7 +58,6 @@
             </div>
           </form>
 
-          <!-- Status da Solicitação -->
           <div *ngIf="solicitacaoEnviada" class="alert alert-info">
             <h5>Solicitação Enviada com Sucesso!</h5>
             <p><strong>ID da Solicitação:</strong> {{ solicitacaoEnviada.id }}</p>
@@ -75,7 +73,6 @@
             </p>
           </div>
 
-          <!-- Orçamento Disponível -->
           <div *ngIf="orcamentoDisponivel" class="card mt-3">
             <div class="card-header">
               <h5 class="mb-0">Orçamento Recebido</h5>
@@ -108,7 +105,6 @@
             </div>
           </div>
 
-          <!-- Mensagem de Status -->
           <div *ngIf="mensagem" class="alert alert-info mt-3" role="alert">
             {{ mensagem }}
           </div>

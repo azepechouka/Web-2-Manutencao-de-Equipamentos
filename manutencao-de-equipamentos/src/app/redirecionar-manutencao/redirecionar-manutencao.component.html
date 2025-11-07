@@ -1,35 +1,67 @@
 <div class="container">
-    <h2>Redirecionar Manutenção</h2>
-  
-    <div class="detalhes-solicitacao">
-        <h4>Dados da Solicitação</h4>
-        <p><strong>Nome do Cliente:</strong> {{ solicitacao.nomeCliente }}</p>
-        <p><strong>Descrição do Equipamento:</strong> {{ solicitacao?.descricao }}</p>
-        <p><strong>Data da Solicitação:</strong> {{ solicitacao?.dataHora | date: "dd/MM/yyyy, HH:mm" }}</p>
-      </div>
-  
-    <div class="form-group">
-      <label for="funcionario-destino">Selecione o Funcionário Destino:</label>
-      <select id="funcionario-destino" class="form-control" [(ngModel)]="funcionarioDestino">
-        <option *ngFor="let funcionario of funcionarios" [value]="funcionario">
-          {{ funcionario }}
-        </option>
-      </select>
+  <h2>Redirecionar Manutenção</h2>
+
+  <div class="detalhes-solicitacao mt-3" *ngIf="solicitacao; else carregandoOuErro">
+    <h4>Dados da Solicitação</h4>
+
+    <p><strong>Nome do Cliente:</strong> {{ cliente?.nome || '—' }}</p>
+    <p><strong>Descrição do Equipamento:</strong> {{ solicitacao.descricaoEquipamento || '—' }}</p>
+    <p><strong>Defeito Reportado:</strong> {{ solicitacao.descricaoDefeito || '—' }}</p>
+    <p><strong>Data da Solicitação:</strong> {{ solicitacao.criadoEm | date: 'dd/MM/yyyy, HH:mm' }}</p>
+  </div>
+
+  <ng-template #carregandoOuErro>
+    <div *ngIf="loading" class="alert alert-secondary mt-3">
+      Carregando dados da solicitação...
     </div>
-  
-    <div class="acoes">
-        <button class="btn btn-warning" (click)="redirecionarManutencao()">Redirecionar Manutenção</button>
-        <button class="btn btn-primary" (click)="voltar()">Voltar para a Lista</button>
+    <div *ngIf="error" class="alert alert-danger mt-3">
+      {{ error }}
     </div>
-  
-    <div *ngIf="mensagem" class="mensagem">
-      <p>{{ mensagem }}</p>
-    </div>
-    <br>
+  </ng-template>
+
+  <div class="form-group mt-4">
+    <label for="funcionario-destino" class="form-label fw-bold">
+      Selecione o Funcionário Destino:
+    </label>
+
+    <select
+      id="funcionario-destino"
+      class="form-select"
+      [(ngModel)]="funcionarioDestino"
+      name="funcionarioDestino"
+    >
+      <option [ngValue]="''" disabled selected>Selecione...</option>
+      <option *ngFor="let funcionario of funcionarios" [ngValue]="funcionario">
+        {{ funcionario }}
+      </option>
+    </select>
+  </div>
+
+  <div class="acoes mt-4 d-flex gap-2">
+    <button
+      class="btn btn-warning flex-fill"
+      (click)="redirecionarManutencao()"
+      [disabled]="!funcionarioDestino"
+    >
+      Redirecionar Manutenção
+    </button>
+
+    <button class="btn btn-primary flex-fill" (click)="voltar()">
+      Voltar para a Lista
+    </button>
+  </div>
+
+  <div *ngIf="mensagem" class="mensagem mt-3 alert alert-info text-center">
+    {{ mensagem }}
+  </div>
+
+  <div *ngIf="historicoRedirecionamento?.length" class="mt-4">
     <h4>Histórico de Redirecionamentos</h4>
-    <ul>
-      <li *ngFor="let historico of historicoRedirecionamento">
-        Data/Hora: {{ historico.dataHora }} - De: {{ historico.origem }} - Para: {{ historico.destino }}
+    <ul class="list-group">
+      <li *ngFor="let historico of historicoRedirecionamento" class="list-group-item">
+        <strong>{{ historico.dataHora }}</strong>
+        — De: {{ historico.origem }} → Para: {{ historico.destino }}
       </li>
     </ul>
   </div>
+</div>

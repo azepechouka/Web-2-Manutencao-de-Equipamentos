@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -14,9 +14,10 @@ type RedirHist = { dataHora: string; origem: string; destino: string };
   templateUrl: './redirecionar-manutencao.component.html',
   styleUrls: ['./redirecionar-manutencao.component.css']
 })
-export class RedirecionarManutencaoComponent {
+export class RedirecionarManutencaoComponent implements OnInit {
   solicitacaoId!: number;
   solicitacao?: Solicitacao;
+  cliente: any = null;
 
   funcionarioOrigem = 'Hermione Granger';
   funcionarios = ['Hermione Granger', 'Harry Potter', 'Ronald Weasley'];
@@ -47,9 +48,15 @@ export class RedirecionarManutencaoComponent {
   private carregarSolicitacao(): void {
     this.loading = true;
     this.svc.getById(this.solicitacaoId).subscribe({
-      next: (det) => {
+      next: (det: Solicitacao) => {
         this.solicitacao = det;
         this.loading = false;
+        if (det.clienteId) {
+          this.svc.getClienteById$(det.clienteId).subscribe({
+            next: (cli) => (this.cliente = cli),
+            error: () => (this.cliente = null)
+          });
+        }
       },
       error: () => {
         this.error = 'Falha ao carregar os dados da solicitação.';
@@ -75,7 +82,7 @@ export class RedirecionarManutencaoComponent {
     this.historicoRedirecionamento.push({
       dataHora: `${agora.toLocaleDateString()} ${agora.toLocaleTimeString()}`,
       origem: this.funcionarioOrigem,
-      destino: this.funcionarioDestino
+      destino: this.funcionarioDestino,
     });
 
     this.funcionarioOrigem = this.funcionarioDestino;

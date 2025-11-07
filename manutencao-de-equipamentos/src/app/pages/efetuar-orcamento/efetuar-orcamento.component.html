@@ -1,21 +1,21 @@
 <div class="container" style="max-width: 980px; margin: 0 auto; padding: 1rem;">
-  <!-- Carregando -->
   <div *ngIf="carregando()" class="text-muted mb-2">Carregando…</div>
 
   <div *ngIf="erro()" class="alert alert-danger mb-3">
     {{ erro() }}
   </div>
 
-  <ng-container *ngIf="!carregando() && detalhe() as d">
+
+  <ng-container *ngIf="!carregando() && solicitacao() as s">
     <div class="card mb-3 border rounded">
       <div class="card-header bg-light fw-bold">Dados da Solicitação</div>
       <div class="card-body">
-        <p><strong>ID:</strong> {{ d.id }}</p>
-        <p><strong>Aberta em:</strong> {{ d.criadoEm | date:'dd/MM/yyyy, HH:mm' }}</p>
-        <p><strong>Status atual:</strong> {{ d.statusAtualNome }}</p>
-        <p><strong>Equipamento:</strong> {{ d.descricaoEquipamento }}</p>
+        <p><strong>ID:</strong> {{ s.id }}</p>
+        <p><strong>Aberta em:</strong> {{ s.criadoEm | date:'dd/MM/yyyy, HH:mm' }}</p>
+        <p><strong>Status atual:</strong> {{ traduzStatus(s.statusAtualId) }}</p>
+        <p><strong>Equipamento:</strong> {{ s.descricaoEquipamento || '—' }}</p>
         <p class="mb-0" style="white-space: pre-line;">
-          <strong>Problema relatado:</strong> {{ d.descricaoProblema }}
+          <strong>Defeito relatado:</strong> {{  '—' }}
         </p>
       </div>
     </div>
@@ -25,9 +25,10 @@
 
       <ng-container *ngIf="cliente() as c; else semCliente">
         <div class="card-body">
-          <p><strong>Nome:</strong> {{ c.nome }}</p>
-          <p><strong>E-mail:</strong> {{ c.email }}</p>
-          <p><strong>Telefone:</strong> {{ c.telefone }}</p>
+          <p><strong>Nome:</strong> {{ c.nome || '—' }}</p>
+          <p><strong>E-mail:</strong> {{ c.email || '—' }}</p>
+          <p><strong>Telefone:</strong> {{ c.telefone || '—' }}</p>
+
           <div *ngIf="c.endereco">
             <strong>Endereço:</strong>
             {{ c.endereco.logradouro }}, {{ c.endereco.numero }}

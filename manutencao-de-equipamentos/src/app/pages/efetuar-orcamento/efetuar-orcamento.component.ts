@@ -1,9 +1,10 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule, DatePipe, CurrencyPipe, NgIf } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { SolicitacoesService, DetalheSolicitacao } from '../../services/solicitacoes.service';
+import { SolicitacoesService } from '../../services/solicitacoes.service';
 import { AuthService } from '../../services/auth.service';
+import { Solicitacao } from '../../models/solicitacao.model';
 
 @Component({
   selector: 'app-efetuar-orcamento',
@@ -19,7 +20,7 @@ export class EfetuarOrcamentoComponent implements OnInit {
   private auth = inject(AuthService);
 
   solicitacaoId!: number;
-  detalhe = signal<DetalheSolicitacao | null>(null);
+  solicitacao = signal<Solicitacao | null>(null);
   cliente = signal<any | null>(null);
   carregando = signal(true);
   erro = signal<string | null>(null);
@@ -36,20 +37,28 @@ export class EfetuarOrcamentoComponent implements OnInit {
       this.carregando.set(false);
       return;
     }
+
     this.solicitacaoId = id;
 
     this.svc.getById(id).subscribe({
-      next: det => {
+      next: (det: Solicitacao) => {
         if (!det) {
           this.erro.set('Solicitação não encontrada.');
           this.carregando.set(false);
           return;
         }
-        this.detalhe.set(det);
-        this.svc.getClienteById$(det.clienteId).subscribe(cli => this.cliente.set(cli ?? null));
+
+        this.solicitacao.set(det);
+
+        if (det.clienteId) {
+          this.svc.getClienteById$(det.clienteId).subscribe(cli => {
+            this.cliente.set(cli ?? null);
+          });
+        }
+
         this.carregando.set(false);
       },
-      error: err => {
+      error: (err) => {
         console.error(err);
         this.erro.set('Falha ao carregar dados.');
         this.carregando.set(false);
@@ -58,7 +67,7 @@ export class EfetuarOrcamentoComponent implements OnInit {
   }
 
   salvar(): void {
-    if (this.form.invalid || !this.detalhe()) {
+    if (this.form.invalid || !this.solicitacao()) {
       this.form.markAllAsTouched();
       return;
     }
@@ -70,6 +79,7 @@ export class EfetuarOrcamentoComponent implements OnInit {
     }
 
     const { valorTotal, observacao } = this.form.value;
+
     this.svc.efetuarOrcamento({
       solicitacaoId: this.solicitacaoId,
       valorTotal: Number(valorTotal),
@@ -80,7 +90,6 @@ export class EfetuarOrcamentoComponent implements OnInit {
       next: (orc) => {
         console.log('Orçamento registrado:', orc);
         alert('Orçamento registrado com sucesso!');
-        // navega para os detalhes da solicitação ou home do funcionário
         this.router.navigate(['/solicitacao', this.solicitacaoId]);
       },
       error: (err) => {
@@ -89,4 +98,16 @@ export class EfetuarOrcamentoComponent implements OnInit {
       }
     });
   }
+
+  traduzStatus(id?: number): string {
+  const mapa: Record<number, string> = {
+    1: 'ABERTA',
+    2: 'ORÇADA',
+    3: 'APROVADA',
+    4: 'REJEITADA',
+    5: 'FINALIZADA'
+  };
+  return mapa[id ?? 0] || '—';
+}
+
 }
