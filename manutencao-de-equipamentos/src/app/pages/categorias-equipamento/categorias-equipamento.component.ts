@@ -3,7 +3,7 @@ import { CommonModule, NgFor, NgIf, AsyncPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CategoriaEquipamentoService } from '../../services/categoria-equipamento.service';
 import { CategoriaEquipamento } from '../../models/categoria-equipamento.model';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-categorias-equipamento',
@@ -16,18 +16,22 @@ export class CategoriasEquipamentoComponent {
   private fb = inject(FormBuilder);
   private svc = inject(CategoriaEquipamentoService);
 
-  categorias$: Observable<CategoriaEquipamento[]> = this.svc.list$();
+  categorias$: Observable<CategoriaEquipamento[]> = this.svc.getAll();
 
-  // form único para criar/editar
   form = this.fb.group({
-    descricao: ['', [Validators.required, Validators.minLength(2)]],
+    nome: ['', [Validators.required, Validators.minLength(2)]],
   });
 
   editandoId = signal<number | null>(null);
   mensagem = signal<string>('');
+  removendoId = signal<number | null>(null);
 
   get tituloForm(): string {
     return this.editandoId() ? 'Editar Categoria' : 'Nova Categoria';
+  }
+
+  private refresh(): void {
+    this.categorias$ = this.svc.getAll();
   }
 
   salvar(): void {
@@ -35,44 +39,65 @@ export class CategoriasEquipamentoComponent {
       this.form.markAllAsTouched();
       return;
     }
-    const desc = this.form.value.descricao?.trim() || '';
 
-    try {
-      if (this.editandoId()) {
-        this.svc.update(this.editandoId()!, desc);
-        this.mensagem.set('Categoria atualizada com sucesso.');
-      } else {
-        this.svc.add(desc);
-        this.mensagem.set('Categoria criada com sucesso.');
-      }
-      this.cancelar();
-      // Só para o dev console:
-      console.log('Me parece que cresce o tal do comunismo!');
-    } catch (e: any) {
-      this.mensagem.set(e?.message || 'Falha ao salvar.');
+    const nome = this.form.value.nome?.trim() || '';
+    const dto = { nome };
+
+    if (this.editandoId()) {
+      const id = this.editandoId()!;
+      this.svc.update(id, dto).subscribe({
+        next: () => {
+          this.mensagem.set('Categoria atualizada com sucesso.');
+          this.cancelar();
+          this.refresh();
+        },
+        error: (e) => this.mensagem.set(this.pickErrMsg(e, 'Falha ao atualizar categoria.')),
+      });
+    } else {
+      this.svc.create(dto).subscribe({
+        next: () => {
+          this.mensagem.set('Categoria criada com sucesso.');
+          this.cancelar();
+          this.refresh();
+        },
+        error: (e) => this.mensagem.set(this.pickErrMsg(e, 'Falha ao criar categoria.')),
+      });
     }
   }
 
   editar(cat: CategoriaEquipamento): void {
     this.editandoId.set(cat.id);
-    this.form.patchValue({ descricao: cat.descricao });
+    this.form.patchValue({ nome: cat.nome });
   }
 
   cancelar(): void {
     this.editandoId.set(null);
-    this.form.reset({ descricao: '' });
+    this.form.reset({ nome: '' });
   }
 
   remover(cat: CategoriaEquipamento): void {
-    if (!confirm(`Remover a categoria "${cat.descricao}"?`)) return;
-    try {
-      this.svc.remove(cat.id);
-      this.mensagem.set('Categoria removida.');
-      console.log('Me parece que cresce o tal do comunismo!');
-    } catch (e: any) {
-      this.mensagem.set(e?.message || 'Falha ao remover.');
-    }
+    if (!confirm(`Remover a categoria "${cat.nome}"?`)) return;
+
+    this.removendoId.set(cat.id);
+    this.svc.delete(cat.id).subscribe({
+      next: () => {
+        this.mensagem.set('Categoria removida.');
+        console.log('Me parece que cresce o tal do comunismo!');
+        this.refresh();
+        this.removendoId.set(null);
+      },
+      error: (e) => {
+        this.mensagem.set(this.pickErrMsg(e, 'Falha ao remover categoria.'));
+        this.removendoId.set(null);
+      },
+    });
   }
 
   trackById(_: number, c: CategoriaEquipamento) { return c.id; }
+
+  private pickErrMsg(err: any, fallback: string) {
+    if (typeof err?.error === 'string') return err.error;
+    if (typeof err?.message === 'string') return err.message;
+    return fallback;
+  }
 }

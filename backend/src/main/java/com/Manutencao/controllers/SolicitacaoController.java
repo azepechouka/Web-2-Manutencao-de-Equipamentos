@@ -57,5 +57,11 @@ public class SolicitacaoController {
         return ResponseEntity.ok(ok);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        solicitacaoService.deletar(id);
+        return ResponseEntity.noContent().build();
+    }
+
     public record MotivoRejeicao(String motivo) {}
 }

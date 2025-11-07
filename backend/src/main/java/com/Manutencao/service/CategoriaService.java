@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @Service
 public class CategoriaService {
@@ -61,5 +62,17 @@ public class CategoriaService {
         CategoriaMapper.copyToEntity(req, entity);
         entity = repo.save(entity);
         return CategoriaMapper.toResponse(entity);
+    }
+
+    @Transactional
+    public void deletar(Long id) {
+        if (!repo.existsById(id)) {
+            throw new ResponseStatusException(NOT_FOUND, "Categoria não encontrada");
+        }
+        try {
+            repo.deleteById(id);
+        } catch (DataIntegrityViolationException ex) {
+            throw new ResponseStatusException(CONFLICT, "Categoria vinculada a registros e não pode ser removida");
+        }
     }
 }

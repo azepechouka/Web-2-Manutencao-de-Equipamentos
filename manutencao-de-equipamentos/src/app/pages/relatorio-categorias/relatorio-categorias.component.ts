@@ -34,21 +34,18 @@ type CategoriaOption = { value: FiltroCatValue; label: string };
 })
 export class RelatorioCategoriasComponent {
   private readonly svc = inject(SolicitacoesService);
-  private readonly catSvc = inject(CategoriaEquipamentoService, { optional: true });
+  private readonly catSvc = inject(CategoriaEquipamentoService);
 
   private readonly categoriasLookup$ = this.catSvc
-    ? this.catSvc.list$().pipe(
-        map((arr) =>
-          arr.reduce(
-            (acc, c) => {
-              acc[c.id] = c.descricao;
-              return acc;
-            },
-            {} as Record<number, string>
-          )
-        )
+    .getAll()
+    .pipe(
+      map(arr =>
+        arr.reduce((acc, c) => {
+          acc[c.id] = c.nome;
+          return acc;
+        }, {} as Record<number, string>)
       )
-    : of({} as Record<number, string>);
+    );
 
   private readonly relatorioReceitaPorCategoria$ = (lookup: Record<number, string>) =>
     this.svc.listTodas().pipe(
@@ -137,12 +134,10 @@ export class RelatorioCategoriasComponent {
       const doc = new jsPDF({ unit: 'pt', format: 'a4' });
       const marginX = 40;
 
-      // Cabeçalho
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(14);
       doc.text('Relatório de Receita por Categoria', marginX, 40);
 
-      // Resumo
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
       const resumo = `${qtdGeral} orçamento(s) — Total: ${new Intl.NumberFormat('pt-BR', {
@@ -151,7 +146,6 @@ export class RelatorioCategoriasComponent {
       }).format(totalGeral)}`;
       doc.text(resumo, marginX, 60);
 
-      // Tabela
       const rows = itens.map((item) => [
         item.categoriaDescricao,
         new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.total),
@@ -178,7 +172,6 @@ export class RelatorioCategoriasComponent {
       });
 
       doc.save('relatorio-receita-por-categoria.pdf');
-
       subscription.unsubscribe();
     });
   }

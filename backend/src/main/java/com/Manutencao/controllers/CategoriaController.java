@@ -41,4 +41,10 @@ public class CategoriaController {
                                                        @RequestBody @Valid CategoriaRequest req) {
         return ResponseEntity.ok(service.atualizar(id, req));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        this.service.deletar(id);
+        return ResponseEntity.noContent().build();
+    }
 }

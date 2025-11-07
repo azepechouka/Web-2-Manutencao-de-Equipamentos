@@ -1,70 +1,58 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, map } from 'rxjs';
+import { BehaviorSubject, Observable, of, map } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import { CategoriaEquipamento } from '../models/categoria-equipamento.model';
+
+export type CategoriaDTO = { nome: string };
 
 @Injectable({ providedIn: 'root' })
 export class CategoriaEquipamentoService {
+  private readonly api = 'http://localhost:8080';
+  private readonly base = `${this.api}/api/categorias`;
+
   private readonly STORAGE_KEY = 'cat.equipamento';
   private readonly _data$ = new BehaviorSubject<CategoriaEquipamento[]>(this.load());
 
+  constructor(private http: HttpClient) {}
+
+  categoriaVazia(): CategoriaEquipamento {
+    return { id: 0, nome: '' };
+  }
+
+  listaComVazio(): CategoriaEquipamento[] {
+    return [this.categoriaVazia()];
+  }
+
   list$(): Observable<CategoriaEquipamento[]> {
-    // ordena por descrição ascendente
-    return this._data$.pipe(
-      map(list => [...list].sort((a, b) => a.descricao.localeCompare(b.descricao, 'pt-BR')))
+    return of(this.listaComVazio());
+  }
+
+  getById(_id: number): CategoriaEquipamento {
+    return this.categoriaVazia();
+  }
+
+  add(_nome: string): CategoriaEquipamento {
+    return this.categoriaVazia();
+  }
+
+  remove(_id: number): void {}
+
+  getAll(): Observable<CategoriaEquipamento[]> {
+    return this.http.get<CategoriaEquipamento[]>(this.base).pipe(
+      map(list => [...list].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')))
     );
   }
 
-  getAll(): CategoriaEquipamento[] {
-    return this._data$.getValue();
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`);
   }
 
-  getById(id: number): CategoriaEquipamento | undefined {
-    return this.getAll().find(c => c.id === id);
+  create(dto: CategoriaDTO): Observable<CategoriaEquipamento> {
+    return this.http.post<CategoriaEquipamento>(this.base, dto);
   }
 
-  add(descricao: string): CategoriaEquipamento {
-    const desc = (descricao ?? '').trim();
-    if (!desc) throw new Error('Descrição obrigatória.');
-    this.assertUnique(desc);
-
-    const nextId = Math.max(0, ...this.getAll().map(c => c.id)) + 1;
-    const novo: CategoriaEquipamento = { id: nextId, descricao: desc };
-    const updated = [...this.getAll(), novo];
-    this.commit(updated);
-    return novo;
-  }
-
-  update(id: number, descricao: string): CategoriaEquipamento {
-    const desc = (descricao ?? '').trim();
-    if (!desc) throw new Error('Descrição obrigatória.');
-    this.assertUnique(desc, id);
-
-    const list = this.getAll();
-    const idx = list.findIndex(c => c.id === id);
-    if (idx < 0) throw new Error('Categoria não encontrada.');
-
-    const updated = [...list];
-    updated[idx] = { ...updated[idx], descricao: desc };
-    this.commit(updated);
-    return updated[idx];
-  }
-
-  remove(id: number): void {
-    const updated = this.getAll().filter(c => c.id !== id);
-    this.commit(updated);
-  }
-
-  // ——— Helpers ———
-  private commit(data: CategoriaEquipamento[]) {
-    this.save(data);
-    this._data$.next(data);
-  }
-
-  private assertUnique(descricao: string, exceptId?: number) {
-    const exists = this.getAll().some(
-      c => c.descricao.toLocaleLowerCase() === descricao.toLocaleLowerCase() && c.id !== exceptId
-    );
-    if (exists) throw new Error('Já existe uma categoria com esta descrição.');
+  update(id: number, dto: CategoriaDTO): Observable<CategoriaEquipamento> {
+    return this.http.put<CategoriaEquipamento>(`${this.base}/${id}`, dto);
   }
 
   private load(): CategoriaEquipamento[] {
@@ -72,13 +60,12 @@ export class CategoriaEquipamentoService {
       const raw = localStorage.getItem(this.STORAGE_KEY);
       if (raw) return JSON.parse(raw) as CategoriaEquipamento[];
     } catch {}
-    // seed inicial
     const seed: CategoriaEquipamento[] = [
-      { id: 1, descricao: 'Impressora' },
-      { id: 2, descricao: 'Notebook' },
-      { id: 3, descricao: 'Desktop' },
-      { id: 4, descricao: 'Roteador' },
-      { id: 5, descricao: 'Scanner' },
+      { id: 1, nome: 'Impressora' },
+      { id: 2, nome: 'Notebook' },
+      { id: 3, nome: 'Desktop' },
+      { id: 4, nome: 'Roteador' },
+      { id: 5, nome: 'Scanner' },
     ];
     this.save(seed);
     return seed;
