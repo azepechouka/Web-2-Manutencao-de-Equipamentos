@@ -8,15 +8,34 @@
         <div class="card-body">
           <form [formGroup]="solicitacaoForm" (ngSubmit)="onSubmit()" *ngIf="!solicitacaoEnviada">
             <div class="mb-3">
+              <label for="categoriaId" class="form-label">Categoria</label>
+              <select
+                id="categoriaId"
+                class="form-select"
+                formControlName="categoriaId"
+                [class.is-invalid]="solicitacaoForm.get('categoriaId')?.invalid && solicitacaoForm.get('categoriaId')?.touched"
+                [disabled]="categoriasLoading || categorias.length === 0">
+                <option [ngValue]="null" disabled>Selecione uma categoria</option>
+                <option *ngFor="let c of categorias" [value]="c.id">{{ c.nome }}</option>
+              </select>
+              <div class="form-text" *ngIf="categoriasLoading">Carregando categorias…</div>
+              <div class="text-danger small" *ngIf="categoriasErro">{{ categoriasErro }}</div>
+              <div class="invalid-feedback"
+                   *ngIf="solicitacaoForm.get('categoriaId')?.invalid && solicitacaoForm.get('categoriaId')?.touched">
+                Selecione uma categoria.
+              </div>
+            </div>
+
+            <div class="mb-3">
               <label for="descricaoEquipamento" class="form-label">Descrição do Equipamento</label>
               <input
                 type="text"
                 class="form-control"
                 id="descricaoEquipamento"
                 formControlName="descricaoEquipamento"
-                placeholder="Ex: Impressora HP LaserJet Pro"
-              >
-              <div class="invalid-feedback" *ngIf="solicitacaoForm.get('descricaoEquipamento')?.invalid && solicitacaoForm.get('descricaoEquipamento')?.touched">
+                placeholder="Ex: Impressora HP LaserJet Pro">
+              <div class="invalid-feedback"
+                   *ngIf="solicitacaoForm.get('descricaoEquipamento')?.invalid && solicitacaoForm.get('descricaoEquipamento')?.touched">
                 Descrição do equipamento é obrigatória.
               </div>
             </div>
@@ -28,30 +47,17 @@
                 id="descricaoDefeito"
                 formControlName="descricaoDefeito"
                 rows="4"
-                placeholder="Descreva detalhadamente o problema encontrado..."
-              ></textarea>
-              <div class="invalid-feedback" *ngIf="solicitacaoForm.get('descricaoDefeito')?.invalid && solicitacaoForm.get('descricaoDefeito')?.touched">
+                placeholder="Descreva detalhadamente o problema encontrado..."></textarea>
+              <div class="invalid-feedback"
+                   *ngIf="solicitacaoForm.get('descricaoDefeito')?.invalid && solicitacaoForm.get('descricaoDefeito')?.touched">
                 Descrição do problema é obrigatória.
               </div>
             </div>
-
-            <div class="mb-3">
-              <label for="equipamentoId" class="form-label">ID do Equipamento (Opcional)</label>
-              <input
-                type="number"
-                class="form-control"
-                id="equipamentoId"
-                formControlName="equipamentoId"
-                placeholder="Deixe em branco se não souber"
-              >
-            </div>
-
             <div class="d-grid">
               <button
                 type="submit"
                 class="btn btn-primary"
-                [disabled]="solicitacaoForm.invalid || loading"
-              >
+                [disabled]="solicitacaoForm.invalid || loading || categoriasLoading">
                 <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
                 Enviar Solicitação
               </button>
@@ -87,20 +93,8 @@
               </div>
               
               <div class="d-flex gap-2 mt-3">
-                <button
-                  type="button"
-                  class="btn btn-success"
-                  (click)="aprovarOrcamento()"
-                >
-                  Aprovar Orçamento
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-danger"
-                  (click)="rejeitarOrcamento()"
-                >
-                  Rejeitar Orçamento
-                </button>
+                <button type="button" class="btn btn-success" (click)="aprovarOrcamento()">Aprovar Orçamento</button>
+                <button type="button" class="btn btn-danger" (click)="rejeitarOrcamento()">Rejeitar Orçamento</button>
               </div>
             </div>
           </div>
@@ -113,4 +107,3 @@
     </div>
   </div>
 </div>
-

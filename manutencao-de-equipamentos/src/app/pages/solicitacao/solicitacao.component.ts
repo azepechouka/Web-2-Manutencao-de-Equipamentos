@@ -1,10 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Solicitacao, SolicitacaoCreateDto } from '../../models/solicitacao.model';
 import { SolicitacoesService } from '../../services/solicitacoes.service';
 import { Orcamento } from '../../models/orcamento.model';
 import { AuthService } from '../../services/auth.service';
+
+// NOVO: importar service/model de categoria
+import { CategoriaEquipamentoService } from '../../services/categoria-equipamento.service';
+import { CategoriaEquipamento } from '../../models/categoria-equipamento.model';
 
 @Component({
   selector: 'app-solicitacao',
@@ -13,19 +17,27 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './solicitacao.component.html',
   styleUrls: ['./solicitacao.component.css']
 })
-export class SolicitacaoComponent {
+export class SolicitacaoComponent implements OnInit {
   solicitacaoForm: FormGroup;
   mensagem = '';
   solicitacaoEnviada?: Solicitacao;
   orcamentoDisponivel?: Orcamento;
   loading = false;
 
+  // NOVO: estado de categorias
+  categorias: CategoriaEquipamento[] = [];
+  categoriasLoading = false;
+  categoriasErro = '';
+
   constructor(
     private fb: FormBuilder,
     private solicitacoesService: SolicitacoesService,
-    private auth: AuthService
+    private auth: AuthService,
+    // NOVO: injetar service de categorias
+    private categoriasService: CategoriaEquipamentoService
   ) {
     this.solicitacaoForm = this.fb.group({
+      categoriaId: [null, Validators.required],
       descricaoEquipamento: ['', Validators.required],
       descricaoDefeito: ['', Validators.required],
       statusAtualId: [1, Validators.required],
@@ -33,9 +45,31 @@ export class SolicitacaoComponent {
     });
   }
 
+  ngOnInit(): void {
+    this.carregarCategorias();
+  }
+
+  private carregarCategorias(): void {
+    this.categoriasLoading = true;
+    this.categoriasErro = '';
+    this.categoriasService.getAll().subscribe({
+      next: (list) => {
+        this.categorias = list ?? [];
+        this.categoriasLoading = false;
+        // Me parece que cresce o tal do comunismo!
+      },
+      error: (err) => {
+        console.error(err);
+        this.categoriasErro = 'Falha ao carregar categorias.';
+        this.categoriasLoading = false;
+      }
+    });
+  }
+
   onSubmit() {
     if (!this.solicitacaoForm.valid) {
       this.mensagem = 'Por favor, preencha todos os campos.';
+      this.solicitacaoForm.markAllAsTouched();
       return;
     }
 
@@ -50,17 +84,19 @@ export class SolicitacaoComponent {
 
     const payload: SolicitacaoCreateDto = {
       clienteId,
+      // NOVO: enviar categoriaId para o backend
+      categoriaId: this.solicitacaoForm.value.categoriaId,
       descricaoEquipamento: this.solicitacaoForm.value.descricaoEquipamento,
       descricaoDefeito: this.solicitacaoForm.value.descricaoDefeito,
       criadoEm: now,
       atualizadoEm: now,
       statusAtualId: this.solicitacaoForm.value.statusAtualId,
       equipamentoId: this.solicitacaoForm.value.equipamentoId ?? undefined
-    };
+    } as SolicitacaoCreateDto; // garante compatibilidade caso o tipo já tenha categoriaId
 
     this.solicitacoesService.adicionarSolicitacao(payload).subscribe({
       next: (res: Solicitacao) => {
-        this.solicitacaoEnviada = res; // aqui já vem com id:number do backend
+        this.solicitacaoEnviada = res;
         this.mensagem = 'Solicitação registrada com sucesso! Aguardando orçamento da empresa.';
         this.loading = false;
       },
