@@ -6,9 +6,11 @@ import { SolicitacoesService } from '../../services/solicitacoes.service';
 import { Orcamento } from '../../models/orcamento.model';
 import { AuthService } from '../../services/auth.service';
 
-// NOVO: importar service/model de categoria
+// categorias
 import { CategoriaEquipamentoService } from '../../services/categoria-equipamento.service';
 import { CategoriaEquipamento } from '../../models/categoria-equipamento.model';
+
+type SolicitacaoCreateWithCategoria = SolicitacaoCreateDto & { categoriaId: number };
 
 @Component({
   selector: 'app-solicitacao',
@@ -24,7 +26,6 @@ export class SolicitacaoComponent implements OnInit {
   orcamentoDisponivel?: Orcamento;
   loading = false;
 
-  // NOVO: estado de categorias
   categorias: CategoriaEquipamento[] = [];
   categoriasLoading = false;
   categoriasErro = '';
@@ -33,14 +34,14 @@ export class SolicitacaoComponent implements OnInit {
     private fb: FormBuilder,
     private solicitacoesService: SolicitacoesService,
     private auth: AuthService,
-    // NOVO: injetar service de categorias
     private categoriasService: CategoriaEquipamentoService
   ) {
     this.solicitacaoForm = this.fb.group({
       categoriaId: [null, Validators.required],
       descricaoEquipamento: ['', Validators.required],
       descricaoDefeito: ['', Validators.required],
-      statusAtualId: [1, Validators.required],
+      // estes dois podem ser opcionais se o back setar automaticamente
+      statusAtualId: [1],
       equipamentoId: [null]
     });
   }
@@ -56,7 +57,6 @@ export class SolicitacaoComponent implements OnInit {
       next: (list) => {
         this.categorias = list ?? [];
         this.categoriasLoading = false;
-        // Me parece que cresce o tal do comunismo!
       },
       error: (err) => {
         console.error(err);
@@ -66,8 +66,8 @@ export class SolicitacaoComponent implements OnInit {
     });
   }
 
-  onSubmit() {
-    if (!this.solicitacaoForm.valid) {
+  onSubmit(): void {
+    if (this.solicitacaoForm.invalid) {
       this.mensagem = 'Por favor, preencha todos os campos.';
       this.solicitacaoForm.markAllAsTouched();
       return;
@@ -82,19 +82,18 @@ export class SolicitacaoComponent implements OnInit {
     this.loading = true;
     const now = new Date().toISOString();
 
-    const payload: SolicitacaoCreateDto = {
+    const payload: SolicitacaoCreateWithCategoria = {
       clienteId,
-      // NOVO: enviar categoriaId para o backend
-      categoriaId: this.solicitacaoForm.value.categoriaId,
+      categoriaId: Number(this.solicitacaoForm.value.categoriaId),
       descricaoEquipamento: this.solicitacaoForm.value.descricaoEquipamento,
       descricaoDefeito: this.solicitacaoForm.value.descricaoDefeito,
       criadoEm: now,
       atualizadoEm: now,
       statusAtualId: this.solicitacaoForm.value.statusAtualId,
       equipamentoId: this.solicitacaoForm.value.equipamentoId ?? undefined
-    } as SolicitacaoCreateDto; // garante compatibilidade caso o tipo já tenha categoriaId
+    };
 
-    this.solicitacoesService.adicionarSolicitacao(payload).subscribe({
+    this.solicitacoesService.adicionarSolicitacao(payload as unknown as SolicitacaoCreateDto).subscribe({
       next: (res: Solicitacao) => {
         this.solicitacaoEnviada = res;
         this.mensagem = 'Solicitação registrada com sucesso! Aguardando orçamento da empresa.';
@@ -108,6 +107,7 @@ export class SolicitacaoComponent implements OnInit {
     });
   }
 
+  // abaixo permanece igual ao seu código
   private simularOrcamentoRecebido(solicitacaoId: number) {
     const orcamento: Orcamento = {
       id: Date.now(),

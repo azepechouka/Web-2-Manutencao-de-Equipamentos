@@ -7,6 +7,7 @@
         </div>
         <div class="card-body">
           <form [formGroup]="solicitacaoForm" (ngSubmit)="onSubmit()" *ngIf="!solicitacaoEnviada">
+            <!-- Categoria (carregada do backend) -->
             <div class="mb-3">
               <label for="categoriaId" class="form-label">Categoria</label>
               <select
@@ -16,7 +17,7 @@
                 [class.is-invalid]="solicitacaoForm.get('categoriaId')?.invalid && solicitacaoForm.get('categoriaId')?.touched"
                 [disabled]="categoriasLoading || categorias.length === 0">
                 <option [ngValue]="null" disabled>Selecione uma categoria</option>
-                <option *ngFor="let c of categorias" [value]="c.id">{{ c.nome }}</option>
+                <option *ngFor="let c of categorias" [ngValue]="c.id">{{ c.nome }}</option>
               </select>
               <div class="form-text" *ngIf="categoriasLoading">Carregando categorias…</div>
               <div class="text-danger small" *ngIf="categoriasErro">{{ categoriasErro }}</div>
@@ -26,6 +27,7 @@
               </div>
             </div>
 
+            <!-- Descrição do Equipamento -->
             <div class="mb-3">
               <label for="descricaoEquipamento" class="form-label">Descrição do Equipamento</label>
               <input
@@ -40,6 +42,7 @@
               </div>
             </div>
 
+            <!-- Descrição do Problema -->
             <div class="mb-3">
               <label for="descricaoDefeito" class="form-label">Descrição do Problema</label>
               <textarea
@@ -53,6 +56,19 @@
                 Descrição do problema é obrigatória.
               </div>
             </div>
+
+            <!-- Equipamento Id (Opcional) -->
+            <div class="mb-3">
+              <label for="equipamentoId" class="form-label">ID do Equipamento (Opcional)</label>
+              <input
+                type="number"
+                class="form-control"
+                id="equipamentoId"
+                formControlName="equipamentoId"
+                placeholder="Deixe em branco se não souber">
+            </div>
+
+            <!-- Botão Enviar -->
             <div class="d-grid">
               <button
                 type="submit"
@@ -64,6 +80,7 @@
             </div>
           </form>
 
+          <!-- Sucesso da Solicitação -->
           <div *ngIf="solicitacaoEnviada" class="alert alert-info">
             <h5>Solicitação Enviada com Sucesso!</h5>
             <p><strong>ID da Solicitação:</strong> {{ solicitacaoEnviada.id }}</p>
@@ -79,6 +96,7 @@
             </p>
           </div>
 
+          <!-- Orçamento Disponível -->
           <div *ngIf="orcamentoDisponivel" class="card mt-3">
             <div class="card-header">
               <h5 class="mb-0">Orçamento Recebido</h5>
@@ -99,6 +117,7 @@
             </div>
           </div>
 
+          <!-- Mensagens Gerais -->
           <div *ngIf="mensagem" class="alert alert-info mt-3" role="alert">
             {{ mensagem }}
           </div>

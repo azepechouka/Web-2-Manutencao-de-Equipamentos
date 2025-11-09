@@ -7,14 +7,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 
-
 @Entity
-@Table(name = "solicitacoes",
-       indexes = {
-         @Index(name = "idx_solic_cliente_criado", columnList = "cliente_id, criado_em"),
-         @Index(name = "idx_solic_estado_criado", columnList = "estado_atual, criado_em"),
-         @Index(name = "idx_solic_categoria", columnList = "categoria_id")
-       })
+@Table(name = "solicitacoes")
 @Data @NoArgsConstructor @AllArgsConstructor @Builder
 public class Solicitacao {
 
@@ -38,8 +32,12 @@ public class Solicitacao {
   private String descricaoDefeito;
 
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
-  @JoinColumn(name = "estado_atual", nullable = false,
-              foreignKey = @ForeignKey(name = "fk_solic_estado_atual"))
+  @JoinColumn(
+      name = "estado_atual_id",
+      referencedColumnName = "id",
+      nullable = false,
+      foreignKey = @ForeignKey(name = "fk_solic_estado_atual")
+  )
   private EstadoSolicitacao estadoAtual;
 
   @CreationTimestamp

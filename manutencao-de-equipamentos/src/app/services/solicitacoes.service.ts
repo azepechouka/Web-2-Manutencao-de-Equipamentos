@@ -35,7 +35,6 @@ export class SolicitacoesService {
     const clienteId = this.auth.getUsuarioId();
     console.log(clienteId);
     if (!clienteId) {
-      console.error('❌ Nenhum cliente autenticado.');
       throw new Error('Nenhum cliente autenticado.');
     }
 

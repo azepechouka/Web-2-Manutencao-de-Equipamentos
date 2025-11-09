@@ -16,8 +16,6 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql
-      # Se der warning de "world-writable", comente a linha abaixo:
-      # - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf:ro
       - ./mysql/initdb:/docker-entrypoint-initdb.d:ro
     ports:
       - "3306:3306"

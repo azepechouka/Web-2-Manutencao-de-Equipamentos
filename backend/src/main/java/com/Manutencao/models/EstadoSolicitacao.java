@@ -2,11 +2,6 @@ package com.Manutencao.models;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.Instant;
-
 
 @Entity
 @Table(name = "estados_solicitacao")
@@ -14,12 +9,9 @@ import java.time.Instant;
 public class EstadoSolicitacao {
 
   @Id
-  @Column(length = 20)
-  private String codigo; // ABERTA, ORCADA, ...
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-  @Column(nullable = false, length = 40)
+  @Column(nullable = false, length = 40, unique = true)
   private String nome;
-
-  @Column(name = "cor_hex", nullable = false, length = 7)
-  private String corHex;
 }

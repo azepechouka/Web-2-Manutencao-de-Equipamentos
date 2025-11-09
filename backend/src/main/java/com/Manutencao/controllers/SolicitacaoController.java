@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.Manutencao.api.dto.SolicitacaoResponse;
 
 import java.util.List;
 
@@ -21,17 +22,19 @@ public class SolicitacaoController {
         this.solicitacaoService = solicitacaoService;
     }
 
-    // Criar usando clienteId
     @PostMapping
-    public ResponseEntity<Solicitacao> criar(@RequestBody @Valid SolicitacaoCreateRequest req) {
-        Solicitacao criada = solicitacaoService.criar(req);
-        return ResponseEntity.status(HttpStatus.CREATED).body(criada);
+    public ResponseEntity<SolicitacaoResponse> criar(@RequestBody @Valid SolicitacaoCreateRequest req) {
+        Solicitacao s = solicitacaoService.criar(req);
+        return ResponseEntity.ok(SolicitacaoResponse.from(s));
     }
 
     @GetMapping
-    public ResponseEntity<List<Solicitacao>> listarTodas() {
-        return ResponseEntity.ok(solicitacaoService.listarTodas());
+    public ResponseEntity<List<SolicitacaoResponse>> listarTodas() {
+        List<SolicitacaoResponse> lista = solicitacaoService.listarTodas()
+            .stream().map(SolicitacaoResponse::from).toList();
+        return ResponseEntity.ok(lista);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Solicitacao> buscarPorId(@PathVariable Long id) {
