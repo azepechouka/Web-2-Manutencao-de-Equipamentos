@@ -1,6 +1,7 @@
 package com.Manutencao.api.dto;
 
 import com.Manutencao.models.Solicitacao;
+import java.time.Instant;
 
 public record SolicitacaoResponse(
     Long id,
@@ -8,7 +9,8 @@ public record SolicitacaoResponse(
     String descricaoDefeito,
     String estadoAtual,
     String clienteNome,
-    String categoriaNome
+    String categoriaNome,
+    Instant criadoEm
 ) {
     public static SolicitacaoResponse from(Solicitacao s) {
         return new SolicitacaoResponse(
@@ -17,7 +19,8 @@ public record SolicitacaoResponse(
             s.getDescricaoDefeito(),
             s.getEstadoAtual().getNome(),
             s.getCliente().getNome(),
-            s.getCategoria().getNome()
+            s.getCategoria().getNome(),
+            s.getCriadoEm()
         );
     }
 }

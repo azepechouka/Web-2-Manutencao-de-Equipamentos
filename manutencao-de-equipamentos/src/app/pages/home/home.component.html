@@ -1,77 +1,79 @@
-<section class="rf003">
-  <h2>Minhas Solicitações</h2>
+<section class="rf003 container-fluid mt-4 px-4">
+  <h2 class="mb-4 fw-semibold">Minhas Solicitações</h2>
 
   <!-- Loading -->
-  <div *ngIf="carregando">
-    <p>Carregando solicitações...</p>
-  </div>
+  <div *ngIf="carregando" class="text-muted mb-2">Carregando…</div>
 
   <!-- Erro -->
-  <div *ngIf="erro">
-    <p class="text-danger">{{ erro }}</p>
+  <div *ngIf="erro" class="alert alert-danger mb-3">
+    {{ erro }}
   </div>
 
   <!-- Tabela de solicitações -->
-  <div class="table" *ngIf="!carregando && !erro && itens.length > 0; else vazio">
-    <div class="row head">
-      <div class="cell when">Data/Hora</div>
-      <div class="cell equip">Equipamento</div>
-      <div class="cell category">Categoria</div>
-      <div class="cell state">Status</div>
-      <div class="cell actions">Ações</div>
-    </div>
+  <div *ngIf="!carregando && !erro && itens.length > 0; else vazio">
+    <table class="table table-striped table-hover align-middle w-100 shadow-sm">
+      <thead class="table-light">
+        <tr class="text-center">
+          <th style="width: 12%">Data/Hora</th>
+          <th style="width: 30%">Equipamento</th>
+          <th style="width: 18%">Categoria</th>
+          <th style="width: 15%">Status</th>
+          <th style="width: 25%">Ações</th>
+        </tr>
+      </thead>
 
-    <div class="row" *ngFor="let item of itens">
-      <div class="cell when">
-        {{ item.criadoEm | date: 'dd/MM/yyyy, HH:mm' }}
-      </div>
+      <tbody>
+        <tr *ngFor="let item of itens" class="text-center">
+          <td>{{ item.criadoEm | date: 'dd/MM/yyyy, HH:mm' }}</td>
 
-      <div class="cell equip" [title]="item.descricaoEquipamento">
-        {{
-          item.descricaoEquipamento.length > 30
-            ? (item.descricaoEquipamento | slice: 0:30) + '…'
-            : item.descricaoEquipamento
-        }}
-      </div>
+          <td class="text-start" [title]="item.descricaoEquipamento">
+            {{
+              item.descricaoEquipamento.length > 30
+                ? (item.descricaoEquipamento | slice: 0:30) + '…'
+                : item.descricaoEquipamento
+            }}
+          </td>
 
-      <div class="cell category">
-        {{ item.categoriaNome }}
-      </div>
+          <td>{{ item.categoriaNome }}</td>
 
-      <div class="cell state">
-        <span
-          class="badge"
-          [ngStyle]="{
-            backgroundColor: getStatusCor(item.estadoAtual),
-            color: '#fff'
-          }"
-        >
-          {{ item.estadoAtual }}
-        </span>
-      </div>
+          <td>
+            <span
+              class="badge px-3 py-2"
+              [ngStyle]="{
+                backgroundColor: getStatusCor(item.estadoAtual),
+                color: '#fff'
+              }"
+            >
+              {{ item.estadoAtual }}
+            </span>
+          </td>
 
-      <div class="cell actions">
-        <button
-          type="button"
-          class="btn btn-sm btn-primary me-2"
-          (click)="verSolicitacao(item.id)"
-        >
-          Visualizar
-        </button>
+          <td>
+            <div class="d-flex justify-content-center gap-2">
+              <button
+                type="button"
+                class="btn btn-sm btn-primary"
+                (click)="verSolicitacao(item.id)"
+              >
+                Visualizar
+              </button>
 
-        <button
-          type="button"
-          class="btn btn-sm btn-success"
-          (click)="abrirOrcamento(item.id)"
-        >
-          Abrir Orçamento
-        </button>
-      </div>
-    </div>
+              <button
+                type="button"
+                class="btn btn-sm btn-success"
+                (click)="abrirOrcamento(item.id)"
+              >
+                Abrir Orçamento
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
   <!-- Template para lista vazia -->
   <ng-template #vazio>
-    <p class="text-muted">Nenhuma solicitação encontrada.</p>
+    <p class="text-muted text-center mt-4">Nenhuma solicitação encontrada.</p>
   </ng-template>
 </section>
