@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SolicitacoesService } from '../services/solicitacoes.service';
-import { Solicitacao } from '../models/solicitacao.model';
+import { Solicitacao,SolicitacaoResponse } from '../models/solicitacao.model';
 
 type RedirHist = { dataHora: string; origem: string; destino: string };
 
@@ -16,7 +16,7 @@ type RedirHist = { dataHora: string; origem: string; destino: string };
 })
 export class RedirecionarManutencaoComponent implements OnInit {
   solicitacaoId!: number;
-  solicitacao?: Solicitacao;
+  solicitacao?: SolicitacaoResponse;
   cliente: any = null;
 
   funcionarioOrigem = 'Hermione Granger';
@@ -48,7 +48,7 @@ export class RedirecionarManutencaoComponent implements OnInit {
   private carregarSolicitacao(): void {
     this.loading = true;
     this.svc.getById(this.solicitacaoId).subscribe({
-      next: (det: Solicitacao) => {
+      next: (det: SolicitacaoResponse) => {
         this.solicitacao = det;
         this.loading = false;
         if (det.clienteId) {

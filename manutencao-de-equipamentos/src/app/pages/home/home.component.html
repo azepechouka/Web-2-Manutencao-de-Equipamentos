@@ -1,36 +1,53 @@
 <section class="rf003">
   <h2>Minhas Solicitações</h2>
 
+  <!-- Loading -->
   <div *ngIf="carregando">
     <p>Carregando solicitações...</p>
   </div>
 
+  <!-- Erro -->
   <div *ngIf="erro">
     <p class="text-danger">{{ erro }}</p>
   </div>
 
+  <!-- Tabela de solicitações -->
   <div class="table" *ngIf="!carregando && !erro && itens.length > 0; else vazio">
     <div class="row head">
       <div class="cell when">Data/Hora</div>
       <div class="cell equip">Equipamento</div>
+      <div class="cell category">Categoria</div>
       <div class="cell state">Status</div>
       <div class="cell actions">Ações</div>
     </div>
 
     <div class="row" *ngFor="let item of itens">
       <div class="cell when">
-        {{ item.criadoEm | date:'dd/MM/yyyy, HH:mm' }}
+        {{ item.criadoEm | date: 'dd/MM/yyyy, HH:mm' }}
       </div>
 
-      <div
-        class="cell equip"
-        [title]="item.descricaoEquipamento"
-      >
-        {{ item.descricaoEquipamento.length > 30 ? (item.descricaoEquipamento | slice:0:30) + '…' : item.descricaoEquipamento }}
+      <div class="cell equip" [title]="item.descricaoEquipamento">
+        {{
+          item.descricaoEquipamento.length > 30
+            ? (item.descricaoEquipamento | slice: 0:30) + '…'
+            : item.descricaoEquipamento
+        }}
+      </div>
+
+      <div class="cell category">
+        {{ item.categoriaNome }}
       </div>
 
       <div class="cell state">
-        <span class="badge bg-secondary">{{ statusNome(item.statusAtualId) }}</span>
+        <span
+          class="badge"
+          [ngStyle]="{
+            backgroundColor: getStatusCor(item.estadoAtual),
+            color: '#fff'
+          }"
+        >
+          {{ item.estadoAtual }}
+        </span>
       </div>
 
       <div class="cell actions">
@@ -53,6 +70,7 @@
     </div>
   </div>
 
+  <!-- Template para lista vazia -->
   <ng-template #vazio>
     <p class="text-muted">Nenhuma solicitação encontrada.</p>
   </ng-template>

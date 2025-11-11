@@ -1,10 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { Solicitacao, SolicitacaoCreateDto } from '../models/solicitacao.model';
+import { Solicitacao, SolicitacaoCreateDto,SolicitacaoResponse } from '../models/solicitacao.model';
 import { Orcamento } from '../models/orcamento.model';
 import { AuthService } from './auth.service';
-import { HistoricoStatus } from '../models/historico-status.model';
+import { HistoricoStatus, HistoricoStatusDTO  } from '../models/historico-status.model';
 
 @Injectable({ providedIn: 'root' })
 export class SolicitacoesService {
@@ -20,12 +20,12 @@ export class SolicitacoesService {
     return this.http.get<Solicitacao[]>(this.SOLICITACOES);
   }
 
-  getById(id: number): Observable<Solicitacao> {
-    return this.http.get<Solicitacao>(`${this.SOLICITACOES}/${id}`);
+  getById(id: number): Observable<SolicitacaoResponse> {
+    return this.http.get<SolicitacaoResponse>(`${this.SOLICITACOES}/${id}`);
   }
 
-  listByCliente(clienteId: number): Observable<Solicitacao[]> {
-    return this.http.get<Solicitacao[]>(`${this.SOLICITACOES}/cliente/${clienteId}`);
+  listByCliente(clienteId: number): Observable<SolicitacaoResponse[]> {
+    return this.http.get<SolicitacaoResponse[]>(`${this.SOLICITACOES}/cliente/${clienteId}`);
   }
 
   listEmAberto(): Observable<Solicitacao[]> {
@@ -110,7 +110,7 @@ export class SolicitacoesService {
     });
   }
 
-  getHistoricoBySolicitacao(solicitacaoId: number): Observable<HistoricoStatus[]> {
-    return this.http.get<HistoricoStatus[]>(`${this.SOLICITACOES}/${solicitacaoId}/historico`);
+  getHistoricoBySolicitacao(id: number): Observable<HistoricoStatusDTO[]> {
+    return this.http.get<HistoricoStatusDTO[]>(`${this.API}/historico/solicitacao/${id}`);
   }
 }

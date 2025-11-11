@@ -1,7 +1,7 @@
 <div class="container mt-4" *ngIf="!isLoading && solicitacao as s; else loading">
   <div class="card shadow-sm">
     <div class="card-header d-flex justify-content-between align-items-center">
-      <h3>Detalhes da Solicitação #{{ s.id }}</h3>
+      <h3>Detalhes da Solicitação</h3>
       <a routerLink="/home" class="btn btn-secondary">Voltar para a Lista</a>
     </div>
 
@@ -13,23 +13,43 @@
           <table class="table table-borderless table-sm">
             <tbody>
               <tr>
-                <th scope="row" style="width: 200px;">Data e Hora da Abertura:</th>
+                <th scope="row" style="width: 200px;">Data de Abertura:</th>
                 <td>{{ s.criadoEm | date: 'dd/MM/yyyy, HH:mm' }}</td>
               </tr>
+
+              <!-- Status Atual com cor e texto -->
               <tr>
                 <th scope="row">Status Atual:</th>
                 <td>
-                  <span class="badge bg-primary">
-                    {{ statusNome(s.statusAtualId) }}
+                  <span
+                    class="badge"
+                    [ngStyle]="{
+                      backgroundColor: getStatusCor(s.estadoAtual),
+                      color: '#fff'
+                    }"
+                  >
+                    {{ s.estadoAtual }}
                   </span>
                 </td>
               </tr>
+
+              <tr>
+                <th scope="row">Cliente:</th>
+                <td>{{ s.clienteNome }}</td>
+              </tr>
+
+              <tr>
+                <th scope="row">Categoria:</th>
+                <td>{{ s.categoriaNome }}</td>
+              </tr>
+
               <tr>
                 <th scope="row">Descrição do Equipamento:</th>
                 <td>{{ s.descricaoEquipamento || '—' }}</td>
               </tr>
+
               <tr>
-                <th scope="row">Descrição do Problema:</th>
+                <th scope="row">Descrição do Defeito:</th>
                 <td>{{ s.descricaoDefeito || '—' }}</td>
               </tr>
             </tbody>
@@ -44,14 +64,16 @@
             <button
               class="btn btn-success"
               (click)="aprovarServico()"
-              [disabled]="isProcessing">
+              [disabled]="isProcessing"
+            >
               <span *ngIf="isProcessing" class="spinner-border spinner-border-sm me-2"></span>
               Aprovar Serviço
             </button>
             <button
               class="btn btn-danger"
               (click)="rejeitarServico()"
-              [disabled]="isProcessing">
+              [disabled]="isProcessing"
+            >
               Rejeitar Serviço
             </button>
           </div>
@@ -78,11 +100,9 @@
           <div class="timeline-item" *ngFor="let h of historico">
             <div class="timeline-marker"></div>
             <div class="timeline-content">
-              <p class="fw-bold mb-1">
-                {{ statusNome(h.paraStatusId) }}
-              </p>
+              <p class="fw-bold mb-1">{{ h.statusNome || '—' }}</p>
               <p class="mb-1">
-                <span class="text-muted">Por:</span> {{ h.usuarioId || 'Sistema' }}
+                <span class="text-muted">Por:</span> {{ h.nomeUsuario || 'Sistema' }}
                 <span *ngIf="h.observacao">
                   | <span class="text-muted">Obs:</span> {{ h.observacao }}
                 </span>
@@ -102,7 +122,7 @@
   </div>
 </div>
 
-<!-- Template de loading (precisa estar no mesmo escopo do *ngIf principal) -->
+<!-- Loading -->
 <ng-template #loading>
   <p class="text-center mt-5">Carregando detalhes da solicitação...</p>
 </ng-template>

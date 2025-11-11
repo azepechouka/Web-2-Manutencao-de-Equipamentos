@@ -4,7 +4,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { SolicitacoesService } from '../../services/solicitacoes.service';
-import { Solicitacao } from '../../models/solicitacao.model';
+import { Solicitacao,SolicitacaoResponse } from '../../models/solicitacao.model';
 import { Orcamento } from '../../models/orcamento.model';
 
 @Component({
@@ -19,7 +19,7 @@ export class RejeitarServicoComponent implements OnInit {
   private readonly service = inject(SolicitacoesService);
   private readonly router = inject(Router);
 
-  solicitacao$?: Observable<Solicitacao>;
+  solicitacao$?: Observable<SolicitacaoResponse>;
   orcamento$?: Observable<Orcamento>;
   solicitacaoId?: number;
 

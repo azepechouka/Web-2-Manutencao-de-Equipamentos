@@ -22,3 +22,16 @@ export interface SolicitacaoCreateDto {
   statusAtualId: number;
   equipamentoId?: number;
 }
+
+export interface SolicitacaoResponse {
+  id: number;
+  clienteNome: string;
+  clienteId?: number;
+  categoriaEquipamento?: string;
+  descricao?: string;
+  categoriaNome: string;
+  descricaoEquipamento: string;
+  descricaoDefeito: string;
+  estadoAtual: string;
+  criadoEm: string;
+}

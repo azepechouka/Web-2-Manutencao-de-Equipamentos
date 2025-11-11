@@ -1,53 +1,114 @@
-<div class="container mt-4">
+<div class="container mt-4" style="max-width: 980px; margin: 0 auto;">
   <h2 class="mb-4">Efetuar Manutenção</h2>
 
+  <!-- Estado de carregamento -->
   <div *ngIf="carregando" class="text-muted">Carregando dados...</div>
+
+  <!-- Mensagem de erro -->
   <div *ngIf="erro" class="alert alert-danger">{{ erro }}</div>
 
-  <div *ngIf="!carregando && solicitacao" class="detalhes-solicitacao mb-4">
-    <h4 class="mb-3">Dados da Solicitação</h4>
+  <!-- Dados da Solicitação -->
+  <div *ngIf="!carregando && solicitacao" class="card mb-4 border rounded shadow-sm">
+    <div class="card-header bg-light fw-bold">Dados da Solicitação</div>
+    <div class="card-body">
+      <p><strong>ID:</strong> {{ solicitacao.id }}</p>
+      <p>
+        <strong>Data de Abertura:</strong>
+        {{ solicitacao.criadoEm | date: 'dd/MM/yyyy, HH:mm' }}
+      </p>
 
-    <p><strong>Descrição do Equipamento:</strong> {{ solicitacao.descricaoEquipamento || '—' }}</p>
+      <p>
+        <strong>Status Atual:</strong>
+        <span
+          class="badge"
+          [ngStyle]="{
+            backgroundColor: getStatusCor(solicitacao.estadoAtual),
+            color: '#fff'
+          }"
+        >
+          {{ solicitacao.estadoAtual }}
+        </span>
+      </p>
 
-    <p><strong>Categoria do Equipamento:</strong>
-      {{ solicitacao.categoriaEquipamento?.descricao || '—' }}
-    </p>
+      <p><strong>Descrição do Equipamento:</strong> {{ solicitacao.descricaoEquipamento || '—' }}</p>
 
-    <p><strong>Descrição do Problema:</strong> {{ solicitacao.descricaoDefeito || '—' }}</p>
+      <p>
+        <strong>Categoria do Equipamento:</strong>
+        {{ solicitacao.categoriaEquipamento || solicitacao.categoriaNome || '—' }}
+      </p>
 
-    <p><strong>Data da Solicitação:</strong> {{ solicitacao.criadoEm | date:'dd/MM/yyyy, HH:mm' }}</p>
-
-    <h4 class="mt-4 mb-3">Dados do Cliente</h4>
-    <p><strong>Nome do Cliente:</strong> {{ cliente?.nome || '—' }}</p>
-    <p><strong>Email do Cliente:</strong> {{ cliente?.email || '—' }}</p>
-    <p><strong>Telefone do Cliente:</strong> {{ cliente?.telefone || '—' }}</p>
+      <p><strong>Descrição do Problema:</strong> {{ solicitacao.descricaoDefeito || '—' }}</p>
+    </div>
   </div>
 
-  <div class="acoes mb-4" *ngIf="!carregando && solicitacao">
-    <button class="btn btn-primary me-2" (click)="iniciarManutencao()">Efetuar Manutenção</button>
-    <button class="btn btn-warning" (click)="redirecionarManutencao()">Redirecionar Manutenção</button>
+  <!-- Dados do Cliente -->
+  <div *ngIf="!carregando && cliente" class="card mb-4 border rounded shadow-sm">
+    <div class="card-header bg-light fw-bold">Dados do Cliente</div>
+    <div class="card-body">
+      <p><strong>Nome:</strong> {{ cliente?.nome || '—' }}</p>
+      <p><strong>E-mail:</strong> {{ cliente?.email || '—' }}</p>
+      <p><strong>Telefone:</strong> {{ cliente?.telefone || '—' }}</p>
+
+      <div *ngIf="cliente?.endereco">
+        <strong>Endereço:</strong>
+        {{ cliente.endereco.logradouro }}, {{ cliente.endereco.numero }}
+        <span *ngIf="cliente.endereco.complemento">
+          - {{ cliente.endereco.complemento }}
+        </span>,
+        {{ cliente.endereco.bairro }} -
+        {{ cliente.endereco.localidade }}/{{ cliente.endereco.uf }}
+        — CEP: {{ cliente.endereco.cep }}
+      </div>
+    </div>
   </div>
 
-  <div *ngIf="exibirCamposManutencao" class="mt-4">
-    <h4 class="mb-3">Dados da Manutenção</h4>
-
-    <div class="mb-3">
-      <label for="descricao-manutencao" class="form-label">Descrição da Manutenção:</label>
-      <textarea id="descricao-manutencao" #descricaoManutencao class="form-control" rows="3"></textarea>
-    </div>
-
-    <div class="mb-3">
-      <label for="orientacoes-cliente" class="form-label">Orientações para o Cliente:</label>
-      <textarea id="orientacoes-cliente" #orientacoesCliente class="form-control" rows="3"></textarea>
-    </div>
-
-    <button
-      class="btn btn-success"
-      (click)="concluirManutencao(descricaoManutencao.value, orientacoesCliente.value)"
-    >
-      Concluir Manutenção
+  <!-- Ações -->
+  <div *ngIf="!carregando && solicitacao" class="mb-4 d-flex gap-2 flex-wrap">
+    <button class="btn btn-primary" (click)="iniciarManutencao()">
+      <i class="bi bi-tools me-1"></i> Efetuar Manutenção
+    </button>
+    <button class="btn btn-warning text-white" (click)="redirecionarManutencao()">
+      <i class="bi bi-arrow-repeat me-1"></i> Redirecionar Manutenção
     </button>
   </div>
 
+  <!-- Campos de manutenção -->
+  <div *ngIf="exibirCamposManutencao" class="card border rounded shadow-sm mt-4">
+    <div class="card-header bg-light fw-bold">Dados da Manutenção</div>
+    <div class="card-body">
+      <div class="mb-3">
+        <label for="descricao-manutencao" class="form-label">Descrição da Manutenção:</label>
+        <textarea
+          id="descricao-manutencao"
+          #descricaoManutencao
+          class="form-control"
+          rows="3"
+          placeholder="Descreva as ações realizadas, peças trocadas, ajustes feitos..."
+        ></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label for="orientacoes-cliente" class="form-label">Orientações para o Cliente:</label>
+        <textarea
+          id="orientacoes-cliente"
+          #orientacoesCliente
+          class="form-control"
+          rows="3"
+          placeholder="Informe recomendações, cuidados ou prazos..."
+        ></textarea>
+      </div>
+
+      <div class="text-end">
+        <button
+          class="btn btn-success"
+          (click)="concluirManutencao(descricaoManutencao.value, orientacoesCliente.value)"
+        >
+          <i class="bi bi-check2-circle me-1"></i> Concluir Manutenção
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensagem final -->
   <div *ngIf="mensagem" class="alert alert-info mt-4" [innerHTML]="mensagem"></div>
 </div>

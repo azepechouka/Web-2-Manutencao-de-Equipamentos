@@ -2,8 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SolicitacoesService } from '../../services/solicitacoes.service';
-import { Solicitacao } from '../../models/solicitacao.model';
-import { HistoricoStatus } from '../../models/historico-status.model';
+import { SolicitacaoResponse } from '../../models/solicitacao.model';
+import { HistoricoStatusDTO } from '../../models/historico-status.model';
 import { Orcamento } from '../../models/orcamento.model';
 
 @Component({
@@ -18,8 +18,8 @@ export class VisualizarServicoComponent implements OnInit {
   private service = inject(SolicitacoesService);
   private router = inject(Router);
 
-  solicitacao?: Solicitacao;
-  historico: HistoricoStatus[] = [];
+  solicitacao?: SolicitacaoResponse;
+  historico: HistoricoStatusDTO[] = [];
   orcamento?: Orcamento;
 
   solicitacaoId?: number;
@@ -36,9 +36,8 @@ export class VisualizarServicoComponent implements OnInit {
 
   private carregarDados() {
     this.isLoading = true;
-
     this.service.getById(this.solicitacaoId!).subscribe({
-      next: (sol) => {
+      next: (sol: SolicitacaoResponse) => {
         this.solicitacao = sol;
         this.carregarOrcamento();
         this.carregarHistorico();
@@ -68,8 +67,8 @@ export class VisualizarServicoComponent implements OnInit {
 
   aprovarServico() {
     if (!this.solicitacaoId) return;
-
     this.isProcessing = true;
+
     this.service.aprovarOrcamento(this.solicitacaoId).subscribe({
       next: (success) => {
         if (success) {
@@ -94,21 +93,22 @@ export class VisualizarServicoComponent implements OnInit {
     }
   }
 
-  podeAprovarRejeitar(s: Solicitacao): boolean {
-    return s.statusAtualId === 2;
+  podeAprovarRejeitar(s: SolicitacaoResponse): boolean {
+    return s.estadoAtual === 'Orçada';
   }
 
-  statusNome(statusId: number): string {
-    const map: Record<number, string> = {
-      1: 'Aberta',
-      2: 'Orçada',
-      3: 'Aprovada',
-      4: 'Rejeitada',
-      5: 'Redirecionada',
-      6: 'Arrumada',
-      7: 'Paga',
-      8: 'Finalizada',
+  // 🎨 Helper de cores para status textual
+  getStatusCor(estado: string): string {
+    const mapa: Record<string, string> = {
+      'Aberta': '#6c757d',        // Cinza
+      'Orçada': '#8B4513',        // Marrom
+      'Aprovada': '#FFD700',      // Amarelo
+      'Rejeitada': '#DC3545',     // Vermelho
+      'Redirecionada': '#800080', // Roxo
+      'Arrumada': '#0D6EFD',      // Azul
+      'Paga': '#FF8C00',          // Alaranjado
+      'Finalizada': '#28A745'     // Verde
     };
-    return map[statusId] ?? 'Desconhecido';
+    return mapa[estado] ?? '#999999';
   }
 }

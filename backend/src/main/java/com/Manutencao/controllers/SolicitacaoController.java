@@ -3,6 +3,7 @@ package com.Manutencao.controllers;
 import com.Manutencao.api.dto.SolicitacaoCreateRequest;
 import com.Manutencao.models.Solicitacao;
 import com.Manutencao.services.SolicitacaoService;
+import com.Manutencao.api.dto.HistoricoStatusResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

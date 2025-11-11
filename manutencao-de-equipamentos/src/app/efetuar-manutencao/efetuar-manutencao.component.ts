@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SolicitacoesService } from '../services/solicitacoes.service';
-import { Solicitacao } from '../models/solicitacao.model';
+import { Solicitacao, SolicitacaoResponse } from '../models/solicitacao.model';
 
 @Component({
   selector: 'app-efetuar-manutencao',
@@ -18,7 +18,7 @@ export class EfetuarManutencaoComponent implements OnInit {
 
   id!: number;
 
-  solicitacao: Solicitacao | null = null;
+  solicitacao: SolicitacaoResponse | null = null;
   cliente: any = null;
 
   exibirCamposManutencao = false;
@@ -41,7 +41,7 @@ export class EfetuarManutencaoComponent implements OnInit {
   private carregarSolicitacao(): void {
     this.carregando = true;
     this.svc.getById(this.id).subscribe({
-      next: (det: Solicitacao) => {
+      next: (det: SolicitacaoResponse) => {
         if (!det) {
           this.erro = 'Solicitação não encontrada.';
           this.router.navigate(['/home']);
@@ -88,4 +88,19 @@ export class EfetuarManutencaoComponent implements OnInit {
 
     this.exibirCamposManutencao = false;
   }
+
+  getStatusCor(estado: string): string {
+  const mapa: Record<string, string> = {
+    'Aberta': '#6c757d',        // Cinza
+    'Orçada': '#8B4513',        // Marrom
+    'Aprovada': '#FFD700',      // Amarelo
+    'Rejeitada': '#DC3545',     // Vermelho
+    'Redirecionada': '#800080', // Roxo
+    'Arrumada': '#0D6EFD',      // Azul
+    'Paga': '#FF8C00',          // Alaranjado
+    'Finalizada': '#28A745'     // Verde
+  };
+  return mapa[estado] ?? '#999999';
+}
+
 }

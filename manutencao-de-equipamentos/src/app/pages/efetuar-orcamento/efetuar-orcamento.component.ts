@@ -4,7 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SolicitacoesService } from '../../services/solicitacoes.service';
 import { AuthService } from '../../services/auth.service';
-import { Solicitacao } from '../../models/solicitacao.model';
+import { Solicitacao, SolicitacaoResponse } from '../../models/solicitacao.model';
 
 @Component({
   selector: 'app-efetuar-orcamento',
@@ -20,7 +20,7 @@ export class EfetuarOrcamentoComponent implements OnInit {
   private auth = inject(AuthService);
 
   solicitacaoId!: number;
-  solicitacao = signal<Solicitacao | null>(null);
+  solicitacao = signal<SolicitacaoResponse | null>(null);
   cliente = signal<any | null>(null);
   carregando = signal(true);
   erro = signal<string | null>(null);
@@ -41,7 +41,7 @@ export class EfetuarOrcamentoComponent implements OnInit {
     this.solicitacaoId = id;
 
     this.svc.getById(id).subscribe({
-      next: (det: Solicitacao) => {
+      next: (det: SolicitacaoResponse) => {
         if (!det) {
           this.erro.set('Solicitação não encontrada.');
           this.carregando.set(false);
@@ -108,6 +108,19 @@ export class EfetuarOrcamentoComponent implements OnInit {
     5: 'FINALIZADA'
   };
   return mapa[id ?? 0] || '—';
+}
+getStatusCor(estado: string): string {
+  const mapa: Record<string, string> = {
+    'Aberta': '#6c757d',        // Cinza
+    'Orçada': '#8B4513',        // Marrom
+    'Aprovada': '#FFD700',      // Amarelo
+    'Rejeitada': '#DC3545',     // Vermelho
+    'Redirecionada': '#800080', // Roxo
+    'Arrumada': '#0D6EFD',      // Azul
+    'Paga': '#FF8C00',          // Alaranjado
+    'Finalizada': '#28A745'     // Verde
+  };
+  return mapa[estado] ?? '#999999';
 }
 
 }
