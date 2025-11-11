@@ -65,24 +65,30 @@ public class SolicitacaoService {
         return repository.findAll();
     }
 
-    public Optional<Solicitacao> buscarPorId(Long id) {
-        return repository.findById(id);
+    public Solicitacao buscarPorId(Long id) {
+        Solicitacao s = repository.findByIdComFetch(id);
+        if (s == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada");
+        }
+        return s;
     }
 
     public List<Solicitacao> buscarPorCliente(Long clienteId) {
-        return repository.findByCliente_Id(clienteId);
+        return repository.findByCliente_IdWithFetch(clienteId);
     }
 
     public boolean trocarEstado(Long solicitacaoId, String novoEstadoNome) {
-        Optional<EstadoSolicitacao> estado = estadoRepo.findByNomeIgnoreCase(novoEstadoNome);
+        var estado = estadoRepo.findByNomeIgnoreCase(novoEstadoNome);
         if (estado.isEmpty()) return false;
 
-        return repository.findById(solicitacaoId).map(solicitacao -> {
-            solicitacao.setEstadoAtual(estado.get());
-            repository.save(solicitacao);
-            return true;
-        }).orElse(false);
+        Solicitacao solicitacao = repository.findByIdComFetch(solicitacaoId);
+        if (solicitacao == null) return false;
+
+        solicitacao.setEstadoAtual(estado.get());
+        repository.save(solicitacao);
+        return true;
     }
+
 
     public Solicitacao salvar(Solicitacao s) {
         return repository.save(s);

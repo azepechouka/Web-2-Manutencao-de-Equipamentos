@@ -3,10 +3,31 @@ package com.Manutencao.repositories;
 import com.Manutencao.models.Solicitacao;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
 @Repository
 public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> {
+
     List<Solicitacao> findByCliente_Id(Long clienteId);
+
+    @Query("""
+        SELECT s FROM Solicitacao s
+        JOIN FETCH s.estadoAtual
+        JOIN FETCH s.categoria
+        JOIN FETCH s.cliente
+        WHERE s.cliente.id = :clienteId
+    """)
+    List<Solicitacao> findByCliente_IdWithFetch(@Param("clienteId") Long clienteId);
+
+    @Query("""
+        SELECT s FROM Solicitacao s
+        LEFT JOIN FETCH s.categoria
+        LEFT JOIN FETCH s.cliente
+        LEFT JOIN FETCH s.estadoAtual
+        WHERE s.id = :id
+    """)
+    Solicitacao findByIdComFetch(@Param("id") Long id);
 }

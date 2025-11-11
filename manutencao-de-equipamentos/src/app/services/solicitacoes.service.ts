@@ -4,6 +4,7 @@ import { Observable, of } from 'rxjs';
 import { Solicitacao, SolicitacaoCreateDto } from '../models/solicitacao.model';
 import { Orcamento } from '../models/orcamento.model';
 import { AuthService } from './auth.service';
+import { HistoricoStatus } from '../models/historico-status.model';
 
 @Injectable({ providedIn: 'root' })
 export class SolicitacoesService {
@@ -72,6 +73,10 @@ export class SolicitacoesService {
     return this.http.post<boolean>(`${this.SOLICITACOES}/${solicitacaoId}/rejeitar`, { motivo });}
 
 
+  getDetalhesCompletos(id: number): Observable<Solicitacao> {
+    return this.http.get<Solicitacao>(`${this.SOLICITACOES}/${id}/detalhes`);
+  }
+
   relatorioReceitaPorCategoria$(): Observable<
     {
       categoriaId: number | null;
@@ -103,5 +108,9 @@ export class SolicitacoesService {
       ]);
       observer.complete();
     });
+  }
+
+  getHistoricoBySolicitacao(solicitacaoId: number): Observable<HistoricoStatus[]> {
+    return this.http.get<HistoricoStatus[]>(`${this.SOLICITACOES}/${solicitacaoId}/historico`);
   }
 }

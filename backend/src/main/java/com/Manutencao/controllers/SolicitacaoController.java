@@ -37,15 +37,22 @@ public class SolicitacaoController {
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<Solicitacao> buscarPorId(@PathVariable Long id) {
-        return solicitacaoService.buscarPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<SolicitacaoResponse> buscarPorId(@PathVariable Long id) {
+        Solicitacao s = solicitacaoService.buscarPorId(id);
+        if (s == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(SolicitacaoResponse.from(s));
     }
 
     @GetMapping("/cliente/{clienteId}")
-    public ResponseEntity<List<Solicitacao>> buscarPorCliente(@PathVariable Long clienteId) {
-        return ResponseEntity.ok(solicitacaoService.buscarPorCliente(clienteId));
+    public ResponseEntity<List<SolicitacaoResponse>> buscarPorCliente(@PathVariable Long clienteId) {
+        var lista = solicitacaoService.buscarPorCliente(clienteId)
+            .stream()
+            .map(SolicitacaoResponse::from)
+            .toList();
+
+        return ResponseEntity.ok(lista);
     }
 
     @PostMapping("/{id}/aprovar")

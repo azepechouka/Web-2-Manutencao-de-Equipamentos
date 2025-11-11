@@ -1,4 +1,4 @@
-<div class="container mt-4" *ngIf="solicitacao$ | async as s; else loading">
+<div class="container mt-4" *ngIf="!isLoading && solicitacao as s; else loading">
   <div class="card shadow-sm">
     <div class="card-header d-flex justify-content-between align-items-center">
       <h3>Detalhes da Solicitação #{{ s.id }}</h3>
@@ -14,7 +14,7 @@
             <tbody>
               <tr>
                 <th scope="row" style="width: 200px;">Data e Hora da Abertura:</th>
-                <td>{{ s.criadoEm | date:'dd/MM/yyyy, HH:mm' }}</td>
+                <td>{{ s.criadoEm | date: 'dd/MM/yyyy, HH:mm' }}</td>
               </tr>
               <tr>
                 <th scope="row">Status Atual:</th>
@@ -26,16 +26,17 @@
               </tr>
               <tr>
                 <th scope="row">Descrição do Equipamento:</th>
-                <td>{{ s.descricaoEquipamento }}</td>
+                <td>{{ s.descricaoEquipamento || '—' }}</td>
               </tr>
               <tr>
                 <th scope="row">Descrição do Problema:</th>
-                <td>{{ s.descricaoDefeito }}</td>
+                <td>{{ s.descricaoDefeito || '—' }}</td>
               </tr>
             </tbody>
           </table>
         </div>
 
+        <!-- Ações Disponíveis -->
         <div class="col-md-5">
           <h5 class="mb-3">Ações Disponíveis</h5>
 
@@ -68,37 +69,40 @@
         </div>
       </div>
 
-      <hr class="my-4">
+      <hr class="my-4" />
 
+      <!-- Histórico -->
       <h5 class="mb-3">Histórico de Atualizações</h5>
-
-<h5 class="mb-3">Histórico de Atualizações</h5>
-
-    <ng-container *ngIf="$any(s).historico?.length > 0; else semHistorico">
-      <div class="timeline">
-        <div class="timeline-item" *ngFor="let h of $any(s).historico">
-          <div class="timeline-marker"></div>
-          <div class="timeline-content">
-            <p class="fw-bold mb-1">{{ h.statusNome }}</p>
-            <p class="mb-1">
-              <span class="text-muted">Por:</span> {{ h.usuarioNome || 'Sistema' }}
-              <span *ngIf="h.observacao">
-                | <span class="text-muted">Obs:</span> {{ h.observacao }}
-              </span>
-            </p>
-            <p class="text-muted small">{{ h.criadoEm | date:'dd/MM/yyyy, HH:mm' }}</p>
+      <ng-container *ngIf="historico.length > 0; else semHistorico">
+        <div class="timeline">
+          <div class="timeline-item" *ngFor="let h of historico">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+              <p class="fw-bold mb-1">
+                {{ statusNome(h.paraStatusId) }}
+              </p>
+              <p class="mb-1">
+                <span class="text-muted">Por:</span> {{ h.usuarioId || 'Sistema' }}
+                <span *ngIf="h.observacao">
+                  | <span class="text-muted">Obs:</span> {{ h.observacao }}
+                </span>
+              </p>
+              <p class="text-muted small">
+                {{ h.criadoEm | date: 'dd/MM/yyyy, HH:mm' }}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
-    </ng-container>
+      </ng-container>
 
-    <ng-template #semHistorico>
-      <p class="text-muted">Sem histórico disponível para esta solicitação.</p>
-    </ng-template>
+      <ng-template #semHistorico>
+        <p class="text-muted">Sem histórico disponível para esta solicitação.</p>
+      </ng-template>
     </div>
   </div>
 </div>
 
+<!-- Template de loading (precisa estar no mesmo escopo do *ngIf principal) -->
 <ng-template #loading>
   <p class="text-center mt-5">Carregando detalhes da solicitação...</p>
 </ng-template>
