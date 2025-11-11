@@ -63,17 +63,57 @@ export class HomeComponent implements OnInit {
     this.router.navigate(['/visualizar-servico', id]);
   }
 
+  resgatarServico(id: number): void {
+    this.router.navigate(['/resgatar-servico', id]);
+  }
+
+  pagarServico(id: number): void {
+    this.router.navigate(['/pagar-servico', id]);
+  }
+
+
   getStatusCor(estado: string): string {
     const mapa: Record<string, string> = {
-      'Aberta': '#6c757d',        // Cinza
-      'Orçada': '#8B4513',        // Marrom
-      'Aprovada': '#FFD700',      // Amarelo
-      'Rejeitada': '#DC3545',     // Vermelho
-      'Redirecionada': '#800080', // Roxo
-      'Arrumada': '#0D6EFD',      // Azul
-      'Paga': '#FF8C00',          // Alaranjado
-      'Finalizada': '#28A745',    // Verde
+      Aberta: '#6c757d',
+      Orçada: '#8B4513',
+      Aprovada: '#FFD700',
+      Rejeitada: '#DC3545',
+      Redirecionada: '#800080', 
+      Arrumada: '#0D6EFD', 
+      Paga: '#FF8C00', 
+      Finalizada: '#28A745',   
     };
     return mapa[estado] ?? '#999999';
+  }
+
+  getAcoes(item: SolicitacaoResponse): { texto: string; tipo: string; acao: () => void } | null {
+    switch (item.estadoAtual) {
+      case 'Orçada':
+        return {
+          texto: 'Aprovar / Rejeitar Serviço',
+          tipo: 'btn-warning text-dark fw-semibold',
+          acao: () => this.abrirOrcamento(item.id),
+        };
+      case 'Rejeitada':
+        return {
+          texto: 'Resgatar Serviço',
+          tipo: 'btn-danger',
+          acao: () => this.resgatarServico(item.id),
+        };
+      case 'Arrumada':
+        return {
+          texto: 'Pagar Serviço',
+          tipo: 'btn-primary',
+          acao: () => this.pagarServico(item.id),
+        };
+      case 'Aprovada':
+        return null; 
+      default:
+        return {
+          texto: 'Visualizar Serviço',
+          tipo: 'btn-secondary',
+          acao: () => this.verSolicitacao(item.id),
+        };
+    }
   }
 }
