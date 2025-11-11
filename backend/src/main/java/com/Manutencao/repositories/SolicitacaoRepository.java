@@ -30,4 +30,16 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
         WHERE s.id = :id
     """)
     Solicitacao findByIdComFetch(@Param("id") Long id);
+
+    @Query("""
+    SELECT s
+        FROM Solicitacao s
+        JOIN FETCH s.estadoAtual ea
+        JOIN FETCH s.cliente c
+        JOIN FETCH s.categoria cat
+        WHERE LOWER(ea.nome) = LOWER(:nome)
+    """)
+    List<Solicitacao> findByEstadoAtual_NomeIgnoreCase(@Param("nome") String nome);
+
+
 }

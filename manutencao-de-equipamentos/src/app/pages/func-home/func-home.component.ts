@@ -2,13 +2,14 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { SolicitacoesService } from '../../services/solicitacoes.service';
-import { Solicitacao } from '../../models/solicitacao.model';
+import { SolicitacaoResponse } from '../../models/solicitacao.model';
 
 type ItemFunc = {
   solicitacaoId: number;
   dataHoraSolicitacao: string;
   clienteNome: string;
   equipamentoDesc30: string;
+  estadoAtual: string;
 };
 
 @Component({
@@ -32,15 +33,17 @@ export class FuncHomeComponent implements OnInit {
 
   private carregar(): void {
     this.carregando.set(true);
+
     this.service.listEmAberto().subscribe({
-      next: (data: Solicitacao[]) => {
+      next: (data: SolicitacaoResponse[]) => {
         this.itens = data.map((s) => ({
           solicitacaoId: s.id,
           dataHoraSolicitacao: s.criadoEm,
-          clienteNome: `Cliente #${s.clienteId}`,
+          clienteNome: s.clienteNome || `Cliente #${s.clienteId ?? '—'}`,
           equipamentoDesc30: s.descricaoEquipamento.length > 30
-            ? s.descricaoEquipamento.slice(0, 30) + '...'
+            ? s.descricaoEquipamento.slice(0, 30) + '…'
             : s.descricaoEquipamento,
+          estadoAtual: s.estadoAtual
         }));
         this.erro.set(null);
         this.carregando.set(false);

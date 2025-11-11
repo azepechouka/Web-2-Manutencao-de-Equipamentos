@@ -74,5 +74,10 @@ public class SolicitacaoController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/em-aberto")
+    public ResponseEntity<List<SolicitacaoResponse>> listarEmAberto() {
+        return ResponseEntity.ok(solicitacaoService.listarEmAberto());
+    }
+
     public record MotivoRejeicao(String motivo) {}
 }

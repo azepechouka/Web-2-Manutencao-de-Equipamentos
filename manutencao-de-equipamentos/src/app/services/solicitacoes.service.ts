@@ -28,8 +28,8 @@ export class SolicitacoesService {
     return this.http.get<SolicitacaoResponse[]>(`${this.SOLICITACOES}/cliente/${clienteId}`);
   }
 
-  listEmAberto(): Observable<Solicitacao[]> {
-    return this.http.get<Solicitacao[]>(`${this.SOLICITACOES}/em-aberto`);
+  listEmAberto(): Observable<SolicitacaoResponse[]> {
+    return this.http.get<SolicitacaoResponse[]>(`${this.SOLICITACOES}/em-aberto`);
   }
 
   criarSolicitacao(data: Partial<Solicitacao>): Observable<Solicitacao> {
