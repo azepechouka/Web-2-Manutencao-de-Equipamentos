@@ -22,8 +22,8 @@ public class Pagamento {
               foreignKey = @ForeignKey(name = "fk_pag_solic"))
   private Solicitacao solicitacao;
 
-  @Column(name = "valor_centavos", nullable = false)
-  private Long valorCentavos;
+  @Column(name = "valor", nullable = false)
+  private Long valor;
 
   @Column(name = "forma_pagamento", length = 30)
   private String formaPagamento; // PIX, CARTAO, DINHEIRO

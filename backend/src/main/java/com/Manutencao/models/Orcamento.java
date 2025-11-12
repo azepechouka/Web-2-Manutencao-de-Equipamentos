@@ -21,8 +21,8 @@ public class Orcamento {
               foreignKey = @ForeignKey(name = "fk_orc_solic"))
   private Solicitacao solicitacao;
 
-  @Column(name = "valor_centavos", nullable = false)
-  private Long valorCentavos;
+  @Column(name = "valor", nullable = false)
+  private Long valor;
 
   @ManyToOne(optional = false, fetch = FetchType.LAZY)
   @JoinColumn(name = "funcionario_id", nullable = false,

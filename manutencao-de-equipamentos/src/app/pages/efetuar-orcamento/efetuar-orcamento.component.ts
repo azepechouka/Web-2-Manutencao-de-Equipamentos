@@ -69,9 +69,6 @@ export class EfetuarOrcamentoComponent implements OnInit {
             this.cliente.set(cli ?? null);
           });
         }
-        console.log('eeeeeeeeeeeeeeee')
-        console.log(this.cliente());
-
         this.carregando.set(false);
       },
       error: (err) => {
@@ -108,7 +105,7 @@ export class EfetuarOrcamentoComponent implements OnInit {
         next: (orc) => {
           console.log('Orçamento registrado:', orc);
           alert('Orçamento registrado com sucesso!');
-          this.router.navigate(['/solicitacao', this.solicitacaoId]);
+          this.router.navigate(['/func-home']);
         },
         error: (err) => {
           console.error(err);
