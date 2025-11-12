@@ -7,8 +7,10 @@ import java.time.Instant;
 
 @Entity
 @Table(name = "historico_solicitacao")
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor @Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class HistoricoSolicitacao {
 
     @Id
@@ -16,15 +18,18 @@ public class HistoricoSolicitacao {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "solicitacao_id", nullable = false)
+    @JoinColumn(name = "solicitacao_id", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_hist_solic"))
     private Solicitacao solicitacao;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "de_estado_id")
+    @JoinColumn(name = "de_estado_id",
+            foreignKey = @ForeignKey(name = "fk_hist_de_estado"))
     private EstadoSolicitacao deEstado;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "para_estado_id", nullable = false)
+    @JoinColumn(name = "para_estado_id", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_hist_para_estado"))
     private EstadoSolicitacao paraEstado;
 
     @Column(columnDefinition = "text")
