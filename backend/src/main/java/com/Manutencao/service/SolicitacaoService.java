@@ -67,12 +67,16 @@ public class SolicitacaoService {
         return repository.findAll();
     }
 
-    public Solicitacao buscarPorId(Long id) {
-        Solicitacao s = repository.findByIdComFetch(id);
-        if (s == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada");
-        }
-        return s;
+    @Transactional
+    public SolicitacaoResponse buscarPorId(Long id) {
+        Solicitacao s = repository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada"));
+
+        s.getCliente().getId();
+        s.getCategoria().getNome();
+        s.getEstadoAtual().getNome();
+
+        return SolicitacaoResponse.from(s);
     }
 
     public List<Solicitacao> buscarPorCliente(Long clienteId) {

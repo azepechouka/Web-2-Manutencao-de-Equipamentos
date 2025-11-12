@@ -9,6 +9,7 @@ public record SolicitacaoResponse(
     String descricaoDefeito,
     String estadoAtual,
     String clienteNome,
+    Long clienteId,
     String categoriaNome,
     Instant criadoEm
 ) {
@@ -19,6 +20,7 @@ public record SolicitacaoResponse(
             s.getDescricaoDefeito(),
             s.getEstadoAtual().getNome(),
             s.getCliente().getNome(),
+            s.getCliente().getId(),
             s.getCategoria().getNome(),
             s.getCriadoEm()
         );

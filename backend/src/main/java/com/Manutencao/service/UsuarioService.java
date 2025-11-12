@@ -2,6 +2,7 @@ package com.Manutencao.services;
 
 import com.Manutencao.api.dto.FuncionarioRequest;
 import com.Manutencao.api.dto.FuncionarioResponse;
+import com.Manutencao.api.dto.UsuarioResponse;
 import com.Manutencao.models.Perfil;
 import com.Manutencao.models.Usuario;
 import com.Manutencao.repositories.PerfilRepository;
@@ -9,8 +10,10 @@ import com.Manutencao.repositories.UsuarioRepository;
 import com.Manutencao.security.PasswordHasher;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -22,6 +25,7 @@ public class UsuarioService {
 
     private static final int PERFIL_USER_ID = 0;
     private static final int PERFIL_ADMIN_ID = 1;
+
     public UsuarioService(UsuarioRepository usuarios, PerfilRepository perfis) {
         this.usuarios = usuarios;
         this.perfis = perfis;
@@ -74,6 +78,24 @@ public class UsuarioService {
                 u.getNome(),
                 u.getDataNascimento(),
                 u.getPerfil() != null ? u.getPerfil().getNome() : null
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public UsuarioResponse buscarPorId(Long id) {
+        Usuario usuario = usuarios.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+
+        return new UsuarioResponse(
+            usuario.getId(),
+            usuario.getNome(),
+            usuario.getEmail(),
+            usuario.getTelefone(), // <-- CORRETO
+            usuario.getPerfil() != null ? usuario.getPerfil().getNome() : null, // <-- CORRETO
+            usuario.isAtivo(),
+            usuario.getDataNascimento(),
+            usuario.getCriadoEm(),
+            usuario.getAtualizadoEm()
         );
     }
 }

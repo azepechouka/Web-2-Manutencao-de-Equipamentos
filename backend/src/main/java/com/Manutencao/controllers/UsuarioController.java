@@ -2,6 +2,7 @@ package com.Manutencao.api.controller;
 
 import com.Manutencao.api.dto.FuncionarioRequest;
 import com.Manutencao.api.dto.FuncionarioResponse;
+import com.Manutencao.api.dto.UsuarioResponse;
 import com.Manutencao.services.UsuarioService;
 
 import jakarta.validation.Valid;
@@ -19,6 +20,12 @@ public class UsuarioController {
 
     public UsuarioController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UsuarioResponse> getUsuarioById(@PathVariable Long id) {
+        UsuarioResponse usuario = usuarioService.buscarPorId(id);
+        return ResponseEntity.ok(usuario);
     }
 
     @GetMapping("/funcionarios")

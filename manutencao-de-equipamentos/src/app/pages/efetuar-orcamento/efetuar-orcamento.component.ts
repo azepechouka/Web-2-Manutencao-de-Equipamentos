@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SolicitacoesService } from '../../services/solicitacoes.service';
 import { AuthService } from '../../services/auth.service';
+import { UsuarioService, UsuarioResponse } from '../../services/usuario.service';
 import { Solicitacao, SolicitacaoResponse } from '../../models/solicitacao.model';
 
 @Component({
@@ -18,11 +19,12 @@ export class EfetuarOrcamentoComponent implements OnInit {
   private fb = inject(FormBuilder);
   private svc = inject(SolicitacoesService);
   private auth = inject(AuthService);
+  private usuarioSvc = inject(UsuarioService);
 
   solicitacaoId!: number;
   solicitacao = signal<SolicitacaoResponse | null>(null);
   cliente = signal<any | null>(null);
-  carregando = signal(true);
+  funcionario = signal<UsuarioResponse | null>(null);
   erro = signal<string | null>(null);
 
   form = this.fb.group({
@@ -40,6 +42,17 @@ export class EfetuarOrcamentoComponent implements OnInit {
 
     this.solicitacaoId = id;
 
+    const funcionarioId = this.auth.getUsuarioId();
+    if (funcionarioId) {
+      this.usuarioSvc.getById(funcionarioId).subscribe({
+        next: (user) => this.funcionario.set(user),
+        error: (err) => {
+          console.error(err);
+          this.funcionario.set(null);
+        }
+      });
+    }
+
     this.svc.getById(id).subscribe({
       next: (det: SolicitacaoResponse) => {
         if (!det) {
@@ -49,9 +62,8 @@ export class EfetuarOrcamentoComponent implements OnInit {
         }
 
         this.solicitacao.set(det);
-
         if (det.clienteId) {
-          this.svc.getClienteById$(det.clienteId).subscribe(cli => {
+          this.usuarioSvc.getById(det.clienteId).subscribe(cli => {
             this.cliente.set(cli ?? null);
           });
         }
@@ -100,27 +112,27 @@ export class EfetuarOrcamentoComponent implements OnInit {
   }
 
   traduzStatus(id?: number): string {
-  const mapa: Record<number, string> = {
-    1: 'ABERTA',
-    2: 'ORÇADA',
-    3: 'APROVADA',
-    4: 'REJEITADA',
-    5: 'FINALIZADA'
-  };
-  return mapa[id ?? 0] || '—';
-}
-getStatusCor(estado: string): string {
-  const mapa: Record<string, string> = {
-    'Aberta': '#6c757d',        // Cinza
-    'Orçada': '#8B4513',        // Marrom
-    'Aprovada': '#FFD700',      // Amarelo
-    'Rejeitada': '#DC3545',     // Vermelho
-    'Redirecionada': '#800080', // Roxo
-    'Arrumada': '#0D6EFD',      // Azul
-    'Paga': '#FF8C00',          // Alaranjado
-    'Finalizada': '#28A745'     // Verde
-  };
-  return mapa[estado] ?? '#999999';
-}
+    const mapa: Record<number, string> = {
+      1: 'ABERTA',
+      2: 'ORÇADA',
+      3: 'APROVADA',
+      4: 'REJEITADA',
+      5: 'FINALIZADA'
+    };
+    return mapa[id ?? 0] || '—';
+  }
 
+  getStatusCor(estado: string): string {
+    const mapa: Record<string, string> = {
+      'Aberta': '#6c757d',
+      'Orçada': '#8B4513',
+      'Aprovada': '#FFD700',
+      'Rejeitada': '#DC3545',
+      'Redirecionada': '#800080',
+      'Arrumada': '#0D6EFD',
+      'Paga': '#FF8C00',
+      'Finalizada': '#28A745'
+    };
+    return mapa[estado] ?? '#999999';
+  }
 }
