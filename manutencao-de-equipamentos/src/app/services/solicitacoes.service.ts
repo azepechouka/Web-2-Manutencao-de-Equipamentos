@@ -113,4 +113,9 @@ export class SolicitacoesService {
   getHistoricoBySolicitacao(id: number): Observable<HistoricoStatusDTO[]> {
     return this.http.get<HistoricoStatusDTO[]>(`${this.API}/historico/solicitacao/${id}`);
   }
+
+  resgatarSolicitacao(solicitacaoId: number): Observable<boolean> {
+    return this.http.post<boolean>(`${this.SOLICITACOES}/${solicitacaoId}/resgatar`, {});
+  }
+
 }

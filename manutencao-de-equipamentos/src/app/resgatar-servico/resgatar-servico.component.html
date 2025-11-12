@@ -1,0 +1,37 @@
+<div class="container mt-5" *ngIf="!isLoading && solicitacao; else loading">
+  <div class="card shadow-sm">
+    <div class="card-header bg-warning text-dark">
+      <h4 class="mb-0">Resgatar Solicitação Rejeitada</h4>
+    </div>
+
+    <div class="card-body">
+      <p>
+        A solicitação abaixo foi <strong>rejeitada</strong>. Caso deseje reativá-la,
+        ela retornará ao fluxo de atendimento como <strong>APROVADA</strong>.
+      </p>
+
+      <table class="table table-borderless table-sm mt-3">
+        <tbody>
+          <tr><th>ID:</th><td>{{ solicitacao.id }}</td></tr>
+          <tr><th>Cliente:</th><td>{{ solicitacao.clienteNome }}</td></tr>
+          <tr><th>Categoria:</th><td>{{ solicitacao.categoriaNome }}</td></tr>
+          <tr><th>Equipamento:</th><td>{{ solicitacao.descricaoEquipamento || '—' }}</td></tr>
+          <tr><th>Defeito:</th><td>{{ solicitacao.descricaoDefeito || '—' }}</td></tr>
+          <tr><th>Status Atual:</th><td><span class="badge bg-danger">Rejeitada</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="d-flex justify-content-center mt-4 gap-3">
+        <button class="btn btn-success" (click)="confirmarResgate()" [disabled]="isProcessing">
+          <span *ngIf="isProcessing" class="spinner-border spinner-border-sm me-2"></span>
+          Resgatar Solicitação
+        </button>
+        <button class="btn btn-secondary" (click)="cancelar()" [disabled]="isProcessing">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #loading>
+  <p class="text-center mt-5">Carregando dados da solicitação...</p>
+</ng-template>
