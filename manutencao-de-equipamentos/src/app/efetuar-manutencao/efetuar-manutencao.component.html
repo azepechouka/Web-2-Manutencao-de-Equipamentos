@@ -1,4 +1,7 @@
-<div class="container mt-4" style="max-width: 980px; margin: 0 auto;">
+<!-- Garanta no index.html -->
+<!-- <meta name="viewport" content="width=device-width, initial-scale=1" /> -->
+
+<div class="container-lg py-3">
   <h2 class="mb-4">Efetuar Manutenção</h2>
 
   <!-- Estado de carregamento -->
@@ -7,67 +10,84 @@
   <!-- Mensagem de erro -->
   <div *ngIf="erro" class="alert alert-danger">{{ erro }}</div>
 
-  <!-- Dados da Solicitação -->
-  <div *ngIf="!carregando && solicitacao" class="card mb-4 border rounded shadow-sm">
-    <div class="card-header bg-light fw-bold">Dados da Solicitação</div>
-    <div class="card-body">
-      <p><strong>ID:</strong> {{ solicitacao.id }}</p>
-      <p>
-        <strong>Data de Abertura:</strong>
-        {{ solicitacao.criadoEm | date: 'dd/MM/yyyy, HH:mm' }}
-      </p>
+  <!-- Grid principal: Solicitação + Cliente -->
+  <div class="row g-4" *ngIf="!carregando">
+    <!-- Dados da Solicitação -->
+    <div class="col-12 col-lg-6" *ngIf="solicitacao">
+      <div class="card h-100 border rounded shadow-sm">
+        <div class="card-header bg-light fw-bold">Dados da Solicitação</div>
+        <div class="card-body">
+          <p class="mb-2 text-break"><strong>ID:</strong> {{ solicitacao.id }}</p>
 
-      <p>
-        <strong>Status Atual:</strong>
-        <span
-          class="badge"
-          [ngStyle]="{
-            backgroundColor: getStatusCor(solicitacao.estadoAtual),
-            color: '#fff'
-          }"
-        >
-          {{ solicitacao.estadoAtual }}
-        </span>
-      </p>
+          <p class="mb-2">
+            <strong>Data de Abertura:</strong>
+            {{ solicitacao.criadoEm | date: 'dd/MM/yyyy, HH:mm' }}
+          </p>
 
-      <p><strong>Descrição do Equipamento:</strong> {{ solicitacao.descricaoEquipamento || '—' }}</p>
+          <p class="mb-2">
+            <strong>Status Atual:</strong>
+            <span
+              class="badge"
+              [ngStyle]="{
+                backgroundColor: getStatusCor(solicitacao.estadoAtual),
+                color: '#fff'
+              }"
+            >
+              {{ solicitacao.estadoAtual }}
+            </span>
+          </p>
 
-      <p>
-        <strong>Categoria do Equipamento:</strong>
-        {{ solicitacao.categoriaEquipamento || solicitacao.categoriaNome || '—' }}
-      </p>
+          <p class="mb-2 text-break">
+            <strong>Descrição do Equipamento:</strong>
+            {{ solicitacao.descricaoEquipamento || '—' }}
+          </p>
 
-      <p><strong>Descrição do Problema:</strong> {{ solicitacao.descricaoDefeito || '—' }}</p>
+          <p class="mb-2 text-break">
+            <strong>Categoria do Equipamento:</strong>
+            {{ solicitacao.categoriaEquipamento || solicitacao.categoriaNome || '—' }}
+          </p>
+
+          <p class="mb-0 text-break">
+            <strong>Descrição do Problema:</strong>
+            {{ solicitacao.descricaoDefeito || '—' }}
+          </p>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <!-- Dados do Cliente -->
-  <div *ngIf="!carregando && cliente" class="card mb-4 border rounded shadow-sm">
-    <div class="card-header bg-light fw-bold">Dados do Cliente</div>
-    <div class="card-body">
-      <p><strong>Nome:</strong> {{ cliente?.nome || '—' }}</p>
-      <p><strong>E-mail:</strong> {{ cliente?.email || '—' }}</p>
-      <p><strong>Telefone:</strong> {{ cliente?.telefone || '—' }}</p>
+    <!-- Dados do Cliente -->
+    <div class="col-12 col-lg-6" *ngIf="cliente">
+      <div class="card h-100 border rounded shadow-sm">
+        <div class="card-header bg-light fw-bold">Dados do Cliente</div>
+        <div class="card-body">
+          <p class="mb-2 text-break"><strong>Nome:</strong> {{ cliente?.nome || '—' }}</p>
+          <p class="mb-2 text-break"><strong>E-mail:</strong> {{ cliente?.email || '—' }}</p>
+          <p class="mb-2 text-break"><strong>Telefone:</strong> {{ cliente?.telefone || '—' }}</p>
 
-      <div *ngIf="cliente?.endereco">
-        <strong>Endereço:</strong>
-        {{ cliente.endereco.logradouro }}, {{ cliente.endereco.numero }}
-        <span *ngIf="cliente.endereco.complemento">
-          - {{ cliente.endereco.complemento }}
-        </span>,
-        {{ cliente.endereco.bairro }} -
-        {{ cliente.endereco.localidade }}/{{ cliente.endereco.uf }}
-        — CEP: {{ cliente.endereco.cep }}
+          <div *ngIf="cliente?.endereco" class="text-break">
+            <strong>Endereço:</strong>
+            {{ cliente.endereco.logradouro }}, {{ cliente.endereco.numero }}
+            <span *ngIf="cliente.endereco.complemento">
+              - {{ cliente.endereco.complemento }}
+            </span>,
+            {{ cliente.endereco.bairro }} -
+            {{ cliente.endereco.localidade }}/{{ cliente.endereco.uf }}
+            — CEP: {{ cliente.endereco.cep }}
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Ações -->
-  <div *ngIf="!carregando && solicitacao" class="mb-4 d-flex gap-2 flex-wrap">
-    <button class="btn btn-primary" (click)="iniciarManutencao()">
+  <div
+    *ngIf="!carregando && solicitacao"
+    class="my-4 d-grid d-sm-flex gap-2"
+  >
+    <button class="btn btn-primary w-100 w-sm-auto" (click)="iniciarManutencao()">
       <i class="bi bi-tools me-1"></i> Efetuar Manutenção
     </button>
-    <button class="btn btn-warning text-white" (click)="redirecionarManutencao()">
+    <button class="btn btn-warning text-white w-100 w-sm-auto" (click)="redirecionarManutencao()">
       <i class="bi bi-arrow-repeat me-1"></i> Redirecionar Manutenção
     </button>
   </div>
@@ -98,9 +118,9 @@
         ></textarea>
       </div>
 
-      <div class="text-end">
+      <div class="d-grid d-sm-flex justify-content-end">
         <button
-          class="btn btn-success"
+          class="btn btn-success w-100 w-sm-auto"
           (click)="concluirManutencao(descricaoManutencao.value, orientacoesCliente.value)"
         >
           <i class="bi bi-check2-circle me-1"></i> Concluir Manutenção
