@@ -16,3 +16,15 @@ export interface Usuario {
   criadoEm: string;
   atualizadoEm: string;
 }
+
+export interface UsuarioResponse {
+  id: number;
+  nome: string;
+  email: string;
+  telefone?: string;
+  perfil?: string;
+  ativo?: boolean;
+  dataNascimento?: string;
+  criadoEm?: string;
+  atualizadoEm?: string;
+}

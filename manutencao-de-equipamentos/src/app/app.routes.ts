@@ -16,6 +16,7 @@ import { EfetuarOrcamentoComponent } from './pages/efetuar-orcamento/efetuar-orc
 import { SolicitacoesListaComponent } from './pages/solicitacoes-lista/solicitacoes-lista.component';
 import { CategoriasEquipamentoComponent } from './pages/categorias-equipamento/categorias-equipamento.component';
 import { RelatorioCategoriasComponent } from './pages/relatorio-categorias/relatorio-categorias.component';
+import { MostrarOrcamentoComponent } from './mostrar-orcamento/mostrar-orcamento.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -34,4 +35,5 @@ export const routes: Routes = [
     { path: 'listaSolicitacoes', component: SolicitacoesListaComponent },
     { path: 'cadastrarcategoria', component: CategoriasEquipamentoComponent },
     { path: 'relatorio-categoria', component: RelatorioCategoriasComponent },
+    { path: 'mostrar-orcamento/:id', component: MostrarOrcamentoComponent },
 ];

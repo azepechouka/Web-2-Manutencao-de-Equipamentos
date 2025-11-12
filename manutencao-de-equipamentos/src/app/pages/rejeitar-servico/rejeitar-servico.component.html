@@ -32,7 +32,7 @@
         <div class="col-md-6" *ngIf="orcamento$ | async as orcamento">
           <h5 class="mb-3">Orçamento</h5>
           <div class="alert alert-info">
-            <h6 class="alert-heading">Valor: {{ orcamento.valorTotal | currency:'BRL' }}</h6>
+            <h6 class="alert-heading">Valor: {{ orcamento.valor | currency:'BRL' }}</h6>
             <p class="mb-0" *ngIf="orcamento.observacao">{{ orcamento.observacao }}</p>
           </div>
         </div>

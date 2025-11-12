@@ -73,7 +73,7 @@ export class VisualizarServicoComponent implements OnInit {
       next: (success) => {
         if (success) {
           const valor = this.orcamento
-            ? `R$ ${this.orcamento.valorTotal.toFixed(2)}`
+            ? `R$ ${this.orcamento.valor.toFixed(2)}`
             : 'R$ 0,00';
           alert(`Serviço Aprovado no Valor ${valor}`);
           this.router.navigate(['/home']);

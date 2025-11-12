@@ -11,7 +11,6 @@ export class CategoriaEquipamentoService {
   private readonly base = `${this.api}/api/categorias`;
 
   private readonly STORAGE_KEY = 'cat.equipamento';
-  private readonly _data$ = new BehaviorSubject<CategoriaEquipamento[]>(this.load());
 
   constructor(private http: HttpClient) {}
 

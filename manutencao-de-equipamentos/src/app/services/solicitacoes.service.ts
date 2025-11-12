@@ -58,7 +58,7 @@ export class SolicitacoesService {
 
   efetuarOrcamento(params: {
     solicitacaoId: number;
-    valorTotal: number;
+    valor: number;
     funcionarioId: number;
     observacao?: string;
     moeda?: string;

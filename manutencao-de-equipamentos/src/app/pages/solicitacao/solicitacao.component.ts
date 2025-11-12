@@ -107,24 +107,6 @@ export class SolicitacaoComponent implements OnInit {
     });
   }
 
-  // abaixo permanece igual ao seu código
-  private simularOrcamentoRecebido(solicitacaoId: number) {
-    const orcamento: Orcamento = {
-      id: Date.now(),
-      solicitacaoId,
-      valorTotal: 780.5,
-      moeda: 'BRL',
-      observacao: 'Substituição do conjunto de roletes e limpeza interna',
-      criadoEm: new Date().toISOString(),
-    };
-
-    this.orcamentoDisponivel = orcamento;
-    if (this.solicitacaoEnviada) {
-      this.solicitacaoEnviada.statusAtualId = 2;
-    }
-    this.mensagem = 'Orçamento recebido! Revise e aprove ou rejeite o serviço.';
-  }
-
   aprovarOrcamento() {
     if (!this.solicitacaoEnviada?.id) {
       this.mensagem = 'Solicitação inválida para aprovação.';

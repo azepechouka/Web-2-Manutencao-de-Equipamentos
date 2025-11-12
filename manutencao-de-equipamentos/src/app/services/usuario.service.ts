@@ -2,18 +2,8 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { AuthService } from './auth.service';
+import { UsuarioResponse } from '../models/usuario.model';
 
-export interface UsuarioResponse {
-  id: number;
-  nome: string;
-  email: string;
-  telefone?: string;
-  perfil?: string;
-  ativo?: boolean;
-  dataNascimento?: string;
-  criadoEm?: string;
-  atualizadoEm?: string;
-}
 
 @Injectable({ providedIn: 'root' })
 export class UsuarioService {

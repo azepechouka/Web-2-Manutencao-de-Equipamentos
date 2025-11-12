@@ -1,8 +1,7 @@
 export interface Orcamento {
   id: number;
   solicitacaoId: number;
-  valorTotal: number;
-  moeda: string;
+  valor: number;
   observacao?: string | null;
   criadoEm: string;
 }

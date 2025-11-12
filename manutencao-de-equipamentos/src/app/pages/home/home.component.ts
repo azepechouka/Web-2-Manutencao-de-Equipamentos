@@ -60,7 +60,7 @@ export class HomeComponent implements OnInit {
   }
 
   abrirOrcamento(id: number): void {
-    this.router.navigate(['/visualizar-servico', id]);
+    this.router.navigate(['/mostrar-orcamento', id]);
   }
 
   resgatarServico(id: number): void {
@@ -90,7 +90,7 @@ export class HomeComponent implements OnInit {
     switch (item.estadoAtual) {
       case 'Orçada':
         return {
-          texto: 'Aprovar / Rejeitar Serviço',
+          texto: 'Aprovar / Rejeitar Serviço', 
           tipo: 'btn-warning text-dark fw-semibold',
           acao: () => this.abrirOrcamento(item.id),
         };

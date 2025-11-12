@@ -1,1 +1,67 @@
-<p>mostrar-orcamento works!</p>
+<div class="container mt-4" *ngIf="!isLoading && solicitacao && orcamento; else loading">
+  <div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h3>Orçamento da Solicitação</h3>
+      <a routerLink="/home" class="btn btn-secondary">Voltar</a>
+    </div>
+
+    <div class="card-body">
+      <div class="row">
+        <!-- 📋 Dados da Solicitação -->
+        <div class="col-md-6">
+          <h5 class="mb-3">Detalhes da Solicitação</h5>
+          <table class="table table-borderless table-sm">
+            <tbody>
+              <tr><th>Cliente:</th><td>{{ solicitacao.clienteNome }}</td></tr>
+              <tr><th>Categoria:</th><td>{{ solicitacao.categoriaNome }}</td></tr>
+              <tr><th>Equipamento:</th><td>{{ solicitacao.descricaoEquipamento || '—' }}</td></tr>
+              <tr><th>Defeito:</th><td>{{ solicitacao.descricaoDefeito || '—' }}</td></tr>
+              <tr><th>Data de Abertura:</th><td>{{ solicitacao.criadoEm | date: 'dd/MM/yyyy, HH:mm' }}</td></tr>
+              <tr><th>Status Atual:</th><td>{{ solicitacao.estadoAtual }}</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 💰 Dados do Orçamento -->
+        <div class="col-md-6">
+          <h5 class="mb-3">Informações do Orçamento</h5>
+          <table class="table table-borderless table-sm">
+            <tbody>
+              <tr><th>Valor:</th><td><strong>R$ {{ orcamento.valor | number: '1.2-2' }}</strong></td></tr>
+              <tr><th>Observação:</th><td>{{ orcamento.observacao || '—' }}</td></tr>
+              <tr><th>Criado em:</th><td>{{ orcamento.criadoEm | date: 'dd/MM/yyyy, HH:mm' }}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 👤 Dados do Usuário -->
+      <hr />
+      <div *ngIf="usuario">
+        <h5 class="mb-3">Informações do Cliente</h5>
+        <table class="table table-borderless table-sm">
+          <tbody>
+            <tr><th>Nome:</th><td>{{ usuario.nome }}</td></tr>
+            <tr><th>Email:</th><td>{{ usuario.email }}</td></tr>
+            <tr><th>Telefone:</th><td>{{ usuario.telefone || '—' }}</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ⚙️ Ações -->
+      <div class="d-flex justify-content-center mt-4 gap-3">
+        <button class="btn btn-success" (click)="aceitarOrcamento()" [disabled]="isProcessing">
+          <span *ngIf="isProcessing" class="spinner-border spinner-border-sm me-2"></span>
+          Aceitar Orçamento
+        </button>
+        <button class="btn btn-danger" (click)="recusarOrcamento()" [disabled]="isProcessing">
+          Recusar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #loading>
+  <p class="text-center mt-5">Carregando informações do orçamento...</p>
+</ng-template>

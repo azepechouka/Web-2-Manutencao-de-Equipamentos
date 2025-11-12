@@ -4,8 +4,9 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SolicitacoesService } from '../../services/solicitacoes.service';
 import { AuthService } from '../../services/auth.service';
-import { UsuarioService, UsuarioResponse } from '../../services/usuario.service';
+import { UsuarioService } from '../../services/usuario.service';
 import { SolicitacaoResponse } from '../../models/solicitacao.model';
+import { UsuarioResponse } from '../../models/usuario.model';
 
 @Component({
   selector: 'app-efetuar-orcamento',
@@ -29,7 +30,7 @@ export class EfetuarOrcamentoComponent implements OnInit {
   carregando = signal(true);
 
   form = this.fb.group({
-    valorTotal: [null as number | null, [Validators.required, Validators.min(0.01)]],
+    valor: [null as number | null, [Validators.required, Validators.min(0.01)]],
     observacao: ['' as string],
   });
 
@@ -91,15 +92,14 @@ export class EfetuarOrcamentoComponent implements OnInit {
       return;
     }
 
-    const { valorTotal, observacao } = this.form.value;
+    const { valor, observacao } = this.form.value;
 
     this.svc
       .efetuarOrcamento({
         solicitacaoId: this.solicitacaoId,
-        valorTotal: Number(valorTotal),
+        valor: Number(valor),
         funcionarioId,
         observacao: observacao || undefined,
-        moeda: 'BRL',
       })
       .subscribe({
         next: (orc) => {

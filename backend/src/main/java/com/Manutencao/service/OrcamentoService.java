@@ -58,7 +58,7 @@ public class OrcamentoService {
         Orcamento orc = Orcamento.builder()
                 .solicitacao(solicitacao)
                 .funcionario(funcionario)
-                .valor(req.valorTotal().longValue())
+                .valor(req.valor().longValue())
                 .build();
 
         orcamentos.save(orc);
@@ -70,10 +70,8 @@ public class OrcamentoService {
                 orc.getId(),
                 solicitacao.getId(),
                 funcionario.getNome(),
-                BigDecimal.valueOf(orc.getValor()), 
-                "BRL",
-                estadoOrcada.getNome(),
-                LocalDateTime.ofInstant(orc.getCriadoEm(), ZoneId.systemDefault())
+                orc.getValor(),
+                orc.getCriadoEm()
         );
     }
 
@@ -92,15 +90,13 @@ public class OrcamentoService {
         return mapToResponse(orc);
     }
 
-    private OrcamentoResponse mapToResponse(Orcamento orc) {
+        private OrcamentoResponse mapToResponse(Orcamento orc) {
         return new OrcamentoResponse(
                 orc.getId(),
                 orc.getSolicitacao().getId(),
                 orc.getFuncionario().getNome(),
-                BigDecimal.valueOf(orc.getValor()),
-                "BRL",
-                orc.getSolicitacao().getEstadoAtual().getNome(),
-                LocalDateTime.ofInstant(orc.getCriadoEm(), ZoneId.systemDefault())
+                orc.getValor(),
+                orc.getCriadoEm()
         );
-    }
+        }
 }
