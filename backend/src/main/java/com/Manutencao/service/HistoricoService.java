@@ -1,6 +1,6 @@
 package com.Manutencao.services;
 
-import com.Manutencao.api.dto.HistoricoStatusResponse;
+import com.Manutencao.dto.HistoricoStatusResponse;
 import com.Manutencao.repositories.HistoricoSolicitacaoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

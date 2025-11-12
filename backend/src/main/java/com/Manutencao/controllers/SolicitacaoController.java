@@ -3,12 +3,13 @@ package com.Manutencao.controllers;
 import com.Manutencao.api.dto.SolicitacaoCreateRequest;
 import com.Manutencao.models.Solicitacao;
 import com.Manutencao.services.SolicitacaoService;
-import com.Manutencao.api.dto.HistoricoStatusResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.Manutencao.api.dto.SolicitacaoResponse;
+import com.Manutencao.dto.HistoricoStatusResponse;
+
 
 import java.util.List;
 
@@ -74,6 +75,11 @@ public class SolicitacaoController {
     @GetMapping("/em-aberto")
     public ResponseEntity<List<SolicitacaoResponse>> listarEmAberto() {
         return ResponseEntity.ok(solicitacaoService.listarEmAberto());
+    }
+    @PostMapping("/{id}/resgatar")
+    public ResponseEntity<Boolean> resgatarSolicitacao(@PathVariable Long id) {
+        boolean resultado = solicitacaoService.resgatarSolicitacao(id);
+        return ResponseEntity.ok(resultado);
     }
 
     public record MotivoRejeicao(String motivo) {}

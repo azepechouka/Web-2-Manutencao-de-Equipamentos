@@ -1,6 +1,6 @@
 package com.Manutencao.controllers;
 
-import com.Manutencao.api.dto.HistoricoStatusResponse;
+import com.Manutencao.dto.HistoricoStatusResponse;
 import com.Manutencao.services.HistoricoService;
 import org.springframework.web.bind.annotation.*;
 

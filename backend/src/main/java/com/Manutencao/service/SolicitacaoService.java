@@ -1,25 +1,17 @@
-// src/main/java/com/Manutencao/services/SolicitacaoService.java
 package com.Manutencao.services;
 
 import com.Manutencao.api.dto.SolicitacaoCreateRequest;
-import com.Manutencao.models.Categoria;
-import com.Manutencao.models.EstadoSolicitacao;
-import com.Manutencao.models.Solicitacao;
-import com.Manutencao.models.Usuario;
-import com.Manutencao.repositories.CategoriaRepository;
-import com.Manutencao.repositories.EstadoSolicitacaoRepository;
-import com.Manutencao.repositories.SolicitacaoRepository;
-import com.Manutencao.repositories.UsuarioRepository;
+import com.Manutencao.api.dto.SolicitacaoResponse;
+import com.Manutencao.models.*;
+import com.Manutencao.repositories.*;
 import jakarta.transaction.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.dao.DataIntegrityViolationException;
-import com.Manutencao.api.dto.SolicitacaoResponse;
 
-
+import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class SolicitacaoService {
@@ -28,17 +20,20 @@ public class SolicitacaoService {
     private final EstadoSolicitacaoRepository estadoRepo;
     private final UsuarioRepository usuarioRepo;
     private final CategoriaRepository categoriaRepo;
+    private final HistoricoSolicitacaoRepository historicoRepo; // ✅ adicionado
 
     public SolicitacaoService(
             SolicitacaoRepository repository,
             EstadoSolicitacaoRepository estadoRepo,
             UsuarioRepository usuarioRepo,
-            CategoriaRepository categoriaRepo
+            CategoriaRepository categoriaRepo,
+            HistoricoSolicitacaoRepository historicoRepo // ✅ adicionado no construtor
     ) {
         this.repository = repository;
         this.estadoRepo = estadoRepo;
         this.usuarioRepo = usuarioRepo;
         this.categoriaRepo = categoriaRepo;
+        this.historicoRepo = historicoRepo; // ✅ inicializado
     }
 
     public Solicitacao criar(SolicitacaoCreateRequest req) {
@@ -70,7 +65,7 @@ public class SolicitacaoService {
     @Transactional
     public SolicitacaoResponse buscarPorId(Long id) {
         Solicitacao s = repository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada"));
 
         s.getCliente().getId();
         s.getCategoria().getNome();
@@ -95,7 +90,6 @@ public class SolicitacaoService {
         return true;
     }
 
-
     public Solicitacao salvar(Solicitacao s) {
         return repository.save(s);
     }
@@ -109,8 +103,8 @@ public class SolicitacaoService {
             repository.deleteById(id);
         } catch (DataIntegrityViolationException ex) {
             throw new ResponseStatusException(
-                HttpStatus.CONFLICT,
-                "Solicitação vinculada a outros registros e não pode ser removida"
+                    HttpStatus.CONFLICT,
+                    "Solicitação vinculada a outros registros e não pode ser removida"
             );
         }
     }
@@ -123,4 +117,35 @@ public class SolicitacaoService {
                 .toList();
     }
 
+    @Transactional
+    public boolean resgatarSolicitacao(Long solicitacaoId) {
+        var solicitacaoOpt = repository.findById(solicitacaoId);
+        if (solicitacaoOpt.isEmpty()) return false;
+
+        var solicitacao = solicitacaoOpt.get();
+
+        if (!"Rejeitada".equalsIgnoreCase(solicitacao.getEstadoAtual().getNome())) {
+            return false;
+        }
+
+        var estadoAprovada = estadoRepo.findByNomeIgnoreCase("Aprovada")
+                .orElseThrow(() -> new IllegalStateException("Estado 'Aprovada' não encontrado no banco."));
+
+        var estadoAnterior = solicitacao.getEstadoAtual();
+
+        solicitacao.setEstadoAtual(estadoAprovada);
+        repository.save(solicitacao);
+
+        var historico = HistoricoSolicitacao.builder()
+                .solicitacao(solicitacao)
+                .deEstado(estadoAnterior)
+                .paraEstado(estadoAprovada)
+                .observacao("Solicitação resgatada manualmente e reativada em " + Instant.now())
+                .criadoEm(Instant.now())
+                .build();
+
+        historicoRepo.save(historico);
+
+        return true;
+    }
 }
