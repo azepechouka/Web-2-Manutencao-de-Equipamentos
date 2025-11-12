@@ -46,12 +46,14 @@
           <p><strong>E-mail:</strong> {{ c.email || '—' }}</p>
           <p><strong>Telefone:</strong> {{ c.telefone || '—' }}</p>
 
-          <div *ngIf="c.endereco">
+          <div *ngIf="c.enderecos?.length">
             <strong>Endereço:</strong>
-            {{ c.endereco.logradouro }}, {{ c.endereco.numero }}
-            <span *ngIf="c.endereco.complemento"> - {{ c.endereco.complemento }}</span>,
-            {{ c.endereco.bairro }} - {{ c.endereco.localidade }}/{{ c.endereco.uf }}
-            — CEP: {{ c.endereco.cep }}
+            {{ c.enderecos[0].logradouro }}, {{ c.enderecos[0].numero }}
+            <span *ngIf="c.enderecos[0].complemento">
+              - {{ c.enderecos[0].complemento }}
+            </span>,
+            {{ c.enderecos[0].bairro }} - {{ c.enderecos[0].cidade }}/{{ c.enderecos[0].uf }}
+            — CEP: {{ c.enderecos[0].cep }}
           </div>
         </div>
       </ng-container>

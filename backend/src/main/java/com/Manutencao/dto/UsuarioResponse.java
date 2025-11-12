@@ -2,6 +2,7 @@ package com.Manutencao.api.dto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record UsuarioResponse(
     Long id,
@@ -12,5 +13,6 @@ public record UsuarioResponse(
     boolean ativo,
     LocalDate dataNascimento,
     LocalDateTime criadoEm,
-    LocalDateTime atualizadoEm
+    LocalDateTime atualizadoEm,
+    List<EnderecoResponse> enderecos
 ) {}

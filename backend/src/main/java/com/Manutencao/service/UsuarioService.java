@@ -3,6 +3,7 @@ package com.Manutencao.services;
 import com.Manutencao.api.dto.FuncionarioRequest;
 import com.Manutencao.api.dto.FuncionarioResponse;
 import com.Manutencao.api.dto.UsuarioResponse;
+import com.Manutencao.api.dto.EnderecoResponse;
 import com.Manutencao.models.Perfil;
 import com.Manutencao.models.Usuario;
 import com.Manutencao.repositories.PerfilRepository;
@@ -86,16 +87,34 @@ public class UsuarioService {
         Usuario usuario = usuarios.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
 
+        List<EnderecoResponse> enderecos = usuario.getEnderecos()
+                .stream()
+                .map(e -> new EnderecoResponse(
+                        e.getId(),
+                        e.getCep(),
+                        e.getLogradouro(),
+                        e.getNumero(),
+                        e.getComplemento(),
+                        e.getBairro(),
+                        e.getCidade(),
+                        e.getUf(),
+                        e.getCriadoEm(),
+                        e.getAtualizadoEm()
+                ))
+                .toList();
+
         return new UsuarioResponse(
             usuario.getId(),
             usuario.getNome(),
             usuario.getEmail(),
-            usuario.getTelefone(), // <-- CORRETO
-            usuario.getPerfil() != null ? usuario.getPerfil().getNome() : null, // <-- CORRETO
+            usuario.getTelefone(),
+            usuario.getPerfil() != null ? usuario.getPerfil().getNome() : null,
             usuario.isAtivo(),
             usuario.getDataNascimento(),
             usuario.getCriadoEm(),
-            usuario.getAtualizadoEm()
+            usuario.getAtualizadoEm(),
+            enderecos
         );
     }
+
 }

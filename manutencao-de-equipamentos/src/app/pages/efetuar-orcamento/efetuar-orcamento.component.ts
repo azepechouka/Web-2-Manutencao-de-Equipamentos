@@ -69,6 +69,8 @@ export class EfetuarOrcamentoComponent implements OnInit {
             this.cliente.set(cli ?? null);
           });
         }
+        console.log('eeeeeeeeeeeeeeee')
+        console.log(this.cliente());
 
         this.carregando.set(false);
       },
