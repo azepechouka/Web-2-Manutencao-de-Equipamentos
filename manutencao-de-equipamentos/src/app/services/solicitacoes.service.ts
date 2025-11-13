@@ -47,11 +47,6 @@ export class SolicitacoesService {
     return this.http.post<Solicitacao>(this.SOLICITACOES, payload);
   }
 
-  getClienteById$(clienteId: number): Observable<any> {
-    if (!clienteId) return of(null);
-    return this.http.get<any>(`${this.CLIENTES}/${clienteId}`);
-  }
-
   getOrcamentoBySolicitacao(solicitacaoId: number): Observable<Orcamento> {
     return this.http.get<Orcamento>(`${this.ORCAMENTOS}/solicitacao/${solicitacaoId}`);
   }

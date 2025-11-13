@@ -35,6 +35,7 @@ export const routes: Routes = [
     { path: 'rejeitar-servico/:id', component: RejeitarServicoComponent, canActivate: [authGuard, clienteGuard] },
     { path: 'pagar-servico/:id', component: PagarServicoComponent, canActivate: [authGuard, clienteGuard] },
     { path: 'mostrar-orcamento/:id', component: MostrarOrcamentoComponent, canActivate: [authGuard, clienteGuard] },
+    { path: 'resgatar-servico/:id', component: ResgatarServicoComponent, canActivate: [authGuard, clienteGuard] },
 
     // Área do Funcionário
     { path: 'home-func', component: FuncHomeComponent, canActivate: [authGuard, funcionarioGuard] },
@@ -46,7 +47,4 @@ export const routes: Routes = [
     { path: 'relatorio-categoria', component: RelatorioCategoriasComponent, canActivate: [authGuard, funcionarioGuard] },
     { path: 'listaSolicitacoes', component: SolicitacoesListaComponent, canActivate: [authGuard, funcionarioGuard] },
     { path: 'cadastrarcategoria', component: CategoriasEquipamentoComponent, canActivate: [authGuard, funcionarioGuard] },
-
-    // Comum
-    { path: 'resgatar-servico/:id', component: ResgatarServicoComponent, canActivate: [authGuard, funcionarioGuard] }
 ];

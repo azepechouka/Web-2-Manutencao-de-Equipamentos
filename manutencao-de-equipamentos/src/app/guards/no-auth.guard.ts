@@ -8,11 +8,6 @@ export const noAuthGuard: CanActivateFn = () => {
 
   const autenticado = auth.isAuthenticated();
 
-  console.log('%c[NO-AUTH GUARD]', 'color: red;', {
-    autenticado,
-    usuario: auth.getUsuario()
-  });
-
   if (!autenticado) return true;
 
   const perfis = auth.getPerfis();

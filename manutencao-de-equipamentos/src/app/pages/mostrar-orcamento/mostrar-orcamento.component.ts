@@ -8,6 +8,7 @@ import { Orcamento } from '../../models/orcamento.model';
 import { UsuarioResponse } from '../../models/usuario.model';
 import { OrcamentosService } from '../../services/orcamento.service';
 import { AuthService } from '../../services/auth.service';
+import { HistoricoStatusDTO } from '../../models/historico-status.model';
 
 @Component({
   selector: 'app-mostrar-orcamento',
@@ -31,7 +32,7 @@ export class MostrarOrcamentoComponent implements OnInit {
   solicitacaoId!: number;
   isLoading = true;
   isProcessing = false;
-
+  historico: HistoricoStatusDTO[] = [];
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
@@ -48,6 +49,7 @@ export class MostrarOrcamentoComponent implements OnInit {
         this.solicitacao = s;
         this.carregarOrcamento();
         if (s.clienteId) this.carregarUsuario(s.clienteId);
+        this.carregarHistorico();
         this.isLoading = false;
       },
       error: () => {
@@ -55,6 +57,13 @@ export class MostrarOrcamentoComponent implements OnInit {
         alert('Erro ao carregar a solicitação.');
         this.router.navigate(['/home']);
       }
+    });
+  }
+
+  private carregarHistorico() {
+    this.solicitacoesService.getHistoricoBySolicitacao(this.solicitacaoId!).subscribe({
+      next: (h) => (this.historico = h),
+      error: () => console.warn('Nenhum histórico encontrado.')
     });
   }
 
