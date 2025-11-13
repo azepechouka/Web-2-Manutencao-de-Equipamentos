@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class SolicitacaoService {
@@ -71,7 +73,20 @@ public class SolicitacaoService {
         s.getCategoria().getNome();
         s.getEstadoAtual().getNome();
 
-        return SolicitacaoResponse.from(s);
+        String nomeFunc = null;
+
+        // Se a solicitação estiver no estado "Arrumada", buscamos  funcionário do histórico
+        if ("Arrumada".equalsIgnoreCase(s.getEstadoAtual().getNome())) {
+            var historicoArrumada = historicoRepo
+                .findTopBySolicitacaoIdAndParaEstadoNomeIgnoreCaseOrderByCriadoEmDesc(s.getId(), "Arrumada");
+
+
+            if (historicoArrumada != null && historicoArrumada.getUsuario() != null) {
+                nomeFunc = historicoArrumada.getUsuario().getNome();
+            }
+        }
+
+        return SolicitacaoResponse.from(s, nomeFunc);
     }
 
     public List<Solicitacao> buscarPorCliente(Long clienteId) {
@@ -150,44 +165,43 @@ public class SolicitacaoService {
     }
 
     @Transactional
-public SolicitacaoResponse efetuarManutencao(ManutencaoRequest req) {
-    Solicitacao solicitacao = repository.findByIdComFetch(req.solicitacaoId());
-    if (solicitacao == null) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada.");
+    public SolicitacaoResponse efetuarManutencao(ManutencaoRequest req) {
+        Solicitacao solicitacao = repository.findByIdComFetch(req.solicitacaoId());
+        if (solicitacao == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada.");
+        }
+
+        EstadoSolicitacao estadoArrumada = estadoRepo.findByNomeIgnoreCase("Arrumada")
+                .orElseThrow(() -> new IllegalStateException("Estado 'Arrumada' não configurado."));
+
+        Usuario funcionario = usuarioRepo.findById(req.funcionarioId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Funcionário não encontrado."));
+
+        EstadoSolicitacao estadoAnterior = solicitacao.getEstadoAtual();
+
+        solicitacao.setDescricaoManutencao(req.descricaoManutencao());
+        solicitacao.setOrientacoesCliente(req.orientacoesCliente());
+        solicitacao.setEstadoAtual(estadoArrumada);
+        repository.save(solicitacao);
+
+        HistoricoSolicitacao historico = HistoricoSolicitacao.builder()
+                .solicitacao(solicitacao)
+                .deEstado(estadoAnterior)
+                .paraEstado(estadoArrumada)
+                .usuario(funcionario)
+                .observacao(
+                        String.format(
+                                "🛠️ Manutenção concluída.\nDescrição: %s\nOrientações: %s",
+                                req.descricaoManutencao(), req.orientacoesCliente()
+                        )
+                )
+                .criadoEm(Instant.now())
+                .build();
+
+        historicoRepo.save(historico);
+
+        return SolicitacaoResponse.from(solicitacao);
     }
-
-    EstadoSolicitacao estadoArrumada = estadoRepo.findByNomeIgnoreCase("Arrumada")
-            .orElseThrow(() -> new IllegalStateException("Estado 'Arrumada' não configurado."));
-
-    Usuario funcionario = usuarioRepo.findById(req.funcionarioId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Funcionário não encontrado."));
-
-    EstadoSolicitacao estadoAnterior = solicitacao.getEstadoAtual();
-
-    // 🔧 agora salvamos as informações direto na entidade
-    solicitacao.setDescricaoManutencao(req.descricaoManutencao());
-    solicitacao.setOrientacoesCliente(req.orientacoesCliente());
-    solicitacao.setEstadoAtual(estadoArrumada);
-    repository.save(solicitacao);
-
-    HistoricoSolicitacao historico = HistoricoSolicitacao.builder()
-            .solicitacao(solicitacao)
-            .deEstado(estadoAnterior)
-            .paraEstado(estadoArrumada)
-            .usuario(funcionario)
-            .observacao(
-                    String.format(
-                            "🛠️ Manutenção concluída.\nDescrição: %s\nOrientações: %s",
-                            req.descricaoManutencao(), req.orientacoesCliente()
-                    )
-            )
-            .criadoEm(Instant.now())
-            .build();
-
-    historicoRepo.save(historico);
-
-    return SolicitacaoResponse.from(solicitacao);
-}
 
 
 
@@ -223,4 +237,42 @@ public SolicitacaoResponse efetuarManutencao(ManutencaoRequest req) {
         return SolicitacaoResponse.from(solicitacao);
     }
 
+
+    @Transactional
+    public boolean pagarSolicitacao(Long solicitacaoId) {
+        Solicitacao solicitacao = repository.findByIdComFetch(solicitacaoId);
+        if (solicitacao == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada.");
+        }
+
+        // Estado "Paga"
+        EstadoSolicitacao estadoPaga = estadoRepo.findByNomeIgnoreCase("Paga")
+                .orElseThrow(() -> new IllegalStateException("Estado 'Paga' não configurado."));
+
+        // Guarda o estado anterior
+        EstadoSolicitacao estadoAnterior = solicitacao.getEstadoAtual();
+
+        // Atualiza o estado
+        solicitacao.setEstadoAtual(estadoPaga);
+        repository.save(solicitacao);
+
+        Usuario cliente = solicitacao.getCliente();
+
+        String dataFormatada = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
+                .withLocale(new Locale("pt", "BR"))
+                .format(Instant.now().atZone(java.time.ZoneId.systemDefault()));
+
+        HistoricoSolicitacao historico = HistoricoSolicitacao.builder()
+                .solicitacao(solicitacao)
+                .deEstado(estadoAnterior)
+                .paraEstado(estadoPaga)
+                .usuario(cliente) 
+                .observacao(String.format(" Solicitação paga por %s em %s", cliente.getNome(), dataFormatada))
+                .criadoEm(Instant.now())
+                .build();
+
+        historicoRepo.save(historico);
+
+        return true;
+    }
 }

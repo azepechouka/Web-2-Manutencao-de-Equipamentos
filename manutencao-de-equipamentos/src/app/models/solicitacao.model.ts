@@ -34,6 +34,9 @@ export interface SolicitacaoResponse {
   descricaoDefeito: string;
   estadoAtual: string;
   criadoEm: string;
+  descricaoManutencao?: string;
+  orientacoesCliente?: string;
+  nomeFunc?: string;
 }
 
 export interface ManutencaoRequest {

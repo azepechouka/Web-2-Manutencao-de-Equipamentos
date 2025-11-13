@@ -100,4 +100,8 @@ export class SolicitacoesService {
     );
   }
 
+  pagar(solicitacaoId: number) {
+    return this.http.post<boolean>(`${this.SOLICITACOES}/${solicitacaoId}/pagar`, {});
+  }
+
 }

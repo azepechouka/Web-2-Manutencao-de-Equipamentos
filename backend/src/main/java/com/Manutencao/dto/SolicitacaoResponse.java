@@ -11,9 +11,16 @@ public record SolicitacaoResponse(
     String clienteNome,
     Long clienteId,
     String categoriaNome,
-    Instant criadoEm
+    Instant criadoEm,
+    String descricaoManutencao,
+    String orientacoesCliente,
+    String nomeFunc 
 ) {
     public static SolicitacaoResponse from(Solicitacao s) {
+        return from(s, null);
+    }
+
+    public static SolicitacaoResponse from(Solicitacao s, String nomeFunc) {
         return new SolicitacaoResponse(
             s.getId(),
             s.getDescricaoEquipamento(),
@@ -22,7 +29,10 @@ public record SolicitacaoResponse(
             s.getCliente().getNome(),
             s.getCliente().getId(),
             s.getCategoria().getNome(),
-            s.getCriadoEm()
+            s.getCriadoEm(),
+            s.getDescricaoManutencao(),
+            s.getOrientacoesCliente(),
+            nomeFunc
         );
     }
 }

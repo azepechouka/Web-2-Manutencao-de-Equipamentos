@@ -9,4 +9,9 @@ import java.util.List;
 public interface HistoricoSolicitacaoRepository extends JpaRepository<HistoricoSolicitacao, Long> {
 
     List<HistoricoSolicitacao> findBySolicitacaoIdOrderByCriadoEmAsc(Long solicitacaoId);
+
+    HistoricoSolicitacao findTopBySolicitacaoIdAndParaEstadoNomeIgnoreCaseOrderByCriadoEmDesc(
+        Long solicitacaoId,
+        String nomeEstado
+    );
 }

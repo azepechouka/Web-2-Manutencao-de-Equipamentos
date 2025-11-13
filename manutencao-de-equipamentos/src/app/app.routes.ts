@@ -18,6 +18,7 @@ import { CategoriasEquipamentoComponent } from './pages/categorias-equipamento/c
 import { RelatorioCategoriasComponent } from './pages/relatorio-categorias/relatorio-categorias.component';
 import { MostrarOrcamentoComponent } from './mostrar-orcamento/mostrar-orcamento.component';
 import { ResgatarServicoComponent } from './resgatar-servico/resgatar-servico.component';
+import { PagarServicoComponent } from './pagar-servico/pagar-servico.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -37,5 +38,6 @@ export const routes: Routes = [
     { path: 'cadastrarcategoria', component: CategoriasEquipamentoComponent },
     { path: 'relatorio-categoria', component: RelatorioCategoriasComponent },
     { path: 'mostrar-orcamento/:id', component: MostrarOrcamentoComponent },
-    {path: 'resgatar-servico/:id', component: ResgatarServicoComponent}
+    { path: 'resgatar-servico/:id', component: ResgatarServicoComponent},
+    { path: 'pagar-servico/:id', component: PagarServicoComponent}
 ];

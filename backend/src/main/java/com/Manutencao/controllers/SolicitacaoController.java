@@ -95,5 +95,11 @@ public class SolicitacaoController {
     }
 
 
+    @PostMapping("/{id}/pagar")
+    public ResponseEntity<Boolean> pagar(@PathVariable Long id) {
+        boolean ok = solicitacaoService.trocarEstado(id, "PAGA");
+        return ResponseEntity.ok(ok);
+    }
+
     public record MotivoRejeicao(String motivo) {}
 }
