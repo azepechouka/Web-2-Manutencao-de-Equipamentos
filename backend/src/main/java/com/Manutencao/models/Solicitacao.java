@@ -57,4 +57,9 @@ public class Solicitacao {
   @Column(name = "motivo_rejeicao", columnDefinition = "text")
   private String motivoRejeicao;
   
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "funcionario_direcionado_id", nullable = true,
+              foreignKey = @ForeignKey(name = "fk_solic_funcionario_direcionado"))
+  private Usuario funcionarioDirecionado;
 }

@@ -89,10 +89,19 @@ export class SolicitacoesService {
     return this.http.post(`${this.SOLICITACOES}/${req.solicitacaoId}/efetuar-manutencao`, req);
   }
 
-  redirecionarManutencao(solicitacaoId: number, payload: {
-    motivo: string;
-    destinoFuncionarioId: number;
-  }): Observable<boolean> {
+  redirecionarManutencao(solicitacaoId: number, motivo: string, destinoFuncionarioId: number): Observable<boolean> {
+    const usuarioId = this.auth.getUsuarioId();
+
+    if (!usuarioId) {
+      throw new Error('Usuário não autenticado');
+    }
+
+    const payload = {
+      motivo,
+      destinoFuncionarioId,
+      usuarioId  
+    };
+
     return this.http.post<boolean>(
       `${this.SOLICITACOES}/${solicitacaoId}/redirecionar`,
       payload

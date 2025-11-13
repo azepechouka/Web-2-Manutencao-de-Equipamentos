@@ -97,29 +97,34 @@ export class RedirecionarManutencaoComponent implements OnInit {
       return;
     }
 
-    // 🚀 Chama o backend
-    this.solicitacoes.redirecionarManutencao(this.solicitacaoId, {
-      motivo: this.motivoRedirecionamento.trim(),
-      destinoFuncionarioId: this.funcionarioDestinoId
-    }).subscribe({
-      next: () => {
-        const agora = new Date();
-        this.historicoRedirecionamento.push({
-          dataHora: `${agora.toLocaleDateString()} ${agora.toLocaleTimeString()}`,
-          origem,
-          destino: destino.nome,
-          motivo: this.motivoRedirecionamento.trim(),
-        });
-        this.funcionarioOrigem = destino.nome;
-        this.funcionarioDestinoId = undefined;
-        this.motivoRedirecionamento = '';
-        this.mensagem = '✅ Manutenção redirecionada com sucesso.';
-      },
-      error: () => {
-        this.mensagem = '❌ Erro ao redirecionar a manutenção.';
-      }
-    });
+    const usuarioId = this.auth.getUsuarioId(); 
+
+    if (!usuarioId) {
+      this.mensagem = 'Erro: usuário não autenticado.';
+      return;
+    }
+
+    this.solicitacoes.redirecionarManutencao(this.solicitacaoId, this.motivoRedirecionamento.trim(), this.funcionarioDestinoId)
+      .subscribe({
+        next: () => {
+          const agora = new Date();
+          this.historicoRedirecionamento.push({
+            dataHora: `${agora.toLocaleDateString()} ${agora.toLocaleTimeString()}`,
+            origem,
+            destino: destino.nome,
+            motivo: this.motivoRedirecionamento.trim(),
+          });
+          this.funcionarioOrigem = destino.nome;
+          this.funcionarioDestinoId = undefined;
+          this.motivoRedirecionamento = '';
+          this.mensagem = 'Manutenção redirecionada com sucesso.';
+        },
+        error: () => {
+          this.mensagem = 'Erro ao redirecionar a manutenção.';
+        }
+      });
   }
+
 
   voltar(): void {
     this.router.navigate(['/efetuar-manutencao', this.solicitacaoId]);

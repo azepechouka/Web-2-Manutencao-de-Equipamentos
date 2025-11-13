@@ -34,9 +34,19 @@ public class SolicitacaoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SolicitacaoResponse>> listarTodas() {
-        List<SolicitacaoResponse> lista = solicitacaoService.listarTodas()
-                .stream().map(SolicitacaoResponse::from).toList();
+    public ResponseEntity<List<SolicitacaoResponse>> listarTodas(@RequestParam(required = false) Long clienteId) {
+        List<SolicitacaoResponse> lista;
+        
+        if (clienteId != null) {
+            // Filtra as solicitações pelo clienteId
+            lista = solicitacaoService.buscarPorCliente(clienteId)
+                    .stream().map(SolicitacaoResponse::from).toList();
+        } else {
+            // Retorna todas as solicitações
+            lista = solicitacaoService.listarTodas()
+                    .stream().map(SolicitacaoResponse::from).toList();
+        }
+
         return ResponseEntity.ok(lista);
     }
 
@@ -108,14 +118,15 @@ public class SolicitacaoController {
             @PathVariable Long id,
             @RequestBody RedirecionamentoRequest req
     ) {
-        if (req == null || req.destinoFuncionarioId() == null) {
+        if (req == null || req.destinoFuncionarioId() == null || req.funcionarioRequisitanteId() == null) {
             return ResponseEntity.badRequest().build();
         }
 
         SolicitacaoResponse resp = solicitacaoService.redirecionarManutencao(
                 id,
                 req.destinoFuncionarioId(),
-                req.motivo()
+                req.motivo(),
+                req.funcionarioRequisitanteId() 
         );
 
         return ResponseEntity.ok(resp);

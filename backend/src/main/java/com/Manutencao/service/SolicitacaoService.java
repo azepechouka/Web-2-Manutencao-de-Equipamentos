@@ -274,51 +274,54 @@
 
 
         @Transactional
-        public SolicitacaoResponse redirecionarManutencao(Long solicitacaoId, Long destinoFuncionarioId, String motivo) {
-        //  Busca a solicitação
-        Solicitacao solicitacao = repository.findByIdComFetch(solicitacaoId);
-        if (solicitacao == null) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada");
+        public SolicitacaoResponse redirecionarManutencao(Long solicitacaoId, Long destinoFuncionarioId, String motivo, Long funcionarioRequisitanteId) {
+
+                Solicitacao solicitacao = repository.findByIdComFetch(solicitacaoId);
+                if (solicitacao == null) {
+                        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada");
+                }
+
+                // Estado "Redirecionada"
+                EstadoSolicitacao estadoRedirecionada = estadoRepo.findByNomeIgnoreCase("Redirecionada")
+                        .orElseThrow(() -> new IllegalStateException("Estado 'Redirecionada' não configurado."));
+
+                // Funcionário de destino
+                Usuario destino = usuarioRepo.findById(destinoFuncionarioId)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Funcionário destino não encontrado."));
+
+                // Funcionário requisitante (quem fez o redirecionamento)
+                Usuario requisitante = usuarioRepo.findById(funcionarioRequisitanteId)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Funcionário requisitante não encontrado."));
+
+                EstadoSolicitacao estadoAnterior = solicitacao.getEstadoAtual();
+
+                // Atualiza o estado e o funcionário direcionado
+                solicitacao.setEstadoAtual(estadoRedirecionada);
+                solicitacao.setFuncionarioDirecionado(destino);  // Setando o funcionário direcionado
+                repository.save(solicitacao);
+
+                // Formata data de registro
+                String dataFormatada = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
+                        .withLocale(new Locale("pt", "BR"))
+                        .format(java.time.LocalDateTime.now());
+
+                // Cria histórico detalhado
+                HistoricoSolicitacao hist = HistoricoSolicitacao.builder()
+                        .solicitacao(solicitacao)
+                        .deEstado(estadoAnterior)
+                        .paraEstado(estadoRedirecionada)
+                        .usuario(requisitante) 
+                        .observacao(String.format(
+                                "Redirecionado para %s em %s. Motivo: %s",
+                                destino.getNome(), dataFormatada, motivo != null ? motivo : "—"
+                        ))
+                        .criadoEm(Instant.now())
+                        .build();
+
+                historicoRepo.save(hist);
+
+                return SolicitacaoResponse.from(solicitacao);
         }
-
-        // Estado "Redirecionada"
-        EstadoSolicitacao estadoRedirecionada = estadoRepo.findByNomeIgnoreCase("Redirecionada")
-                .orElseThrow(() -> new IllegalStateException("Estado 'Redirecionada' não configurado."));
-
-        // Funcionário de destino
-        Usuario destino = usuarioRepo.findById(destinoFuncionarioId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Funcionário destino não encontrado."));
-
-        EstadoSolicitacao estadoAnterior = solicitacao.getEstadoAtual();
-
-        // Atualiza estado
-        solicitacao.setEstadoAtual(estadoRedirecionada);
-        repository.save(solicitacao);
-
-        // Formata data de registro
-        String dataFormatada = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
-                .withLocale(new Locale("pt", "BR"))
-                .format(java.time.LocalDateTime.now());
-
-        // Cria histórico detalhado
-        HistoricoSolicitacao hist = HistoricoSolicitacao.builder()
-                .solicitacao(solicitacao)
-                .deEstado(estadoAnterior)
-                .paraEstado(estadoRedirecionada)
-                .usuario(destino)
-                .observacao(String.format(
-                        "Redirecionado para %s em %s. Motivo: %s",
-                        destino.getNome(), dataFormatada, motivo != null ? motivo : "—"
-                ))
-                .criadoEm(Instant.now())
-                .build();
-
-        historicoRepo.save(hist);
-
-        return SolicitacaoResponse.from(solicitacao);
-        }
-
-
 
         @Transactional
         public boolean pagarSolicitacao(Long solicitacaoId) {
