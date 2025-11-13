@@ -96,7 +96,7 @@ export class SolicitacaoComponent implements OnInit {
     this.solicitacoesService.adicionarSolicitacao(payload as unknown as SolicitacaoCreateDto).subscribe({
       next: (res: Solicitacao) => {
         this.solicitacaoEnviada = res;
-        this.mensagem = 'Solicitação registrada com sucesso! Aguardando orçamento da empresa.';
+        this.mensagem = 'Solicitação registrada com sucesso! Status: Aberta.';
         this.loading = false;
       },
       error: (err) => {
@@ -107,17 +107,6 @@ export class SolicitacaoComponent implements OnInit {
     });
   }
 
-  aprovarOrcamento() {
-    if (!this.solicitacaoEnviada?.id) {
-      this.mensagem = 'Solicitação inválida para aprovação.';
-      return;
-    }
-    this.solicitacoesService
-      .aprovarOrcamento(this.solicitacaoEnviada.id)
-      .subscribe((ok) => {
-        this.mensagem = ok ? 'Serviço aprovado com sucesso.' : 'Não foi possível aprovar o serviço.';
-      });
-  }
 
   rejeitarOrcamento() {
     if (!this.solicitacaoEnviada?.id) {

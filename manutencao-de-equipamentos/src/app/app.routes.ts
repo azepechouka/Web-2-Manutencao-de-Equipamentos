@@ -1,6 +1,8 @@
-// src/app/app.routes.ts
-
 import { Routes } from '@angular/router';
+import { authGuard } from './guards/auth.guard';
+import { funcionarioGuard } from './guards/funcionario.guard';
+import { noAuthGuard } from './guards/no-auth.guard';
+import { clienteGuard } from './guards/cliente.guard';
 import { LoginComponent } from './pages/login/login.component';
 import { AutocadastroComponent } from './pages/autocadastro/autocadastro.component';
 import { HomeComponent } from './pages/home/home.component';
@@ -22,22 +24,29 @@ import { PagarServicoComponent } from './pagar-servico/pagar-servico.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'login', pathMatch: 'full' },
-    { path: 'login', component: LoginComponent },
-    { path: 'autocadastro', component: AutocadastroComponent },
-    { path: 'home', component: HomeComponent },
-    { path: 'solicitacao', component: SolicitacaoComponent },
-    { path: 'solicitacao/:id', component: VisualizarServicoComponent },
-    { path: 'rejeitar-servico/:id', component: RejeitarServicoComponent },
-    { path: 'efetuar-manutencao/:id', component: EfetuarManutencaoComponent },
-    { path: 'redirecionar-manutencao/:solicitacao', component: RedirecionarManutencaoComponent },
-    { path: 'crudFuncionario', component: CrudFuncionarioComponent },
-    { path: 'relatorioReceita', component: RelatorioReceitaComponent },
-    { path: 'home-func', component: FuncHomeComponent },
-    { path: 'efetuar-orcamento/:id', component: EfetuarOrcamentoComponent },
-    { path: 'listaSolicitacoes', component: SolicitacoesListaComponent },
-    { path: 'cadastrarcategoria', component: CategoriasEquipamentoComponent },
-    { path: 'relatorio-categoria', component: RelatorioCategoriasComponent },
-    { path: 'mostrar-orcamento/:id', component: MostrarOrcamentoComponent },
-    { path: 'resgatar-servico/:id', component: ResgatarServicoComponent},
-    { path: 'pagar-servico/:id', component: PagarServicoComponent}
+
+    { path: 'login', component: LoginComponent, canActivate: [noAuthGuard] },
+    { path: 'autocadastro', component: AutocadastroComponent, canActivate: [noAuthGuard] },
+
+    // Área do Cliente
+    { path: 'home', component: HomeComponent, canActivate: [authGuard, clienteGuard] },
+    { path: 'solicitacao', component: SolicitacaoComponent, canActivate: [authGuard, clienteGuard] },
+    { path: 'solicitacao/:id', component: VisualizarServicoComponent, canActivate: [authGuard, clienteGuard] },
+    { path: 'rejeitar-servico/:id', component: RejeitarServicoComponent, canActivate: [authGuard, clienteGuard] },
+    { path: 'pagar-servico/:id', component: PagarServicoComponent, canActivate: [authGuard, clienteGuard] },
+    { path: 'mostrar-orcamento/:id', component: MostrarOrcamentoComponent, canActivate: [authGuard, clienteGuard] },
+
+    // Área do Funcionário
+    { path: 'home-func', component: FuncHomeComponent, canActivate: [authGuard, funcionarioGuard] },
+    { path: 'efetuar-orcamento/:id', component: EfetuarOrcamentoComponent, canActivate: [authGuard, funcionarioGuard] },
+    { path: 'efetuar-manutencao/:id', component: EfetuarManutencaoComponent, canActivate: [authGuard, funcionarioGuard] },
+    { path: 'redirecionar-manutencao/:solicitacao', component: RedirecionarManutencaoComponent, canActivate: [authGuard, funcionarioGuard] },
+    { path: 'crudFuncionario', component: CrudFuncionarioComponent, canActivate: [authGuard, funcionarioGuard] },
+    { path: 'relatorioReceita', component: RelatorioReceitaComponent, canActivate: [authGuard, funcionarioGuard] },
+    { path: 'relatorio-categoria', component: RelatorioCategoriasComponent, canActivate: [authGuard, funcionarioGuard] },
+    { path: 'listaSolicitacoes', component: SolicitacoesListaComponent, canActivate: [authGuard, funcionarioGuard] },
+    { path: 'cadastrarcategoria', component: CategoriasEquipamentoComponent, canActivate: [authGuard, funcionarioGuard] },
+
+    // Comum
+    { path: 'resgatar-servico/:id', component: ResgatarServicoComponent, canActivate: [authGuard, funcionarioGuard] }
 ];

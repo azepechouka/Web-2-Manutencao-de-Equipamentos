@@ -5,6 +5,7 @@ import { SolicitacoesService } from '../../services/solicitacoes.service';
 import { SolicitacaoResponse } from '../../models/solicitacao.model';
 import { HistoricoStatusDTO } from '../../models/historico-status.model';
 import { Orcamento } from '../../models/orcamento.model';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-visualizar-servico',
@@ -17,6 +18,7 @@ export class VisualizarServicoComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private service = inject(SolicitacoesService);
   private router = inject(Router);
+  private readonly auth = inject(AuthService);
 
   solicitacao?: SolicitacaoResponse;
   historico: HistoricoStatusDTO[] = [];
@@ -65,28 +67,6 @@ export class VisualizarServicoComponent implements OnInit {
     });
   }
 
-  aprovarServico() {
-    if (!this.solicitacaoId) return;
-    this.isProcessing = true;
-
-    this.service.aprovarOrcamento(this.solicitacaoId).subscribe({
-      next: (success) => {
-        if (success) {
-          const valor = this.orcamento
-            ? `R$ ${this.orcamento.valor.toFixed(2)}`
-            : 'R$ 0,00';
-          alert(`Serviço Aprovado no Valor ${valor}`);
-          this.router.navigate(['/home']);
-        }
-        this.isProcessing = false;
-      },
-      error: () => {
-        this.isProcessing = false;
-        alert('Erro ao aprovar o serviço. Tente novamente.');
-      }
-    });
-  }
-
   rejeitarServico() {
     if (this.solicitacaoId) {
       this.router.navigate(['/rejeitar-servico', this.solicitacaoId]);
@@ -97,7 +77,6 @@ export class VisualizarServicoComponent implements OnInit {
     return s.estadoAtual === 'Orçada';
   }
 
-  // 🎨 Helper de cores para status textual
   getStatusCor(estado: string): string {
     const mapa: Record<string, string> = {
       'Aberta': '#6c757d',        // Cinza

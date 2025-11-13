@@ -83,18 +83,16 @@
           <!-- Sucesso da Solicitação -->
           <div *ngIf="solicitacaoEnviada" class="alert alert-info">
             <h5>Solicitação Enviada com Sucesso!</h5>
+
             <p><strong>ID da Solicitação:</strong> {{ solicitacaoEnviada.id }}</p>
-            <p><strong>Status:</strong> 
-              <span [ngClass]="{
-                'badge bg-warning': solicitacaoEnviada.statusAtualId === 1,
-                'badge bg-info': solicitacaoEnviada.statusAtualId === 2,
-                'badge bg-success': solicitacaoEnviada.statusAtualId === 3
-              }">
-                {{ solicitacaoEnviada.statusAtualId === 1 ? 'Aguardando Orçamento' : 
-                   solicitacaoEnviada.statusAtualId === 2 ? 'Orçada' : 'Aprovada' }}
+
+            <p><strong>Status:</strong>
+              <span class="badge bg-secondary">
+                Aberta
               </span>
             </p>
           </div>
+
 
           <!-- Orçamento Disponível -->
           <div *ngIf="orcamentoDisponivel" class="card mt-3">
@@ -111,8 +109,6 @@
               </div>
               
               <div class="d-flex gap-2 mt-3">
-                <button type="button" class="btn btn-success" (click)="aprovarOrcamento()">Aprovar Orçamento</button>
-                <button type="button" class="btn btn-danger" (click)="rejeitarOrcamento()">Rejeitar Orçamento</button>
               </div>
             </div>
           </div>

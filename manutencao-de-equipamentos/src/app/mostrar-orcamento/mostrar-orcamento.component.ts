@@ -7,6 +7,7 @@ import { UsuarioService } from '../services/usuario.service';
 import { Orcamento } from '../models/orcamento.model';
 import { UsuarioResponse } from '../models/usuario.model';
 import { OrcamentosService } from '../services/orcamento.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-mostrar-orcamento',
@@ -21,6 +22,7 @@ export class MostrarOrcamentoComponent implements OnInit {
   private readonly usuarioService = inject(UsuarioService);
   private readonly router = inject(Router);
   private readonly orcamentos = inject(OrcamentosService);
+  private readonly auth = inject(AuthService);
 
   solicitacao?: SolicitacaoResponse;
   orcamento?: Orcamento;
@@ -72,9 +74,16 @@ export class MostrarOrcamentoComponent implements OnInit {
 
   aceitarOrcamento(): void {
     if (!this.solicitacaoId) return;
+
+    const usuarioId = this.auth.getUsuarioId();
+    if (!usuarioId) {
+      alert('Usuário não identificado!');
+      return;
+    }
+
     this.isProcessing = true;
 
-    this.solicitacoesService.aprovarOrcamento(this.solicitacaoId).subscribe({
+    this.solicitacoesService.aprovarOrcamento(this.solicitacaoId, usuarioId).subscribe({
       next: (success) => {
         this.isProcessing = false;
         if (success) {

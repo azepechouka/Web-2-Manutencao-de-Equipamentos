@@ -98,7 +98,18 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!this.getUsuario()?.token;
+    const usuario = this.getUsuario();
+
+    const autenticado = !!usuario && (
+      !!usuario.token || !!usuario.id
+    );
+
+    console.log('[AuthService.isAuthenticated]', {
+      usuario,
+      autenticado
+    });
+
+    return autenticado;
   }
 
   getUsuario(): UsuarioLogado | null {

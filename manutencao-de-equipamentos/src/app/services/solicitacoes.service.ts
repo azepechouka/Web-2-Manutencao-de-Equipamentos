@@ -66,8 +66,11 @@ export class SolicitacoesService {
     return this.http.post<Orcamento>(this.ORCAMENTOS, params);
   }
   
-  aprovarOrcamento(solicitacaoId: number): Observable<boolean> {
-    return this.http.post<boolean>(`${this.SOLICITACOES}/${solicitacaoId}/aprovar`, {});
+  aprovarOrcamento(solicitacaoId: number, usuarioId: number): Observable<boolean> {
+    return this.http.post<boolean>(
+      `${this.SOLICITACOES}/${solicitacaoId}/aprovar`,
+      { usuarioId }
+    );
   }
 
   rejeitarOrcamento(solicitacaoId: number, motivo: string): Observable<boolean> {
