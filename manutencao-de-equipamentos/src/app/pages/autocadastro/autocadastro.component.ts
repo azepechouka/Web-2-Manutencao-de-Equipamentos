@@ -7,12 +7,20 @@ import { AuthService } from '../../services/auth.service';
 import { Endereco } from '../../models/endereco.model';
 import { UsuarioCreateDto } from '../../dtos/usuario-create.dto';
 
+import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
+
 const PERFIL_CLIENTE_ID = 1;
 
 @Component({
   selector: 'app-autocadastro',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, HttpClientModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    HttpClientModule,
+    NgxMaskDirective,
+  ],
+  providers: [provideNgxMask()],
   templateUrl: './autocadastro.component.html',
   styleUrls: ['./autocadastro.component.css']
 })
@@ -26,23 +34,59 @@ export class AutocadastroComponent {
     private authService: AuthService
   ) {
     this.cadastroForm = this.fb.group({
-      nome: ['', [Validators.required]],
-      email: ['', [Validators.required, Validators.email]],
-      cpf: [''],
-      telefone: [''],
-      dataNascimento: ['', [this.dataIsoValidator]],
-      perfilId: [PERFIL_CLIENTE_ID, [Validators.required]],
+      nome: ['', [Validators.required, Validators.minLength(3)]],
+
+      email: ['', [
+        Validators.required,
+        Validators.email
+      ]],
+
+      cpf: ['', [
+        Validators.required,
+        Validators.pattern(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/)
+      ]],
+
+      telefone: ['', [
+        Validators.required,
+        Validators.pattern(/^\(\d{2}\) \d{5}-\d{4}$/)
+      ]],
+
+      dataNascimento: ['', [
+        Validators.required,
+        this.dataIsoValidator
+      ]],
+
+      perfilId: [PERFIL_CLIENTE_ID, Validators.required],
+
       endereco: this.fb.group({
-        cep: ['', [Validators.required, Validators.pattern(/^\d{5}-?\d{3}$/)]],
-        logradouro: ['', [Validators.required]],
-        numero: ['', [Validators.required]],
+        cep: ['', [
+          Validators.required,
+          Validators.pattern(/^\d{5}-\d{3}$/)
+        ]],
+
+        logradouro: ['', Validators.required],
+
+        numero: ['', [
+          Validators.required,
+          Validators.pattern(/^\d+$/)
+        ]],
+
         complemento: [''],
-        bairro: ['', [Validators.required]],
-        cidade: ['', [Validators.required]],
-        uf: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(2)]],
+
+        bairro: ['', Validators.required],
+
+        cidade: ['', Validators.required],
+
+        uf: ['', [
+          Validators.required,
+          Validators.minLength(2),
+          Validators.maxLength(2),
+          Validators.pattern(/^[A-Za-z]{2}$/)
+        ]],
       }),
     });
 
+    // Sempre joga UF para maiúsculo
     this.cadastroForm.get('endereco.uf')?.valueChanges.subscribe(v => {
       if (typeof v === 'string' && v !== v.toUpperCase()) {
         this.cadastroForm.get('endereco.uf')?.setValue(v.toUpperCase(), { emitEvent: false });
@@ -50,12 +94,14 @@ export class AutocadastroComponent {
     });
   }
 
+  // Validador ISO da data
   private dataIsoValidator(ctrl: AbstractControl): ValidationErrors | null {
     const v: string = ctrl.value;
     if (!v) return null;
     return /^\d{4}-\d{2}-\d{2}$/.test(v) ? null : { dataInvalida: true };
   }
 
+  // Busca CEP via ViaCEP
   buscarCep() {
     const cep = this.cadastroForm.get('endereco.cep')?.value?.replace(/\D/g, '');
     if (cep?.length === 8) {
@@ -74,6 +120,15 @@ export class AutocadastroComponent {
         }
       });
     }
+  }
+
+  // Atalhos para facilitar o HTML
+  get f() {
+    return this.cadastroForm.controls;
+  }
+
+  get e() {
+    return (this.cadastroForm.get('endereco') as FormGroup).controls;
   }
 
   onSubmit() {

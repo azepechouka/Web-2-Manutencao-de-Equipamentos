@@ -1,58 +1,48 @@
-
-:host {
-  display: block;
-  background-color: #f0f2f5; 
-  padding-top: 3rem;
-  padding-bottom: 3rem;
-  min-height: 100vh;
-}
-
-
+/* Ajusta o card */
 .card {
-  border: none;
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
 }
 
-
-.card-header {
-  background-color: #0655cc; 
-  color: white;
-  border-top-left-radius: 0.75rem;
-  border-top-right-radius: 0.75rem;
-  padding: 1.25rem;
-  text-align: center;
-}
-
-.card-header h3 {
-  margin: 0;
-  font-weight: 300;
-}
-
-
+/* Padroniza labels */
 .form-label {
-  font-weight: 500;
-  color: #495057;
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: block;
 }
 
+/* Uniformiza inputs */
 .form-control {
-  border-radius: 0.5rem;
-  padding: 0.75rem 1rem;
+  height: 44px;
+  border-radius: 8px;
+  font-size: 15px;
 }
 
-.form-control:focus {
-  border-color: #86b7fe;
-  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+/* Espaçamento consistente entre colunas */
+.row .col-md-3,
+.row .col-md-4,
+.row .col-md-5,
+.row .col-md-6,
+.row .col-md-8 {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
 
-/* Estilo para o botão de cadastro */
-.btn-primary {
-  padding: 0.75rem;
-  font-size: 1.1rem;
-  border-radius: 0.5rem;
-  transition: background-color 0.2s ease-in-out;
+/* Ajusta seção Endereço */
+h5 {
+  margin-top: 10px;
+  font-weight: 700;
 }
 
-.btn-primary:hover {
-  background-color: #0b5ed7;
+/* Ajusta botão */
+button.btn-primary {
+  height: 50px;
+  border-radius: 10px;
+  font-size: 18px;
+}
+
+/* Alinha a divisão da página */
+.container {
+  max-width: 1000px;
 }
