@@ -5,9 +5,9 @@ import {
   AbstractControl, ValidationErrors, ValidatorFn, FormGroup
 } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { FuncionariosService } from '../services/funcionarios.service';
-import { AuthService } from '../services/auth.service';
-import { Usuario } from '../models/usuario.model';
+import { FuncionariosService } from '../../services/funcionarios.service';
+import { AuthService } from '../../services/auth.service';
+import { Usuario } from '../../models/usuario.model';
 
 const passwordMatchValidator: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
   const senha = group.get('senha')?.value;

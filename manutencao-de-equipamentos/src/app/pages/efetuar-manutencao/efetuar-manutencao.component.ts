@@ -1,9 +1,9 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { SolicitacoesService } from '../services/solicitacoes.service';
-import { AuthService } from '../services/auth.service';
-import { SolicitacaoResponse, ManutencaoRequest } from '../models/solicitacao.model';
+import { SolicitacoesService } from '../../services/solicitacoes.service';
+import { AuthService } from '../../services/auth.service';
+import { SolicitacaoResponse, ManutencaoRequest } from '../../models/solicitacao.model';
 
 @Component({
   selector: 'app-efetuar-manutencao',

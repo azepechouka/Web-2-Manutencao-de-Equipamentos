@@ -2,11 +2,11 @@ import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SolicitacoesService } from '../services/solicitacoes.service';
-import { FuncionariosService } from '../services/funcionarios.service';
-import { AuthService } from '../services/auth.service';
-import { SolicitacaoResponse } from '../models/solicitacao.model';
-import { Usuario } from '../models/usuario.model';
+import { SolicitacoesService } from '../../services/solicitacoes.service';
+import { FuncionariosService } from '../../services/funcionarios.service';
+import { AuthService } from '../../services/auth.service';
+import { SolicitacaoResponse } from '../../models/solicitacao.model';
+import { Usuario } from '../../models/usuario.model';
 
 type RedirHist = { dataHora: string; origem: string; destino: string; motivo?: string };
 

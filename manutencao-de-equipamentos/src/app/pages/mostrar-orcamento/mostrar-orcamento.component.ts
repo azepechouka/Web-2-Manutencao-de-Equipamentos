@@ -1,13 +1,13 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { SolicitacoesService } from '../services/solicitacoes.service';
-import { SolicitacaoResponse } from '../models/solicitacao.model';
-import { UsuarioService } from '../services/usuario.service';
-import { Orcamento } from '../models/orcamento.model';
-import { UsuarioResponse } from '../models/usuario.model';
-import { OrcamentosService } from '../services/orcamento.service';
-import { AuthService } from '../services/auth.service';
+import { SolicitacoesService } from '../../services/solicitacoes.service';
+import { SolicitacaoResponse } from '../../models/solicitacao.model';
+import { UsuarioService } from '../../services/usuario.service';
+import { Orcamento } from '../../models/orcamento.model';
+import { UsuarioResponse } from '../../models/usuario.model';
+import { OrcamentosService } from '../../services/orcamento.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-mostrar-orcamento',

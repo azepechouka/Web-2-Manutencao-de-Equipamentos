@@ -1,23 +1,72 @@
-<div class="card-pagamento">
-  <h2>Confirmar Pagamento</h2>
-  <hr>
+<div class="container py-4 text-center">
+  <h2 class="fw-bold mb-4">Pagamento do Serviço</h2>
 
-  <div class="detalhes-solicitacao">
-    <h4>Resumo do Serviço</h4>
-    <p><strong>Protocolo:</strong> {{ solicitacao.protocolo }}</p>
-    <p><strong>Equipamento:</strong> {{ solicitacao.equipamento }}</p>
-    <p><strong>Defeito Reportado:</strong> {{ solicitacao.defeito }}</p>
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="text-muted">
+    <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem"></div>
+    <p>Carregando dados da solicitação...</p>
   </div>
 
-  <div class="valor-pagar">
-    <p class="valor-pagar-label">Valor total a pagar</p>
-    <p class="valor-destaque">{{ solicitacao.valor | currency:'BRL' }}</p>
-  </div>
+  <!-- Erro -->
+  <div *ngIf="erro" class="alert alert-danger">{{ erro }}</div>
 
-  <button class="btn btn-primary btn-confirmar-pagamento" (click)="confirmarPagamento()">
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-lock-fill" viewBox="0 0 16 16">
-      <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2m3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2"/>
-    </svg>
-    Pagar com Segurança
-  </button>
+  <!-- Dados da Solicitação -->
+  <div *ngIf="!isLoading && solicitacao" class="card mx-auto shadow-sm border-0" style="max-width: 650px;">
+    <div class="card-header bg-light fw-semibold fs-5">
+      Detalhes do Serviço
+    </div>
+
+    <div class="card-body text-start px-4">
+      <div class="mb-3">
+        <p class="mb-1"><strong>Cliente:</strong> {{ solicitacao.clienteNome }}</p>
+        <p class="mb-1"><strong>Categoria:</strong> {{ solicitacao.categoriaNome }}</p>
+        <p class="mb-1"><strong>Equipamento:</strong> {{ solicitacao.descricaoEquipamento }}</p>
+      </div>
+
+      <hr />
+
+      <div class="mb-3">
+        <p class="mb-1"><strong>Descrição do Defeito:</strong></p>
+        <p class="text-muted">{{ solicitacao.descricaoDefeito }}</p>
+      </div>
+
+      <div class="mb-3">
+        <p class="mb-1"><strong>Descrição da Manutenção:</strong></p>
+        <p class="text-muted">{{ solicitacao.descricaoManutencao }}</p>
+      </div>
+
+      <div class="mb-3">
+        <p class="mb-1"><strong>Orientações ao Cliente:</strong></p>
+        <p class="text-muted">{{ solicitacao.orientacoesCliente }}</p>
+      </div>
+
+      <div class="mb-3">
+        <p class="mb-1"><strong>Funcionário Responsável:</strong> {{ solicitacao.nomeFunc }}</p>
+      </div>
+
+      <div class="mb-3">
+        <p class="mb-1"><strong>Status Atual         :</strong>
+          <span class="badge bg-info text-dark px-3 py-2">
+            {{ solicitacao.estadoAtual }}
+          </span>
+        </p>
+      </div>
+
+      <div class="mb-3 text-muted small">
+        <i class="bi bi-calendar-event me-1"></i>
+        <strong>Data de Criação:</strong> {{ solicitacao.criadoEm | date: 'dd/MM/yyyy, HH:mm' }}
+      </div>
+
+      <div class="d-flex justify-content-center mt-4">
+        <button
+          class="btn btn-success px-5 py-2 fw-semibold"
+          (click)="pagarServico()"
+          [disabled]="isProcessing"
+        >
+          <span *ngIf="isProcessing" class="spinner-border spinner-border-sm me-2"></span>
+           Pagar Serviço
+        </button>
+      </div>
+    </div>
+  </div>
 </div>

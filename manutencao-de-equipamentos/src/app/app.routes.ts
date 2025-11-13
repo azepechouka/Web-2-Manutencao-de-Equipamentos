@@ -7,9 +7,9 @@ import { LoginComponent } from './pages/login/login.component';
 import { AutocadastroComponent } from './pages/autocadastro/autocadastro.component';
 import { HomeComponent } from './pages/home/home.component';
 import { SolicitacaoComponent } from './pages/solicitacao/solicitacao.component';
-import { EfetuarManutencaoComponent } from './efetuar-manutencao/efetuar-manutencao.component';
-import { RedirecionarManutencaoComponent } from './redirecionar-manutencao/redirecionar-manutencao.component';
-import { CrudFuncionarioComponent } from './crud-funcionario/crud-funcionario.component';
+import { EfetuarManutencaoComponent } from './pages/efetuar-manutencao/efetuar-manutencao.component';
+import { RedirecionarManutencaoComponent } from './pages/redirecionar-manutencao/redirecionar-manutencao.component';
+import { CrudFuncionarioComponent } from './pages/crud-funcionario/crud-funcionario.component';
 import { VisualizarServicoComponent } from './pages/visualizar-servico/visualizar-servico.component';
 import { RejeitarServicoComponent } from './pages/rejeitar-servico/rejeitar-servico.component';
 import { RelatorioReceitaComponent } from './pages/relatorio-receita/relatorio-receita.component';
@@ -18,9 +18,9 @@ import { EfetuarOrcamentoComponent } from './pages/efetuar-orcamento/efetuar-orc
 import { SolicitacoesListaComponent } from './pages/solicitacoes-lista/solicitacoes-lista.component';
 import { CategoriasEquipamentoComponent } from './pages/categorias-equipamento/categorias-equipamento.component';
 import { RelatorioCategoriasComponent } from './pages/relatorio-categorias/relatorio-categorias.component';
-import { MostrarOrcamentoComponent } from './mostrar-orcamento/mostrar-orcamento.component';
-import { ResgatarServicoComponent } from './resgatar-servico/resgatar-servico.component';
-import { PagarServicoComponent } from './pagar-servico/pagar-servico.component';
+import { MostrarOrcamentoComponent } from './pages/mostrar-orcamento/mostrar-orcamento.component';
+import { ResgatarServicoComponent } from './pages/resgatar-servico/resgatar-servico.component';
+import { PagarServicoComponent } from './pages/pagar-servico/pagar-servico.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: 'login', pathMatch: 'full' },
