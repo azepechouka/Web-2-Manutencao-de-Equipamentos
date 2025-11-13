@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import com.Manutencao.api.dto.SolicitacaoResponse;
 import com.Manutencao.dto.HistoricoStatusResponse;
 import com.Manutencao.api.dto.ManutencaoRequest;
-
+import com.Manutencao.api.dto.RedirecionamentoRequest;
 
 import java.util.List;
 
@@ -101,5 +101,31 @@ public class SolicitacaoController {
         return ResponseEntity.ok(ok);
     }
 
+    @PostMapping("/{id}/redirecionar")
+    public ResponseEntity<SolicitacaoResponse> redirecionarManutencao(
+            @PathVariable Long id,
+            @RequestBody RedirecionamentoRequest req
+    ) {
+        if (req == null || req.destinoFuncionarioId() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        SolicitacaoResponse resp = solicitacaoService.redirecionarManutencao(
+                id,
+                req.destinoFuncionarioId(),
+                req.motivo()
+        );
+
+        return ResponseEntity.ok(resp);
+    }
+
+    @PostMapping("/{id}/finalizar")
+    public ResponseEntity<Boolean> finalizar(@PathVariable Long id) {
+        boolean ok = solicitacaoService.trocarEstado(id, "FINALIZADA");
+        return ResponseEntity.ok(ok);
+    }
+
+
+    // DTO interno para rejeição
     public record MotivoRejeicao(String motivo) {}
 }

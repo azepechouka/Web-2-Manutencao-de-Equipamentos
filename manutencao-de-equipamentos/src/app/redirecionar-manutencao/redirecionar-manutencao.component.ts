@@ -1,11 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SolicitacoesService } from '../services/solicitacoes.service';
-import { Solicitacao,SolicitacaoResponse } from '../models/solicitacao.model';
+import { FuncionariosService } from '../services/funcionarios.service';
+import { AuthService } from '../services/auth.service';
+import { SolicitacaoResponse } from '../models/solicitacao.model';
+import { Usuario } from '../models/usuario.model';
 
-type RedirHist = { dataHora: string; origem: string; destino: string };
+type RedirHist = { dataHora: string; origem: string; destino: string; motivo?: string };
 
 @Component({
   selector: 'app-redirecionar-manutencao',
@@ -15,24 +18,25 @@ type RedirHist = { dataHora: string; origem: string; destino: string };
   styleUrls: ['./redirecionar-manutencao.component.css']
 })
 export class RedirecionarManutencaoComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly solicitacoes = inject(SolicitacoesService);
+  private readonly funcionariosSvc = inject(FuncionariosService);
+  private readonly auth = inject(AuthService);
+
   solicitacaoId!: number;
   solicitacao?: SolicitacaoResponse;
   cliente: any = null;
 
-  funcionarioOrigem = 'Hermione Granger';
-  funcionarios = ['Hermione Granger', 'Harry Potter', 'Ronald Weasley'];
-  funcionarioDestino = '';
+  funcionarios: Usuario[] = [];
+  funcionarioDestinoId?: number;
+  funcionarioOrigem = '';
 
+  motivoRedirecionamento = '';
   mensagem = '';
   historicoRedirecionamento: RedirHist[] = [];
   loading = false;
   error: string | null = null;
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private svc: SolicitacoesService
-  ) {}
 
   ngOnInit(): void {
     const raw = this.route.snapshot.paramMap.get('solicitacao');
@@ -43,20 +47,15 @@ export class RedirecionarManutencaoComponent implements OnInit {
     }
     this.solicitacaoId = id;
     this.carregarSolicitacao();
+    this.carregarFuncionarios();
   }
 
   private carregarSolicitacao(): void {
     this.loading = true;
-    this.svc.getById(this.solicitacaoId).subscribe({
+    this.solicitacoes.getById(this.solicitacaoId).subscribe({
       next: (det: SolicitacaoResponse) => {
         this.solicitacao = det;
         this.loading = false;
-        if (det.clienteId) {
-          this.svc.getClienteById$(det.clienteId).subscribe({
-            next: (cli) => (this.cliente = cli),
-            error: () => (this.cliente = null)
-          });
-        }
       },
       error: () => {
         this.error = 'Falha ao carregar os dados da solicitação.';
@@ -65,30 +64,61 @@ export class RedirecionarManutencaoComponent implements OnInit {
     });
   }
 
+  private carregarFuncionarios(): void {
+    const usuarioLogadoId = this.auth.getUsuarioId();
+    this.funcionariosSvc.list$().subscribe({
+      next: (lista) => {
+        // 🔥 Remove o usuário logado da lista
+        this.funcionarios = lista.filter(f => f.id !== usuarioLogadoId);
+      },
+      error: () => (this.error = 'Falha ao carregar lista de funcionários.')
+    });
+  }
+
   redirecionarManutencao(): void {
     this.mensagem = '';
     this.error = null;
 
-    if (!this.funcionarioDestino) {
+    if (!this.funcionarioDestinoId) {
       this.mensagem = 'Por favor, selecione um funcionário para redirecionar a manutenção.';
       return;
     }
-    if (this.funcionarioDestino === this.funcionarioOrigem) {
+
+    if (!this.motivoRedirecionamento.trim()) {
+      this.mensagem = 'Por favor, informe o motivo do redirecionamento.';
+      return;
+    }
+
+    const destino = this.funcionarios.find(f => f.id === this.funcionarioDestinoId);
+    const origem = this.funcionarioOrigem || 'Funcionário atual';
+
+    if (!destino || destino.nome === origem) {
       this.mensagem = 'Erro: não é possível redirecionar para o mesmo funcionário.';
       return;
     }
 
-    const agora = new Date();
-    this.historicoRedirecionamento.push({
-      dataHora: `${agora.toLocaleDateString()} ${agora.toLocaleTimeString()}`,
-      origem: this.funcionarioOrigem,
-      destino: this.funcionarioDestino,
+    // 🚀 Chama o backend
+    this.solicitacoes.redirecionarManutencao(this.solicitacaoId, {
+      motivo: this.motivoRedirecionamento.trim(),
+      destinoFuncionarioId: this.funcionarioDestinoId
+    }).subscribe({
+      next: () => {
+        const agora = new Date();
+        this.historicoRedirecionamento.push({
+          dataHora: `${agora.toLocaleDateString()} ${agora.toLocaleTimeString()}`,
+          origem,
+          destino: destino.nome,
+          motivo: this.motivoRedirecionamento.trim(),
+        });
+        this.funcionarioOrigem = destino.nome;
+        this.funcionarioDestinoId = undefined;
+        this.motivoRedirecionamento = '';
+        this.mensagem = '✅ Manutenção redirecionada com sucesso.';
+      },
+      error: () => {
+        this.mensagem = '❌ Erro ao redirecionar a manutenção.';
+      }
     });
-
-    this.funcionarioOrigem = this.funcionarioDestino;
-    this.funcionarioDestino = '';
-
-    this.mensagem = 'Manutenção redirecionada com sucesso.';
   }
 
   voltar(): void {

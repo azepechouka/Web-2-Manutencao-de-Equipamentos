@@ -1,24 +1,68 @@
-<div class="container">
-  <h2>Redirecionar Manutenção</h2>
+<div class="container py-4">
+  <h2 class="fw-bold mb-3 text-center">Redirecionar Manutenção</h2>
 
+  <!-- Dados da solicitação -->
   <div class="detalhes-solicitacao mt-3" *ngIf="solicitacao; else carregandoOuErro">
-    <h4>Dados da Solicitação</h4>
+    <h4 class="fw-semibold mb-3">Dados da Solicitação</h4>
 
-    <p><strong>Nome do Cliente:</strong> {{ cliente?.nome || '—' }}</p>
-    <p><strong>Descrição do Equipamento:</strong> {{ solicitacao.descricaoEquipamento || '—' }}</p>
-    <p><strong>Defeito Reportado:</strong> {{ solicitacao.descricaoDefeito || '—' }}</p>
-    <p><strong>Data da Solicitação:</strong> {{ solicitacao.criadoEm | date: 'dd/MM/yyyy, HH:mm' }}</p>
+    <table class="table table-borderless table-sm">
+      <tbody>
+        <tr>
+          <th scope="row" style="width: 200px;">Cliente:</th>
+          <td>{{ solicitacao.clienteNome || '—' }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Categoria:</th>
+          <td>{{ solicitacao.categoriaNome || '—' }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Equipamento:</th>
+          <td>{{ solicitacao.descricaoEquipamento || '—' }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Defeito Reportado:</th>
+          <td>{{ solicitacao.descricaoDefeito || '—' }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Data da Solicitação:</th>
+          <td>{{ solicitacao.criadoEm | date: 'dd/MM/yyyy, HH:mm' }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Status Atual:</th>
+          <td>
+            <span class="badge bg-secondary px-3 py-2">{{ solicitacao.estadoAtual }}</span>
+          </td>
+        </tr>
+
+        <tr *ngIf="solicitacao.descricaoManutencao">
+          <th scope="row">Descrição da Manutenção:</th>
+          <td>{{ solicitacao.descricaoManutencao }}</td>
+        </tr>
+
+        <tr *ngIf="solicitacao.orientacoesCliente">
+          <th scope="row">Orientações ao Cliente:</th>
+          <td>{{ solicitacao.orientacoesCliente }}</td>
+        </tr>
+
+        <tr *ngIf="solicitacao.nomeFunc">
+          <th scope="row">Responsável Técnico:</th>
+          <td>{{ solicitacao.nomeFunc }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
+  <!-- Estado de carregamento ou erro -->
   <ng-template #carregandoOuErro>
-    <div *ngIf="loading" class="alert alert-secondary mt-3">
+    <div *ngIf="loading" class="alert alert-secondary mt-3 text-center">
       Carregando dados da solicitação...
     </div>
-    <div *ngIf="error" class="alert alert-danger mt-3">
+    <div *ngIf="error" class="alert alert-danger mt-3 text-center">
       {{ error }}
     </div>
   </ng-template>
 
+  <!-- Seleção do funcionário -->
   <div class="form-group mt-4">
     <label for="funcionario-destino" class="form-label fw-bold">
       Selecione o Funcionário Destino:
@@ -27,36 +71,56 @@
     <select
       id="funcionario-destino"
       class="form-select"
-      [(ngModel)]="funcionarioDestino"
-      name="funcionarioDestino"
+      [(ngModel)]="funcionarioDestinoId"
+      name="funcionarioDestinoId"
     >
-      <option [ngValue]="''" disabled selected>Selecione...</option>
-      <option *ngFor="let funcionario of funcionarios" [ngValue]="funcionario">
-        {{ funcionario }}
+      <option [ngValue]="undefined" disabled selected>Selecione...</option>
+      <option *ngFor="let funcionario of funcionarios" [ngValue]="funcionario.id">
+        {{ funcionario.nome }}
       </option>
     </select>
   </div>
 
+  <!-- Campo de motivo -->
+  <div class="form-group mt-3">
+    <label for="motivo" class="form-label fw-bold">
+      Motivo do Redirecionamento:
+    </label>
+    <textarea
+      id="motivo"
+      class="form-control"
+      [(ngModel)]="motivoRedirecionamento"
+      name="motivoRedirecionamento"
+      rows="3"
+      placeholder="Descreva o motivo do redirecionamento..."
+    ></textarea>
+  </div>
+
+  <!-- Botões -->
   <div class="acoes mt-4 d-flex gap-2">
     <button
-      class="btn btn-warning flex-fill"
+      class="btn btn-warning flex-fill text-white fw-semibold"
       (click)="redirecionarManutencao()"
-      [disabled]="!funcionarioDestino"
+      [disabled]="!funcionarioDestinoId || !motivoRedirecionamento.trim()"
     >
+      <i class="bi bi-arrow-repeat me-1"></i>
       Redirecionar Manutenção
     </button>
 
-    <button class="btn btn-primary flex-fill" (click)="voltar()">
-      Voltar para a Lista
+    <button class="btn btn-outline-primary flex-fill fw-semibold" (click)="voltar()">
+      <i class="bi bi-arrow-left me-1"></i>
+      Voltar
     </button>
   </div>
 
-  <div *ngIf="mensagem" class="mensagem mt-3 alert alert-info text-center">
+  <!-- Mensagem -->
+  <div *ngIf="mensagem" class="alert alert-info text-center mt-4">
     {{ mensagem }}
   </div>
 
-  <div *ngIf="historicoRedirecionamento?.length" class="mt-4">
-    <h4>Histórico de Redirecionamentos</h4>
+  <!-- Histórico -->
+  <div *ngIf="historicoRedirecionamento.length" class="mt-4">
+    <h4 class="fw-semibold">Histórico de Redirecionamentos</h4>
     <ul class="list-group">
       <li *ngFor="let historico of historicoRedirecionamento" class="list-group-item">
         <strong>{{ historico.dataHora }}</strong>

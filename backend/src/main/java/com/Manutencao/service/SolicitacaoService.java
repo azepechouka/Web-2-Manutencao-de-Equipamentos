@@ -207,28 +207,41 @@ public class SolicitacaoService {
 
     @Transactional
     public SolicitacaoResponse redirecionarManutencao(Long solicitacaoId, Long destinoFuncionarioId, String motivo) {
+        //  Busca a solicitação
         Solicitacao solicitacao = repository.findByIdComFetch(solicitacaoId);
         if (solicitacao == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada");
         }
 
+        // Estado "Redirecionada"
         EstadoSolicitacao estadoRedirecionada = estadoRepo.findByNomeIgnoreCase("Redirecionada")
                 .orElseThrow(() -> new IllegalStateException("Estado 'Redirecionada' não configurado."));
 
-        var destino = usuarioRepo.findById(destinoFuncionarioId)
-                .orElseThrow(() -> new IllegalArgumentException("Funcionário destino não encontrado: " + destinoFuncionarioId));
+        // Funcionário de destino
+        Usuario destino = usuarioRepo.findById(destinoFuncionarioId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Funcionário destino não encontrado."));
 
-        var estadoAnterior = solicitacao.getEstadoAtual();
+        EstadoSolicitacao estadoAnterior = solicitacao.getEstadoAtual();
 
+        // Atualiza estado
         solicitacao.setEstadoAtual(estadoRedirecionada);
         repository.save(solicitacao);
 
+        // Formata data de registro
+        String dataFormatada = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
+            .withLocale(new Locale("pt", "BR"))
+            .format(java.time.LocalDateTime.now());
+
+        // Cria histórico detalhado
         HistoricoSolicitacao hist = HistoricoSolicitacao.builder()
                 .solicitacao(solicitacao)
                 .deEstado(estadoAnterior)
                 .paraEstado(estadoRedirecionada)
                 .usuario(destino)
-                .observacao("Redirecionado para " + destino.getNome() + ". Motivo: " + motivo)
+                .observacao(String.format(
+                        "Redirecionado para %s em %s. Motivo: %s",
+                        destino.getNome(), dataFormatada, motivo != null ? motivo : "—"
+                ))
                 .criadoEm(Instant.now())
                 .build();
 
@@ -236,6 +249,7 @@ public class SolicitacaoService {
 
         return SolicitacaoResponse.from(solicitacao);
     }
+
 
 
     @Transactional

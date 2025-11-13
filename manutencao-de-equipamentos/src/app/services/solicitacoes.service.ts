@@ -104,4 +104,8 @@ export class SolicitacoesService {
     return this.http.post<boolean>(`${this.SOLICITACOES}/${solicitacaoId}/pagar`, {});
   }
 
+
+  finalizarSolicitacao(id: number) {
+    return this.http.post(`${this.SOLICITACOES}/${id}/finalizar`, {});
+  }
 }

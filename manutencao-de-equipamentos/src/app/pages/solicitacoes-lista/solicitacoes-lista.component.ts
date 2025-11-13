@@ -149,16 +149,30 @@ export class SolicitacoesListaComponent implements OnInit {
   finalizarSolicitacao(id: number): void {
     if (!confirm(`Tem certeza que deseja finalizar a solicitação #${id}?`)) return;
 
-    this.itens.update((atual) =>
-      atual.map((item) =>
-        item.id === id
-          ? { ...item, statusCodigo: 'FINALIZADA', statusNome: 'Finalizada' }
-          : item
-      )
-    );
+    this.carregando.set(true);
 
-    alert(`Solicitação #${id} finalizada com sucesso!`);
+    this.svc.finalizarSolicitacao(id).subscribe({
+      next: () => {
+        // Atualiza localmente a lista
+        this.itens.update((atual) =>
+          atual.map((item) =>
+            item.id === id
+              ? { ...item, statusCodigo: 'FINALIZADA', statusNome: 'Finalizada' }
+              : item
+          )
+        );
+
+        alert(`✅ Solicitação #${id} finalizada com sucesso!`);
+        this.carregando.set(false);
+      },
+      error: (err) => {
+        console.error('Erro ao finalizar solicitação:', err);
+        alert('❌ Erro ao finalizar solicitação. Tente novamente.');
+        this.carregando.set(false);
+      },
+    });
   }
+
 
   trackById = (_: number, i: ViewItem): number => i.id;
 }
