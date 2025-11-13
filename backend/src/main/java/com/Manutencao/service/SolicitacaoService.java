@@ -59,7 +59,7 @@ public class SolicitacaoService {
     }
 
     public List<Solicitacao> listarTodas() {
-        return repository.findAll();
+        return repository.findAllWithFetch();
     }
 
     @Transactional

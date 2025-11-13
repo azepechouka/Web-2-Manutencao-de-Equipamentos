@@ -41,5 +41,11 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
     """)
     List<Solicitacao> findByEstadoAtual_NomeIgnoreCase(@Param("nome") String nome);
 
-
+    @Query("""
+        SELECT s FROM Solicitacao s
+        JOIN FETCH s.cliente
+        JOIN FETCH s.categoria
+        JOIN FETCH s.estadoAtual
+    """)
+    List<Solicitacao> findAllWithFetch();
 }

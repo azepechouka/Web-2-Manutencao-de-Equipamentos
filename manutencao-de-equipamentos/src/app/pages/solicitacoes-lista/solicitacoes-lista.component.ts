@@ -3,7 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { SolicitacoesService } from '../../services/solicitacoes.service';
-import { Solicitacao } from '../../models/solicitacao.model';
+import { SolicitacaoResponse } from '../../models/solicitacao.model';
 
 type ViewItem = {
   id: number;
@@ -51,15 +51,15 @@ export class SolicitacoesListaComponent implements OnInit {
     this.carregando.set(true);
 
     this.svc.listTodas().subscribe({
-      next: (solicitacoes: Solicitacao[]) => {
-        // converte para ViewItem
+      next: (solicitacoes: SolicitacaoResponse[]) => {
+        // Converte DTO -> ViewItem
         const viewItems: ViewItem[] = solicitacoes.map((s) => ({
           id: s.id,
           criadoEm: s.criadoEm,
-          clienteNome: `Cliente #${s.clienteId}`,
+          clienteNome: s.clienteNome ?? `Cliente #${s.clienteId ?? '-'}`,
           equipamentoDesc: s.descricaoEquipamento ?? '',
-          statusCodigo: this.mapStatusCodigo(s.statusAtualId),
-          statusNome: this.mapStatusNome(s.statusAtualId),
+          statusCodigo: (s.estadoAtual || 'DESCONHECIDO').toUpperCase(),
+          statusNome: s.estadoAtual ?? 'Desconhecido',
         }));
 
         const filtrados = viewItems.filter((s) => this.matchesFiltro(s, tipo, ini, fim));
@@ -68,36 +68,11 @@ export class SolicitacoesListaComponent implements OnInit {
         this.itens.set(filtrados);
         this.carregando.set(false);
       },
-      error: () => this.carregando.set(false),
+      error: (err) => {
+        console.error('Erro ao buscar solicitações:', err);
+        this.carregando.set(false);
+      },
     });
-  }
-
-  private mapStatusCodigo(statusId: number): string {
-    const map: Record<number, string> = {
-      1: 'ABERTA',
-      2: 'ORCADA',
-      3: 'APROVADA',
-      4: 'REJEITADA',
-      5: 'REDIRECIONADA',
-      6: 'ARRUMADA',
-      7: 'PAGA',
-      8: 'FINALIZADA',
-    };
-    return map[statusId] ?? 'DESCONHECIDO';
-  }
-
-  private mapStatusNome(statusId: number): string {
-    const map: Record<number, string> = {
-      1: 'Aberta',
-      2: 'Orçada',
-      3: 'Aprovada',
-      4: 'Rejeitada',
-      5: 'Redirecionada',
-      6: 'Arrumada',
-      7: 'Paga',
-      8: 'Finalizada',
-    };
-    return map[statusId] ?? 'Desconhecido';
   }
 
   private matchesFiltro(s: ViewItem, tipo: FiltroTipo, ini: string | null, fim: string | null): boolean {
@@ -126,7 +101,7 @@ export class SolicitacoesListaComponent implements OnInit {
     const upper = code.toUpperCase();
     const colorMap: Record<string, string> = {
       'ABERTA': '#6c757d',
-      'ORCADA': '#795548',
+      'ORÇADA': '#795548',
       'REJEITADA': '#dc3545',
       'APROVADA': '#ffc107',
       'REDIRECIONADA': '#6f42c1',

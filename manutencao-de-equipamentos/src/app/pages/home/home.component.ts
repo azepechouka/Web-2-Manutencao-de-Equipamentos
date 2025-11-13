@@ -107,7 +107,7 @@ export class HomeComponent implements OnInit {
           acao: () => this.pagarServico(item.id),
         };
       case 'Aprovada':
-        return null; 
+        return null;
       default:
         return {
           texto: 'Visualizar Serviço',

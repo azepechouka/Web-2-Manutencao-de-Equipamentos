@@ -8,7 +8,7 @@
     <div class="card-body">
       <div class="row">
         <!-- Informações do Equipamento -->
-        <div class="col-md-7">
+        <div class="col-md-12">
           <h5 class="mb-3">Informações do Equipamento</h5>
           <table class="table table-borderless table-sm">
             <tbody>
@@ -54,40 +54,6 @@
               </tr>
             </tbody>
           </table>
-        </div>
-
-        <!-- Ações Disponíveis -->
-        <div class="col-md-5">
-          <h5 class="mb-3">Ações Disponíveis</h5>
-
-          <div *ngIf="podeAprovarRejeitar(s); else outrasAcoes" class="d-grid gap-2">
-            <button
-              class="btn btn-success"
-              (click)="aprovarServico()"
-              [disabled]="isProcessing"
-            >
-              <span *ngIf="isProcessing" class="spinner-border spinner-border-sm me-2"></span>
-              Aprovar Serviço
-            </button>
-            <button
-              class="btn btn-danger"
-              (click)="rejeitarServico()"
-              [disabled]="isProcessing"
-            >
-              Rejeitar Serviço
-            </button>
-          </div>
-
-          <ng-template #outrasAcoes>
-            <div class="d-grid gap-2">
-              <button class="btn btn-info" disabled>Resgatar Serviço</button>
-              <button class="btn btn-primary" disabled>Pagar Serviço</button>
-            </div>
-          </ng-template>
-
-          <p class="text-muted small mt-3">
-            * Os botões de ação serão habilitados de acordo com o status da solicitação.
-          </p>
         </div>
       </div>
 

@@ -105,7 +105,7 @@ export class EfetuarOrcamentoComponent implements OnInit {
         next: (orc) => {
           console.log('Orçamento registrado:', orc);
           alert('Orçamento registrado com sucesso!');
-          this.router.navigate(['/func-home']);
+          this.router.navigate(['/home-func']);
         },
         error: (err) => {
           console.error(err);

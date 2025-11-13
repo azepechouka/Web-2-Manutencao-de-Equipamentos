@@ -16,8 +16,8 @@ export class SolicitacoesService {
   private readonly ORCAMENTOS = `${this.API}/orcamento`;
   private readonly CLIENTES = `${this.API}/usuario`;
 
-  listTodas(): Observable<Solicitacao[]> {
-    return this.http.get<Solicitacao[]>(this.SOLICITACOES);
+  listTodas(): Observable<SolicitacaoResponse[]> {
+    return this.http.get<SolicitacaoResponse[]>(this.SOLICITACOES);
   }
 
   getById(id: number): Observable<SolicitacaoResponse> {
