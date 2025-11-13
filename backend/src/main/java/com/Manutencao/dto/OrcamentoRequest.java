@@ -5,5 +5,6 @@ import java.math.BigDecimal;
 public record OrcamentoRequest(
         Long solicitacaoId,
         BigDecimal valor,
-        Long funcionarioId
+        Long funcionarioId,
+        String observacao
 ) {}

@@ -3,6 +3,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SolicitacoesService } from '../services/solicitacoes.service';
 import { SolicitacaoResponse } from '../models/solicitacao.model';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-pagar-servico',
@@ -15,6 +16,7 @@ export class PagarServicoComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly solicitacoesService = inject(SolicitacoesService);
+  private readonly auth = inject(AuthService);
 
   solicitacao?: SolicitacaoResponse;
   solicitacaoId!: number;
@@ -48,9 +50,15 @@ export class PagarServicoComponent implements OnInit {
     if (!this.solicitacaoId) return;
     if (!confirm('Deseja realmente marcar esta solicitação como PAGA?')) return;
 
+    const usuarioId = this.auth.getUsuarioId();
+    if (!usuarioId) {
+      alert('Usuário não identificado!');
+      return;
+    }
+
     this.isProcessing = true;
 
-    this.solicitacoesService.pagar(this.solicitacaoId).subscribe({
+    this.solicitacoesService.pagar(this.solicitacaoId, usuarioId).subscribe({
       next: (success) => {
         this.isProcessing = false;
         if (success) {

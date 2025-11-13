@@ -65,6 +65,7 @@ export class SolicitacoesService {
   }): Observable<Orcamento> {
     return this.http.post<Orcamento>(this.ORCAMENTOS, params);
   }
+  
   aprovarOrcamento(solicitacaoId: number): Observable<boolean> {
     return this.http.post<boolean>(`${this.SOLICITACOES}/${solicitacaoId}/aprovar`, {});
   }
@@ -100,12 +101,17 @@ export class SolicitacoesService {
     );
   }
 
-  pagar(solicitacaoId: number) {
-    return this.http.post<boolean>(`${this.SOLICITACOES}/${solicitacaoId}/pagar`, {});
+  pagar(solicitacaoId: number, usuarioId: number) {
+    return this.http.post<boolean>(
+      `${this.SOLICITACOES}/${solicitacaoId}/pagar`,
+      { usuarioId }
+    );
   }
 
-
-  finalizarSolicitacao(id: number) {
-    return this.http.post(`${this.SOLICITACOES}/${id}/finalizar`, {});
+  finalizarSolicitacao(id: number, usuarioId: number) {
+    return this.http.post(
+      `${this.SOLICITACOES}/${id}/finalizar`,
+      { usuarioId }
+    );
   }
 }

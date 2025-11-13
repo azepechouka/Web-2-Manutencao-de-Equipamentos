@@ -93,15 +93,44 @@ public class SolicitacaoService {
         return repository.findByCliente_IdWithFetch(clienteId);
     }
 
-    public boolean trocarEstado(Long solicitacaoId, String novoEstadoNome) {
-        var estado = estadoRepo.findByNomeIgnoreCase(novoEstadoNome);
-        if (estado.isEmpty()) return false;
+    @Transactional
+    public boolean trocarEstado(Long solicitacaoId, String novoEstadoNome, Long usuarioId) {
+       
+        var estadoNovo = estadoRepo.findByNomeIgnoreCase(novoEstadoNome);
+        if (estadoNovo.isEmpty()) return false;
 
+        // Buscar a solicitação 
         Solicitacao solicitacao = repository.findByIdComFetch(solicitacaoId);
         if (solicitacao == null) return false;
 
-        solicitacao.setEstadoAtual(estado.get());
+        // Buscar o usuário 
+        Usuario usuario = usuarioRepo.findById(usuarioId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
+
+        EstadoSolicitacao estadoAnterior = solicitacao.getEstadoAtual();
+
+        // Atualizar estado
+        solicitacao.setEstadoAtual(estadoNovo.get());
         repository.save(solicitacao);
+
+        // Criar histórico
+        HistoricoSolicitacao historico = HistoricoSolicitacao.builder()
+                .solicitacao(solicitacao)
+                .deEstado(estadoAnterior)
+                .paraEstado(estadoNovo.get())
+                .usuario(usuario)
+                .observacao(
+                        String.format(
+                                "🔄 Estado alterado manualmente: %s → %s",
+                                estadoAnterior != null ? estadoAnterior.getNome() : "Nenhum",
+                                estadoNovo.get().getNome()
+                        )
+                )
+                .criadoEm(Instant.now())
+                .build();
+
+        historicoRepo.save(historico);
+
         return true;
     }
 

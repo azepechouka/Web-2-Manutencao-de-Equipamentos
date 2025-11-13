@@ -4,7 +4,6 @@ import com.Manutencao.api.dto.SolicitacaoCreateRequest;
 import com.Manutencao.models.Solicitacao;
 import com.Manutencao.services.SolicitacaoService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.Manutencao.api.dto.SolicitacaoResponse;
@@ -25,6 +24,9 @@ public class SolicitacaoController {
         this.solicitacaoService = solicitacaoService;
     }
 
+    public record TrocaEstadoRequest(Long usuarioId) {}
+    public record MotivoRejeicao(String motivo, Long usuarioId) {}
+
     @PostMapping
     public ResponseEntity<SolicitacaoResponse> criar(@RequestBody @Valid SolicitacaoCreateRequest req) {
         Solicitacao s = solicitacaoService.criar(req);
@@ -34,10 +36,9 @@ public class SolicitacaoController {
     @GetMapping
     public ResponseEntity<List<SolicitacaoResponse>> listarTodas() {
         List<SolicitacaoResponse> lista = solicitacaoService.listarTodas()
-            .stream().map(SolicitacaoResponse::from).toList();
+                .stream().map(SolicitacaoResponse::from).toList();
         return ResponseEntity.ok(lista);
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<SolicitacaoResponse> buscarPorId(@PathVariable Long id) {
@@ -48,22 +49,22 @@ public class SolicitacaoController {
     @GetMapping("/cliente/{clienteId}")
     public ResponseEntity<List<SolicitacaoResponse>> buscarPorCliente(@PathVariable Long clienteId) {
         var lista = solicitacaoService.buscarPorCliente(clienteId)
-            .stream()
-            .map(SolicitacaoResponse::from)
-            .toList();
+                .stream()
+                .map(SolicitacaoResponse::from)
+                .toList();
 
         return ResponseEntity.ok(lista);
     }
 
     @PostMapping("/{id}/aprovar")
-    public ResponseEntity<Boolean> aprovar(@PathVariable Long id) {
-        boolean ok = solicitacaoService.trocarEstado(id, "APROVADA");
+    public ResponseEntity<Boolean> aprovar(@PathVariable Long id, @RequestBody TrocaEstadoRequest req) {
+        boolean ok = solicitacaoService.trocarEstado(id, "APROVADA", req.usuarioId());
         return ResponseEntity.ok(ok);
     }
 
     @PostMapping("/{id}/rejeitar")
-    public ResponseEntity<Boolean> rejeitar(@PathVariable Long id, @RequestBody MotivoRejeicao motivo) {
-        boolean ok = solicitacaoService.trocarEstado(id, "REJEITADA");
+    public ResponseEntity<Boolean> rejeitar(@PathVariable Long id, @RequestBody MotivoRejeicao req) {
+        boolean ok = solicitacaoService.trocarEstado(id, "REJEITADA", req.usuarioId());
         return ResponseEntity.ok(ok);
     }
 
@@ -77,6 +78,7 @@ public class SolicitacaoController {
     public ResponseEntity<List<SolicitacaoResponse>> listarEmAberto() {
         return ResponseEntity.ok(solicitacaoService.listarEmAberto());
     }
+
     @PostMapping("/{id}/resgatar")
     public ResponseEntity<Boolean> resgatarSolicitacao(@PathVariable Long id) {
         boolean resultado = solicitacaoService.resgatarSolicitacao(id);
@@ -94,10 +96,9 @@ public class SolicitacaoController {
         return ResponseEntity.ok(solicitacaoService.efetuarManutencao(req));
     }
 
-
     @PostMapping("/{id}/pagar")
-    public ResponseEntity<Boolean> pagar(@PathVariable Long id) {
-        boolean ok = solicitacaoService.trocarEstado(id, "PAGA");
+    public ResponseEntity<Boolean> pagar(@PathVariable Long id, @RequestBody TrocaEstadoRequest req) {
+        boolean ok = solicitacaoService.trocarEstado(id, "PAGA", req.usuarioId());
         return ResponseEntity.ok(ok);
     }
 
@@ -120,12 +121,8 @@ public class SolicitacaoController {
     }
 
     @PostMapping("/{id}/finalizar")
-    public ResponseEntity<Boolean> finalizar(@PathVariable Long id) {
-        boolean ok = solicitacaoService.trocarEstado(id, "FINALIZADA");
+    public ResponseEntity<Boolean> finalizar(@PathVariable Long id, @RequestBody TrocaEstadoRequest req) {
+        boolean ok = solicitacaoService.trocarEstado(id, "FINALIZADA", req.usuarioId());
         return ResponseEntity.ok(ok);
     }
-
-
-    // DTO interno para rejeição
-    public record MotivoRejeicao(String motivo) {}
 }

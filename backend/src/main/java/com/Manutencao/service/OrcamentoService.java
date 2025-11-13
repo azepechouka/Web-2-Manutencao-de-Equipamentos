@@ -21,82 +21,86 @@ import java.time.ZoneId;
 @Service
 public class OrcamentoService {
 
-    private final OrcamentoRepository orcamentos;
-    private final SolicitacaoRepository solicitacoes;
-    private final UsuarioRepository usuarios;
-    private final EstadoSolicitacaoRepository estados;
+        private final OrcamentoRepository orcamentos;
+        private final SolicitacaoRepository solicitacoes;
+        private final UsuarioRepository usuarios;
+        private final EstadoSolicitacaoRepository estados;
 
-    public OrcamentoService(
-            OrcamentoRepository orcamentos,
-            SolicitacaoRepository solicitacoes,
-            UsuarioRepository usuarios,
-            EstadoSolicitacaoRepository estados
-    ) {
-        this.orcamentos = orcamentos;
-        this.solicitacoes = solicitacoes;
-        this.usuarios = usuarios;
-        this.estados = estados;
-    }
-
-    @Transactional
-    public OrcamentoResponse criar(OrcamentoRequest req) {
-        // Evita duplicação
-        if (orcamentos.existsBySolicitacaoId(req.solicitacaoId())) {
-            throw new RuntimeException("Já existe um orçamento para esta solicitação.");
+        public OrcamentoService(
+                OrcamentoRepository orcamentos,
+                SolicitacaoRepository solicitacoes,
+                UsuarioRepository usuarios,
+                EstadoSolicitacaoRepository estados
+        ) {
+                this.orcamentos = orcamentos;
+                this.solicitacoes = solicitacoes;
+                this.usuarios = usuarios;
+                this.estados = estados;
         }
 
-        // Busca entidades relacionadas
-        Solicitacao solicitacao = solicitacoes.findById(req.solicitacaoId())
-                .orElseThrow(() -> new RuntimeException("Solicitação não encontrada."));
+        @Transactional
+        public OrcamentoResponse criar(OrcamentoRequest req) {
 
-        Usuario funcionario = usuarios.findById(req.funcionarioId())
-                .orElseThrow(() -> new RuntimeException("Funcionário não encontrado."));
+                if (orcamentos.existsBySolicitacaoId(req.solicitacaoId())) {
+                        throw new RuntimeException("Já existe um orçamento para esta solicitação.");
+                }
 
-        EstadoSolicitacao estadoOrcada = estados.findByNomeIgnoreCase("ORÇADA")
-                .orElseThrow(() -> new RuntimeException("Estado 'ORÇADA' não encontrado."));
+                Solicitacao solicitacao = solicitacoes.findById(req.solicitacaoId())
+                        .orElseThrow(() -> new RuntimeException("Solicitação não encontrada."));
 
-        Orcamento orc = Orcamento.builder()
-                .solicitacao(solicitacao)
-                .funcionario(funcionario)
-                .valor(req.valor().longValue())
-                .build();
+                Usuario funcionario = usuarios.findById(req.funcionarioId())
+                        .orElseThrow(() -> new RuntimeException("Funcionário não encontrado."));
 
-        orcamentos.save(orc);
+                EstadoSolicitacao estadoOrcada = estados.findByNomeIgnoreCase("ORÇADA")
+                        .orElseThrow(() -> new RuntimeException("Estado 'ORÇADA' não encontrado."));
 
-        solicitacao.setEstadoAtual(estadoOrcada);
-        solicitacoes.save(solicitacao);
+                Orcamento orc = Orcamento.builder()
+                        .solicitacao(solicitacao)
+                        .funcionario(funcionario)
+                        .valor(req.valor().longValue())
+                        .observacao(req.observacao())
+                        .build();
 
-        return new OrcamentoResponse(
-                orc.getId(),
-                solicitacao.getId(),
-                funcionario.getNome(),
-                orc.getValor(),
-                orc.getCriadoEm()
-        );
-    }
+                orcamentos.save(orc);
 
-    @Transactional(readOnly = true)
-    public OrcamentoResponse buscarPorSolicitacao(Long solicitacaoId) {
-        Orcamento orc = orcamentos.findBySolicitacaoId(solicitacaoId)
-                .orElseThrow(() -> new RuntimeException("Orçamento não encontrado para esta solicitação."));
+                solicitacao.setEstadoAtual(estadoOrcada);
+                solicitacoes.save(solicitacao);
 
-        return mapToResponse(orc);
-    }
+                return new OrcamentoResponse(
+                        orc.getId(),
+                        solicitacao.getId(),
+                        funcionario.getNome(),
+                        orc.getValor(),
+                        orc.getObservacao(),
+                        orc.getCriadoEm()
+                );
+        }
 
-    @Transactional(readOnly = true)
-    public OrcamentoResponse buscarPorId(Long id) {
-        Orcamento orc = orcamentos.findById(id)
-                .orElseThrow(() -> new RuntimeException("Orçamento não encontrado."));
-        return mapToResponse(orc);
-    }
+
+        @Transactional(readOnly = true)
+        public OrcamentoResponse buscarPorSolicitacao(Long solicitacaoId) {
+                Orcamento orc = orcamentos.findBySolicitacaoId(solicitacaoId)
+                        .orElseThrow(() -> new RuntimeException("Orçamento não encontrado para esta solicitação."));
+
+                return mapToResponse(orc);
+        }
+
+        @Transactional(readOnly = true)
+        public OrcamentoResponse buscarPorId(Long id) {
+                Orcamento orc = orcamentos.findById(id)
+                        .orElseThrow(() -> new RuntimeException("Orçamento não encontrado."));
+                return mapToResponse(orc);
+        }
 
         private OrcamentoResponse mapToResponse(Orcamento orc) {
-        return new OrcamentoResponse(
-                orc.getId(),
-                orc.getSolicitacao().getId(),
-                orc.getFuncionario().getNome(),
-                orc.getValor(),
-                orc.getCriadoEm()
-        );
+                return new OrcamentoResponse(
+                        orc.getId(),
+                        orc.getSolicitacao().getId(),
+                        orc.getFuncionario().getNome(),
+                        orc.getValor(),
+                        orc.getObservacao(),
+                        orc.getCriadoEm()
+                );
         }
+
 }

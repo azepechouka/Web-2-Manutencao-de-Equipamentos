@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { SolicitacoesService } from '../../services/solicitacoes.service';
 import { SolicitacaoResponse } from '../../models/solicitacao.model';
+import { AuthService } from '../../services/auth.service';
 
 type ViewItem = {
   id: number;
@@ -32,6 +33,7 @@ export class SolicitacoesListaComponent implements OnInit {
   private fb = inject(FormBuilder);
   private svc = inject(SolicitacoesService);
   private router = inject(Router);
+  private auth = inject(AuthService);
 
   itens = signal<ViewItem[]>([]);
   carregando = signal<boolean>(false);
@@ -146,14 +148,19 @@ export class SolicitacoesListaComponent implements OnInit {
     }
   }
 
-  finalizarSolicitacao(id: number): void {
+ finalizarSolicitacao(id: number): void {
     if (!confirm(`Tem certeza que deseja finalizar a solicitação #${id}?`)) return;
+
+    const usuarioId = this.auth.getUsuarioId();
+    if (!usuarioId) {
+      alert('Usuário não identificado!');
+      return;
+    }
 
     this.carregando.set(true);
 
-    this.svc.finalizarSolicitacao(id).subscribe({
+    this.svc.finalizarSolicitacao(id, usuarioId).subscribe({
       next: () => {
-        // Atualiza localmente a lista
         this.itens.update((atual) =>
           atual.map((item) =>
             item.id === id

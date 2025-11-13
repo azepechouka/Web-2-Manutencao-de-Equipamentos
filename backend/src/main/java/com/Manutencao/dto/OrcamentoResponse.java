@@ -7,5 +7,6 @@ public record OrcamentoResponse(
         Long solicitacaoId,
         String funcionarioNome,
         Long valor,
+        String observacao,
         Instant criadoEm
 ) {}
