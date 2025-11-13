@@ -47,4 +47,12 @@ public class Solicitacao {
   @UpdateTimestamp
   @Column(name = "atualizado_em", nullable = false)
   private Instant atualizadoEm;
+
+  @Column(columnDefinition = "text")
+  private String descricaoManutencao;
+
+  @Column(columnDefinition = "text")
+  private String orientacoesCliente;
+
+  
 }

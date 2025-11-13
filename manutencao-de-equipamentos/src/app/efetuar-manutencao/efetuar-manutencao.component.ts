@@ -2,7 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SolicitacoesService } from '../services/solicitacoes.service';
-import { Solicitacao, SolicitacaoResponse } from '../models/solicitacao.model';
+import { AuthService } from '../services/auth.service';
+import { SolicitacaoResponse, ManutencaoRequest } from '../models/solicitacao.model';
 
 @Component({
   selector: 'app-efetuar-manutencao',
@@ -15,45 +16,30 @@ export class EfetuarManutencaoComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly svc = inject(SolicitacoesService);
-
-  id!: number;
+  private readonly auth = inject(AuthService);
 
   solicitacao: SolicitacaoResponse | null = null;
-  cliente: any = null;
-
-  exibirCamposManutencao = false;
-  mensagem = '';
   carregando = true;
   erro: string | null = null;
+  exibirCamposManutencao = false;
+  processando = false;
+  mensagem = '';
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
-    this.id = Number(idParam);
-
-    if (!this.id || isNaN(this.id)) {
+    const id = Number(idParam);
+    if (!id || isNaN(id)) {
       this.router.navigate(['/home']);
       return;
     }
 
-    this.carregarSolicitacao();
-  }
-
-  private carregarSolicitacao(): void {
-    this.carregando = true;
-    this.svc.getById(this.id).subscribe({
-      next: (det: SolicitacaoResponse) => {
-        if (!det) {
-          this.erro = 'Solicitação não encontrada.';
-          this.router.navigate(['/home']);
-          return;
-        }
-
-        this.solicitacao = det;
+    this.svc.getById(id).subscribe({
+      next: (resp) => {
+        this.solicitacao = resp;
         this.carregando = false;
       },
-      error: (err: unknown) => {
-        console.error('Erro ao carregar solicitação:', err);
-        this.erro = 'Falha ao carregar os dados da solicitação.';
+      error: () => {
+        this.erro = 'Falha ao carregar solicitação.';
         this.carregando = false;
       },
     });
@@ -61,46 +47,62 @@ export class EfetuarManutencaoComponent implements OnInit {
 
   iniciarManutencao(): void {
     this.exibirCamposManutencao = true;
-    this.mensagem = '';
-  }
-
-  redirecionarManutencao(): void {
-    this.router.navigate(['/redirecionar-manutencao', this.id]);
   }
 
   concluirManutencao(descricao: string, orientacoes: string): void {
     if (!descricao.trim() || !orientacoes.trim()) {
-      this.mensagem = '⚠️ Por favor, preencha todos os campos da manutenção.';
+      this.mensagem = '⚠️ Preencha todos os campos antes de concluir.';
       return;
     }
 
-    const now = new Date();
-    const funcionario = 'Ana Souza';
+    const funcionarioId = this.auth.getUsuarioId();
+    if (!funcionarioId) {
+      this.mensagem = 'Erro: usuário não autenticado.';
+      return;
+    }
 
-    this.mensagem = `
-      <strong>Manutenção realizada com sucesso!</strong><br>
-      <b>Descrição da Manutenção:</b> ${descricao}<br>
-      <b>Orientações para o Cliente:</b> ${orientacoes}<br>
-      <b>Data/Hora:</b> ${now.toLocaleDateString()} ${now.toLocaleTimeString()}<br>
-      <b>Funcionário:</b> ${funcionario}<br>
-      <b>Estado:</b> ARRUMADA
-    `;
+    const req: ManutencaoRequest = {
+      solicitacaoId: this.solicitacao!.id,
+      funcionarioId,
+      descricaoManutencao: descricao,
+      orientacoesCliente: orientacoes
+    };
 
-    this.exibirCamposManutencao = false;
+    this.processando = true;
+
+    this.svc.efetuarManutencao(req).subscribe({
+      next: () => {
+        this.mensagem = `
+          <strong>✅ Manutenção registrada com sucesso!</strong><br>
+          <b>Descrição:</b> ${req.descricaoManutencao}<br>
+          <b>Orientações:</b> ${req.orientacoesCliente}<br>
+          <b>Estado:</b> Arrumada
+        `;
+        this.exibirCamposManutencao = false;
+        this.processando = false;
+      },
+      error: () => {
+        this.mensagem = '❌ Erro ao registrar manutenção.';
+        this.processando = false;
+      },
+    });
+  }
+
+  redirecionarManutencao(): void {
+    this.router.navigate(['/redirecionar-manutencao', this.solicitacao?.id]);
   }
 
   getStatusCor(estado: string): string {
-  const mapa: Record<string, string> = {
-    'Aberta': '#6c757d',        // Cinza
-    'Orçada': '#8B4513',        // Marrom
-    'Aprovada': '#FFD700',      // Amarelo
-    'Rejeitada': '#DC3545',     // Vermelho
-    'Redirecionada': '#800080', // Roxo
-    'Arrumada': '#0D6EFD',      // Azul
-    'Paga': '#FF8C00',          // Alaranjado
-    'Finalizada': '#28A745'     // Verde
-  };
-  return mapa[estado] ?? '#999999';
-}
-
+    const mapa: Record<string, string> = {
+      'Aberta': '#6c757d',
+      'Orçada': '#8B4513',
+      'Aprovada': '#FFD700',
+      'Rejeitada': '#DC3545',
+      'Redirecionada': '#800080',
+      'Arrumada': '#0D6EFD',
+      'Paga': '#FF8C00',
+      'Finalizada': '#28A745',
+    };
+    return mapa[estado] ?? '#999999';
+  }
 }

@@ -35,3 +35,10 @@ export interface SolicitacaoResponse {
   estadoAtual: string;
   criadoEm: string;
 }
+
+export interface ManutencaoRequest {
+  solicitacaoId: number;
+  funcionarioId: number;
+  descricaoManutencao: string;
+  orientacoesCliente: string;
+}

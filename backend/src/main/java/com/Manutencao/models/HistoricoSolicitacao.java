@@ -38,4 +38,11 @@ public class HistoricoSolicitacao {
     @CreationTimestamp
     @Column(name = "criado_em", nullable = false, updatable = false)
     private Instant criadoEm;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+        name = "usuario_id",
+        foreignKey = @ForeignKey(name = "fk_hist_usuario")
+    )
+    private Usuario usuario;
 }

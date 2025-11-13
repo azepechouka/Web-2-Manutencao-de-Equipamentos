@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.Manutencao.api.dto.SolicitacaoResponse;
 import com.Manutencao.dto.HistoricoStatusResponse;
+import com.Manutencao.api.dto.ManutencaoRequest;
 
 
 import java.util.List;
@@ -81,6 +82,18 @@ public class SolicitacaoController {
         boolean resultado = solicitacaoService.resgatarSolicitacao(id);
         return ResponseEntity.ok(resultado);
     }
+
+    @PostMapping("/{id}/efetuar-manutencao")
+    public ResponseEntity<SolicitacaoResponse> efetuarManutencao(
+            @PathVariable Long id,
+            @RequestBody ManutencaoRequest req
+    ) {
+        if (!id.equals(req.solicitacaoId())) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(solicitacaoService.efetuarManutencao(req));
+    }
+
 
     public record MotivoRejeicao(String motivo) {}
 }

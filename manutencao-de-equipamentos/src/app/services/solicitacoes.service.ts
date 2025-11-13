@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { Solicitacao, SolicitacaoCreateDto,SolicitacaoResponse } from '../models/solicitacao.model';
+import { ManutencaoRequest, Solicitacao, SolicitacaoCreateDto,SolicitacaoResponse } from '../models/solicitacao.model';
 import { Orcamento } from '../models/orcamento.model';
 import { AuthService } from './auth.service';
 import { HistoricoStatus, HistoricoStatusDTO  } from '../models/historico-status.model';
@@ -77,45 +77,27 @@ export class SolicitacoesService {
     return this.http.get<Solicitacao>(`${this.SOLICITACOES}/${id}/detalhes`);
   }
 
-  relatorioReceitaPorCategoria$(): Observable<
-    {
-      categoriaId: number | null;
-      categoriaDescricao: string;
-      total: number;
-      quantidade: number;
-      primeira: string | null;
-      ultima: string | null;
-    }[]
-  > {
-    return new Observable((observer) => {
-      observer.next([
-        {
-          categoriaId: 1,
-          categoriaDescricao: 'Impressão Digital',
-          total: 3200,
-          quantidade: 5,
-          primeira: '2025-10-10',
-          ultima: '2025-11-02',
-        },
-        {
-          categoriaId: 2,
-          categoriaDescricao: 'Plotagem',
-          total: 1800,
-          quantidade: 3,
-          primeira: '2025-10-12',
-          ultima: '2025-10-28',
-        },
-      ]);
-      observer.complete();
-    });
-  }
-
   getHistoricoBySolicitacao(id: number): Observable<HistoricoStatusDTO[]> {
     return this.http.get<HistoricoStatusDTO[]>(`${this.API}/historico/solicitacao/${id}`);
   }
 
   resgatarSolicitacao(solicitacaoId: number): Observable<boolean> {
     return this.http.post<boolean>(`${this.SOLICITACOES}/${solicitacaoId}/resgatar`, {});
+  }
+
+
+  efetuarManutencao(req: ManutencaoRequest) {
+    return this.http.post(`${this.SOLICITACOES}/${req.solicitacaoId}/efetuar-manutencao`, req);
+  }
+
+  redirecionarManutencao(solicitacaoId: number, payload: {
+    motivo: string;
+    destinoFuncionarioId: number;
+  }): Observable<boolean> {
+    return this.http.post<boolean>(
+      `${this.SOLICITACOES}/${solicitacaoId}/redirecionar`,
+      payload
+    );
   }
 
 }

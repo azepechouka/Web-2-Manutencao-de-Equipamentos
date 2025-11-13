@@ -1,5 +1,5 @@
 package com.Manutencao.services;
-
+import com.Manutencao.api.dto.ManutencaoRequest;
 import com.Manutencao.api.dto.SolicitacaoCreateRequest;
 import com.Manutencao.api.dto.SolicitacaoResponse;
 import com.Manutencao.models.*;
@@ -20,20 +20,20 @@ public class SolicitacaoService {
     private final EstadoSolicitacaoRepository estadoRepo;
     private final UsuarioRepository usuarioRepo;
     private final CategoriaRepository categoriaRepo;
-    private final HistoricoSolicitacaoRepository historicoRepo; // ✅ adicionado
+    private final HistoricoSolicitacaoRepository historicoRepo;
 
     public SolicitacaoService(
             SolicitacaoRepository repository,
             EstadoSolicitacaoRepository estadoRepo,
             UsuarioRepository usuarioRepo,
             CategoriaRepository categoriaRepo,
-            HistoricoSolicitacaoRepository historicoRepo // ✅ adicionado no construtor
+            HistoricoSolicitacaoRepository historicoRepo 
     ) {
         this.repository = repository;
         this.estadoRepo = estadoRepo;
         this.usuarioRepo = usuarioRepo;
         this.categoriaRepo = categoriaRepo;
-        this.historicoRepo = historicoRepo; // ✅ inicializado
+        this.historicoRepo = historicoRepo;
     }
 
     public Solicitacao criar(SolicitacaoCreateRequest req) {
@@ -148,4 +148,79 @@ public class SolicitacaoService {
 
         return true;
     }
+
+    @Transactional
+public SolicitacaoResponse efetuarManutencao(ManutencaoRequest req) {
+    Solicitacao solicitacao = repository.findByIdComFetch(req.solicitacaoId());
+    if (solicitacao == null) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada.");
+    }
+
+    EstadoSolicitacao estadoArrumada = estadoRepo.findByNomeIgnoreCase("Arrumada")
+            .orElseThrow(() -> new IllegalStateException("Estado 'Arrumada' não configurado."));
+
+    Usuario funcionario = usuarioRepo.findById(req.funcionarioId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Funcionário não encontrado."));
+
+    EstadoSolicitacao estadoAnterior = solicitacao.getEstadoAtual();
+
+    // 🔧 agora salvamos as informações direto na entidade
+    solicitacao.setDescricaoManutencao(req.descricaoManutencao());
+    solicitacao.setOrientacoesCliente(req.orientacoesCliente());
+    solicitacao.setEstadoAtual(estadoArrumada);
+    repository.save(solicitacao);
+
+    HistoricoSolicitacao historico = HistoricoSolicitacao.builder()
+            .solicitacao(solicitacao)
+            .deEstado(estadoAnterior)
+            .paraEstado(estadoArrumada)
+            .usuario(funcionario)
+            .observacao(
+                    String.format(
+                            "🛠️ Manutenção concluída.\nDescrição: %s\nOrientações: %s",
+                            req.descricaoManutencao(), req.orientacoesCliente()
+                    )
+            )
+            .criadoEm(Instant.now())
+            .build();
+
+    historicoRepo.save(historico);
+
+    return SolicitacaoResponse.from(solicitacao);
+}
+
+
+
+    @Transactional
+    public SolicitacaoResponse redirecionarManutencao(Long solicitacaoId, Long destinoFuncionarioId, String motivo) {
+        Solicitacao solicitacao = repository.findByIdComFetch(solicitacaoId);
+        if (solicitacao == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada");
+        }
+
+        EstadoSolicitacao estadoRedirecionada = estadoRepo.findByNomeIgnoreCase("Redirecionada")
+                .orElseThrow(() -> new IllegalStateException("Estado 'Redirecionada' não configurado."));
+
+        var destino = usuarioRepo.findById(destinoFuncionarioId)
+                .orElseThrow(() -> new IllegalArgumentException("Funcionário destino não encontrado: " + destinoFuncionarioId));
+
+        var estadoAnterior = solicitacao.getEstadoAtual();
+
+        solicitacao.setEstadoAtual(estadoRedirecionada);
+        repository.save(solicitacao);
+
+        HistoricoSolicitacao hist = HistoricoSolicitacao.builder()
+                .solicitacao(solicitacao)
+                .deEstado(estadoAnterior)
+                .paraEstado(estadoRedirecionada)
+                .usuario(destino)
+                .observacao("Redirecionado para " + destino.getNome() + ". Motivo: " + motivo)
+                .criadoEm(Instant.now())
+                .build();
+
+        historicoRepo.save(hist);
+
+        return SolicitacaoResponse.from(solicitacao);
+    }
+
 }
