@@ -51,13 +51,13 @@ export class EfetuarManutencaoComponent implements OnInit {
 
   concluirManutencao(descricao: string, orientacoes: string): void {
     if (!descricao.trim() || !orientacoes.trim()) {
-      this.mensagem = '⚠️ Preencha todos os campos antes de concluir.';
+      alert(' Preencha todos os campos antes de concluir.');
       return;
     }
 
     const funcionarioId = this.auth.getUsuarioId();
     if (!funcionarioId) {
-      this.mensagem = 'Erro: usuário não autenticado.';
+      alert('Erro: usuário não autenticado.');
       return;
     }
 
@@ -72,21 +72,24 @@ export class EfetuarManutencaoComponent implements OnInit {
 
     this.svc.efetuarManutencao(req).subscribe({
       next: () => {
-        this.mensagem = `
-          <strong>✅ Manutenção registrada com sucesso!</strong><br>
-          <b>Descrição:</b> ${req.descricaoManutencao}<br>
-          <b>Orientações:</b> ${req.orientacoesCliente}<br>
-          <b>Estado:</b> Arrumada
-        `;
-        this.exibirCamposManutencao = false;
+        alert(
+          `Manutenção registrada com sucesso!\n\n` +
+          `Descrição: ${req.descricaoManutencao}\n` +
+          `Orientações: ${req.orientacoesCliente}\n` +
+          `Estado: Arrumada`
+        );
+
         this.processando = false;
+        this.exibirCamposManutencao = false;
+        this.router.navigate(['/home-func']);
       },
       error: () => {
-        this.mensagem = '❌ Erro ao registrar manutenção.';
+        alert(' Erro ao registrar manutenção.');
         this.processando = false;
       },
     });
   }
+
 
   redirecionarManutencao(): void {
     this.router.navigate(['/redirecionar-manutencao', this.solicitacao?.id]);

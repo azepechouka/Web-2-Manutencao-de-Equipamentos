@@ -1,38 +1,43 @@
 <nav class="topbar">
-  <div class="topbar-brand">
-    <a routerLink="/home">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-tools" viewBox="0 0 16 16">
-        <path d="M1 0a1 1 0 0 0-1 1v5.586a1 1 0 0 0 .293.707l8 8a1 1 0 0 0 1.414 0l5.586-5.586a1 1 0 0 0 0-1.414l-8-8A1 1 0 0 0 6.586 0H1zm5.586 4.586a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zM11.293 8.793a1 1 0 0 1 1.414 0l2 2a1 1 0 0 1 0 1.414l-2 2a1 1 0 0 1-1.414-1.414L12.586 11H10.5a.5.5 0 0 1 0-1h2.086l-.793-.793a1 1 0 0 1 0-1.414z"/>
-      </svg>
-      <span>Controle de Manutenção</span>
-    </a>
+  <div class="topbar-left">
+    
+    <!-- Logo + Nome -->
+    <div class="topbar-brand">
+      <a routerLink="/home">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+             fill="currentColor" class="bi bi-tools" viewBox="0 0 16 16">
+          <path d="M1 0a1 1 0 0 0-1 1v5.586a1 1 ..."/>
+        </svg>
+        <span>Controle de Manutenção</span>
+      </a>
+    </div>
+
+    <!-- Menu -->
+    <ul class="topbar-nav">
+      <ng-container *ngIf="isFuncionario(); else menuUsuario">
+        <li><a routerLink="/home-func" routerLinkActive="active">Home</a></li>
+        <li><a routerLink="/crudFuncionario" routerLinkActive="active">Funcionários</a></li>
+        <li><a routerLink="/listaSolicitacoes" routerLinkActive="active">Lista Solicitações</a></li>
+        <li><a routerLink="/relatorioReceita" routerLinkActive="active">Receitas Mês</a></li>
+        <li><a routerLink="/cadastrarcategoria" routerLinkActive="active">Cadastrar Categoria</a></li>
+        <li><a routerLink="/relatorio-categoria" routerLinkActive="active">Relatório por Categoria</a></li>
+      </ng-container>
+
+      <ng-template #menuUsuario>
+        <li><a routerLink="/home" routerLinkActive="active">Minhas Solicitações</a></li>
+        <li><a routerLink="/solicitacao" routerLinkActive="active">Nova Solicitação</a></li>
+      </ng-template>
+    </ul>
+
   </div>
 
-  <ul class="topbar-nav">
-    <ng-container *ngIf="isFuncionario(); else menuUsuario">
-      <li><a routerLink="/home-func" routerLinkActive="active">Home</a></li>
-      <li><a routerLink="/crudFuncionario" routerLinkActive="active">Funcionários</a></li>
-      <li><a routerLink="/listaSolicitacoes" routerLinkActive="active">Lista Solicitações </a></li>
-      <li><a routerLink="/relatorioReceita" routerLinkActive="active">Receitas Mês</a></li>
-      <li><a routerLink="/cadastrarcategoria" routerLinkActive="active">Cadastrar  categoria</a></li>
-      <li><a routerLink="/relatorio-categoria" routerLinkActive="active">Relatorio por categoria</a></li>
-    </ng-container>
-
-    <ng-template #menuUsuario>
-      <li><a routerLink="/home" routerLinkActive="active">Minhas Solicitações</a></li>
-      <li><a routerLink="/solicitacao" routerLinkActive="active">Nova Solicitação</a></li>
-    </ng-template>
-  </ul>
-
+  <!-- Botão Sair -->
   <div class="topbar-actions">
     <button *ngIf="auth.isAuthenticated(); else entrar"
             type="button" class="logout-button" (click)="logout()" title="Sair">
-      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-box-arrow-right" viewBox="0 0 16 16">
-        <path fill-rule="evenodd" d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2.5a.5.5 0 0 0 1 0v-2.5a1.5 1.5 0 0 0-1.5-1.5h-8A1.5 1.5 0 0 0 0 4.5v9A1.5 1.5 0 0 0 1.5 15h8a1.5 1.5 0 0 0 1.5-1.5v-2.5a.5.5 0 0 0-1 0v2.5z"/>
-        <path fill-rule="evenodd" d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3z"/>
-      </svg>
       Sair
     </button>
+
     <ng-template #entrar>
       <a routerLink="/login" class="logout-button">Entrar</a>
     </ng-template>

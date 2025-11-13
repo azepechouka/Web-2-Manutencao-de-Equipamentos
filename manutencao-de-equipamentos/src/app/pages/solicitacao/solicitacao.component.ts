@@ -40,9 +40,7 @@ export class SolicitacaoComponent implements OnInit {
       categoriaId: [null, Validators.required],
       descricaoEquipamento: ['', Validators.required],
       descricaoDefeito: ['', Validators.required],
-      // estes dois podem ser opcionais se o back setar automaticamente
       statusAtualId: [1],
-      equipamentoId: [null]
     });
   }
 

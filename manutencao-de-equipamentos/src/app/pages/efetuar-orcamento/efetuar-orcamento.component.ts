@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SolicitacoesService } from '../../services/solicitacoes.service';
@@ -12,6 +12,7 @@ import { UsuarioResponse } from '../../models/usuario.model';
   selector: 'app-efetuar-orcamento',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  providers: [CurrencyPipe],
   templateUrl: './efetuar-orcamento.component.html',
 })
 export class EfetuarOrcamentoComponent implements OnInit {
@@ -21,6 +22,7 @@ export class EfetuarOrcamentoComponent implements OnInit {
   private svc = inject(SolicitacoesService);
   private auth = inject(AuthService);
   private usuarioSvc = inject(UsuarioService);
+  private currency = inject(CurrencyPipe);
 
   solicitacaoId!: number;
   solicitacao = signal<SolicitacaoResponse | null>(null);
@@ -48,10 +50,7 @@ export class EfetuarOrcamentoComponent implements OnInit {
     if (funcionarioId) {
       this.usuarioSvc.getById(funcionarioId).subscribe({
         next: (user) => this.funcionario.set(user),
-        error: (err) => {
-          console.error(err);
-          this.funcionario.set(null);
-        },
+        error: () => this.funcionario.set(null),
       });
     }
 
@@ -70,10 +69,10 @@ export class EfetuarOrcamentoComponent implements OnInit {
             this.cliente.set(cli ?? null);
           });
         }
+
         this.carregando.set(false);
       },
-      error: (err) => {
-        console.error(err);
+      error: () => {
         this.erro.set('Falha ao carregar dados.');
         this.carregando.set(false);
       },
@@ -102,13 +101,11 @@ export class EfetuarOrcamentoComponent implements OnInit {
         observacao: observacao || undefined,
       })
       .subscribe({
-        next: (orc) => {
-          console.log('Orçamento registrado:', orc);
+        next: () => {
           alert('Orçamento registrado com sucesso!');
           this.router.navigate(['/home-func']);
         },
-        error: (err) => {
-          console.error(err);
+        error: () => {
           alert('Falha ao registrar orçamento.');
         },
       });
@@ -123,6 +120,22 @@ export class EfetuarOrcamentoComponent implements OnInit {
       5: 'FINALIZADA',
     };
     return mapa[id ?? 0] || '—';
+  }
+
+  onValorInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const apenasNumeros = input.value.replace(/\D/g, '');
+    const valor = Number(apenasNumeros) / 100;
+    this.form.controls.valor.setValue(valor, { emitEvent: false });
+    input.value = this.currency.transform(valor, 'BRL', 'symbol', '1.2-2') ?? '';
+  }
+
+  formatarValor() {
+    const valor = this.form.controls.valor.value;
+    if (valor == null) return;
+
+    const formatado = this.currency.transform(valor, 'BRL', 'symbol', '1.2-2');
+    this.form.controls.valor.setValue(valor, { emitEvent: false });
   }
 
   getStatusCor(estado: string): string {

@@ -7,7 +7,6 @@
         </div>
         <div class="card-body">
           <form [formGroup]="solicitacaoForm" (ngSubmit)="onSubmit()" *ngIf="!solicitacaoEnviada">
-            <!-- Categoria (carregada do backend) -->
             <div class="mb-3">
               <label for="categoriaId" class="form-label">Categoria</label>
               <select
@@ -56,18 +55,6 @@
                 Descrição do problema é obrigatória.
               </div>
             </div>
-
-            <!-- Equipamento Id (Opcional) -->
-            <div class="mb-3">
-              <label for="equipamentoId" class="form-label">ID do Equipamento (Opcional)</label>
-              <input
-                type="number"
-                class="form-control"
-                id="equipamentoId"
-                formControlName="equipamentoId"
-                placeholder="Deixe em branco se não souber">
-            </div>
-
             <!-- Botão Enviar -->
             <div class="d-grid">
               <button
