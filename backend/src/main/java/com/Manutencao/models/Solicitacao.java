@@ -54,5 +54,7 @@ public class Solicitacao {
   @Column(columnDefinition = "text")
   private String orientacoesCliente;
 
+  @Column(name = "motivo_rejeicao", columnDefinition = "text")
+  private String motivoRejeicao;
   
 }

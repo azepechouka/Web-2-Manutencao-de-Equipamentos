@@ -1,245 +1,284 @@
-package com.Manutencao.services;
-import com.Manutencao.api.dto.ManutencaoRequest;
-import com.Manutencao.api.dto.SolicitacaoCreateRequest;
-import com.Manutencao.api.dto.SolicitacaoResponse;
-import com.Manutencao.models.*;
-import com.Manutencao.repositories.*;
-import jakarta.transaction.Transactional;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
+        package com.Manutencao.services;
+        import com.Manutencao.api.dto.ManutencaoRequest;
+        import com.Manutencao.api.dto.SolicitacaoCreateRequest;
+        import com.Manutencao.api.dto.SolicitacaoResponse;
+        import com.Manutencao.models.*;
+        import com.Manutencao.repositories.*;
+        import jakarta.transaction.Transactional;
+        import org.springframework.dao.DataIntegrityViolationException;
+        import org.springframework.http.HttpStatus;
+        import org.springframework.stereotype.Service;
+        import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Locale;
+        import java.time.Instant;
+        import java.time.format.DateTimeFormatter;
+        import java.util.List;
+        import java.util.Locale;
 
-@Service
-public class SolicitacaoService {
+        @Service
+        public class SolicitacaoService {
 
-    private final SolicitacaoRepository repository;
-    private final EstadoSolicitacaoRepository estadoRepo;
-    private final UsuarioRepository usuarioRepo;
-    private final CategoriaRepository categoriaRepo;
-    private final HistoricoSolicitacaoRepository historicoRepo;
+        private final SolicitacaoRepository repository;
+        private final EstadoSolicitacaoRepository estadoRepo;
+        private final UsuarioRepository usuarioRepo;
+        private final CategoriaRepository categoriaRepo;
+        private final HistoricoSolicitacaoRepository historicoRepo;
 
-    public SolicitacaoService(
-            SolicitacaoRepository repository,
-            EstadoSolicitacaoRepository estadoRepo,
-            UsuarioRepository usuarioRepo,
-            CategoriaRepository categoriaRepo,
-            HistoricoSolicitacaoRepository historicoRepo 
-    ) {
+        public SolicitacaoService(
+                SolicitacaoRepository repository,
+                EstadoSolicitacaoRepository estadoRepo,
+                UsuarioRepository usuarioRepo,
+                CategoriaRepository categoriaRepo,
+                HistoricoSolicitacaoRepository historicoRepo 
+        ) {
         this.repository = repository;
         this.estadoRepo = estadoRepo;
         this.usuarioRepo = usuarioRepo;
         this.categoriaRepo = categoriaRepo;
         this.historicoRepo = historicoRepo;
-    }
-
-    public Solicitacao criar(SolicitacaoCreateRequest req) {
-        Usuario cliente = usuarioRepo.findById(req.clienteId())
-                .orElseThrow(() -> new IllegalArgumentException("Cliente inexistente: " + req.clienteId()));
-
-        Categoria categoria = categoriaRepo.findById(req.categoriaId())
-                .orElseThrow(() -> new IllegalArgumentException("Categoria inexistente: " + req.categoriaId()));
-
-        EstadoSolicitacao estadoInicial = estadoRepo.findByNomeIgnoreCase("ABERTA")
-                .orElseThrow(() -> new IllegalStateException("Estado 'ABERTA' não configurado."));
-
-        Solicitacao nova = Solicitacao.builder()
-                .id(null)
-                .cliente(cliente)
-                .categoria(categoria)
-                .descricaoEquipamento(req.descricaoEquipamento())
-                .descricaoDefeito(req.descricaoDefeito())
-                .estadoAtual(estadoInicial)
-                .build();
-
-        return repository.save(nova);
-    }
-
-    public List<Solicitacao> listarTodas() {
-        return repository.findAllWithFetch();
-    }
-
-    @Transactional
-    public SolicitacaoResponse buscarPorId(Long id) {
-        Solicitacao s = repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada"));
-
-        s.getCliente().getId();
-        s.getCategoria().getNome();
-        s.getEstadoAtual().getNome();
-
-        String nomeFunc = null;
-
-        // Se a solicitação estiver no estado "Arrumada", buscamos  funcionário do histórico
-        if ("Arrumada".equalsIgnoreCase(s.getEstadoAtual().getNome())) {
-            var historicoArrumada = historicoRepo
-                .findTopBySolicitacaoIdAndParaEstadoNomeIgnoreCaseOrderByCriadoEmDesc(s.getId(), "Arrumada");
-
-
-            if (historicoArrumada != null && historicoArrumada.getUsuario() != null) {
-                nomeFunc = historicoArrumada.getUsuario().getNome();
-            }
         }
 
-        return SolicitacaoResponse.from(s, nomeFunc);
-    }
+        public Solicitacao criar(SolicitacaoCreateRequest req) {
+                Usuario cliente = usuarioRepo.findById(req.clienteId())
+                        .orElseThrow(() -> new IllegalArgumentException("Cliente inexistente: " + req.clienteId()));
 
-    public List<Solicitacao> buscarPorCliente(Long clienteId) {
-        return repository.findByCliente_IdWithFetch(clienteId);
-    }
+                Categoria categoria = categoriaRepo.findById(req.categoriaId())
+                        .orElseThrow(() -> new IllegalArgumentException("Categoria inexistente: " + req.categoriaId()));
 
-    @Transactional
-    public boolean trocarEstado(Long solicitacaoId, String novoEstadoNome, Long usuarioId) {
-       
-        var estadoNovo = estadoRepo.findByNomeIgnoreCase(novoEstadoNome);
-        if (estadoNovo.isEmpty()) return false;
+                EstadoSolicitacao estadoInicial = estadoRepo.findByNomeIgnoreCase("ABERTA")
+                        .orElseThrow(() -> new IllegalStateException("Estado 'ABERTA' não configurado."));
 
-        // Buscar a solicitação 
-        Solicitacao solicitacao = repository.findByIdComFetch(solicitacaoId);
-        if (solicitacao == null) return false;
+                Solicitacao nova = Solicitacao.builder()
+                        .id(null)
+                        .cliente(cliente)
+                        .categoria(categoria)
+                        .descricaoEquipamento(req.descricaoEquipamento())
+                        .descricaoDefeito(req.descricaoDefeito())
+                        .estadoAtual(estadoInicial)
+                        .build();
 
-        // Buscar o usuário 
-        Usuario usuario = usuarioRepo.findById(usuarioId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
+                return repository.save(nova);
+                }
 
-        EstadoSolicitacao estadoAnterior = solicitacao.getEstadoAtual();
+                public List<Solicitacao> listarTodas() {
+                return repository.findAllWithFetch();
+        }
 
-        // Atualizar estado
-        solicitacao.setEstadoAtual(estadoNovo.get());
-        repository.save(solicitacao);
+        @Transactional
+        public SolicitacaoResponse buscarPorId(Long id) {
+                Solicitacao s = repository.findById(id)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada"));
 
-        // Criar histórico
-        HistoricoSolicitacao historico = HistoricoSolicitacao.builder()
-                .solicitacao(solicitacao)
-                .deEstado(estadoAnterior)
-                .paraEstado(estadoNovo.get())
-                .usuario(usuario)
-                .observacao(
-                        String.format(
-                                "🔄 Estado alterado manualmente: %s → %s",
-                                estadoAnterior != null ? estadoAnterior.getNome() : "Nenhum",
-                                estadoNovo.get().getNome()
+                s.getCliente().getId();
+                s.getCategoria().getNome();
+                s.getEstadoAtual().getNome();
+
+                String nomeFunc = null;
+
+                // Se a solicitação estiver no estado "Arrumada", buscamos  funcionário do histórico
+                if ("Arrumada".equalsIgnoreCase(s.getEstadoAtual().getNome())) {
+                        var historicoArrumada = historicoRepo
+                        .findTopBySolicitacaoIdAndParaEstadoNomeIgnoreCaseOrderByCriadoEmDesc(s.getId(), "Arrumada");
+
+
+                        if (historicoArrumada != null && historicoArrumada.getUsuario() != null) {
+                        nomeFunc = historicoArrumada.getUsuario().getNome();
+                        }
+                }
+
+                return SolicitacaoResponse.from(s, nomeFunc);
+                }
+
+                public List<Solicitacao> buscarPorCliente(Long clienteId) {
+                return repository.findByCliente_IdWithFetch(clienteId);
+                }
+
+        @Transactional
+        public boolean trocarEstado(Long solicitacaoId, String novoEstadoNome, Long usuarioId) {
+        
+                var estadoNovo = estadoRepo.findByNomeIgnoreCase(novoEstadoNome);
+                if (estadoNovo.isEmpty()) return false;
+
+                // Buscar a solicitação 
+                Solicitacao solicitacao = repository.findByIdComFetch(solicitacaoId);
+                if (solicitacao == null) return false;
+
+                // Buscar o usuário 
+                Usuario usuario = usuarioRepo.findById(usuarioId)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
+
+                EstadoSolicitacao estadoAnterior = solicitacao.getEstadoAtual();
+
+                // Atualizar estado
+                solicitacao.setEstadoAtual(estadoNovo.get());
+                repository.save(solicitacao);
+
+                // Criar histórico
+                HistoricoSolicitacao historico = HistoricoSolicitacao.builder()
+                        .solicitacao(solicitacao)
+                        .deEstado(estadoAnterior)
+                        .paraEstado(estadoNovo.get())
+                        .usuario(usuario)
+                        .observacao(
+                                String.format(
+                                        "🔄 Estado alterado manualmente: %s → %s",
+                                        estadoAnterior != null ? estadoAnterior.getNome() : "Nenhum",
+                                        estadoNovo.get().getNome()
+                                )
                         )
-                )
-                .criadoEm(Instant.now())
-                .build();
+                        .criadoEm(Instant.now())
+                        .build();
 
-        historicoRepo.save(historico);
+                historicoRepo.save(historico);
 
-        return true;
-    }
-
-    public Solicitacao salvar(Solicitacao s) {
-        return repository.save(s);
-    }
-
-    @Transactional
-    public void deletar(Long id) {
-        if (!repository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada");
-        }
-        try {
-            repository.deleteById(id);
-        } catch (DataIntegrityViolationException ex) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Solicitação vinculada a outros registros e não pode ser removida"
-            );
-        }
-    }
-
-    @Transactional
-    public List<SolicitacaoResponse> listarEmAberto() {
-        return repository.findByEstadoAtual_NomeIgnoreCase("Aberta")
-                .stream()
-                .map(SolicitacaoResponse::from)
-                .toList();
-    }
-
-    @Transactional
-    public boolean resgatarSolicitacao(Long solicitacaoId) {
-        var solicitacaoOpt = repository.findById(solicitacaoId);
-        if (solicitacaoOpt.isEmpty()) return false;
-
-        var solicitacao = solicitacaoOpt.get();
-
-        if (!"Rejeitada".equalsIgnoreCase(solicitacao.getEstadoAtual().getNome())) {
-            return false;
+                return true;
         }
 
-        var estadoAprovada = estadoRepo.findByNomeIgnoreCase("Aprovada")
-                .orElseThrow(() -> new IllegalStateException("Estado 'Aprovada' não encontrado no banco."));
-
-        var estadoAnterior = solicitacao.getEstadoAtual();
-
-        solicitacao.setEstadoAtual(estadoAprovada);
-        repository.save(solicitacao);
-
-        var historico = HistoricoSolicitacao.builder()
-                .solicitacao(solicitacao)
-                .deEstado(estadoAnterior)
-                .paraEstado(estadoAprovada)
-                .observacao("Solicitação resgatada manualmente e reativada em " + Instant.now())
-                .criadoEm(Instant.now())
-                .build();
-
-        historicoRepo.save(historico);
-
-        return true;
-    }
-
-    @Transactional
-    public SolicitacaoResponse efetuarManutencao(ManutencaoRequest req) {
-        Solicitacao solicitacao = repository.findByIdComFetch(req.solicitacaoId());
-        if (solicitacao == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada.");
+        public Solicitacao salvar(Solicitacao s) {
+                return repository.save(s);
         }
 
-        EstadoSolicitacao estadoArrumada = estadoRepo.findByNomeIgnoreCase("Arrumada")
-                .orElseThrow(() -> new IllegalStateException("Estado 'Arrumada' não configurado."));
+        @Transactional
+        public boolean rejeitar(Long solicitacaoId, Long usuarioId, String motivoRejeicao) {
 
-        Usuario funcionario = usuarioRepo.findById(req.funcionarioId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Funcionário não encontrado."));
+                var estadoRejeitada = estadoRepo.findByNomeIgnoreCase("Rejeitada");
+                if (estadoRejeitada.isEmpty()) return false;
 
-        EstadoSolicitacao estadoAnterior = solicitacao.getEstadoAtual();
+                Solicitacao solicitacao = repository.findByIdComFetch(solicitacaoId);
+                if (solicitacao == null) return false;
 
-        solicitacao.setDescricaoManutencao(req.descricaoManutencao());
-        solicitacao.setOrientacoesCliente(req.orientacoesCliente());
-        solicitacao.setEstadoAtual(estadoArrumada);
-        repository.save(solicitacao);
+                Usuario usuario = usuarioRepo.findById(usuarioId)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado."));
 
-        HistoricoSolicitacao historico = HistoricoSolicitacao.builder()
-                .solicitacao(solicitacao)
-                .deEstado(estadoAnterior)
-                .paraEstado(estadoArrumada)
-                .usuario(funcionario)
-                .observacao(
-                        String.format(
-                                "🛠️ Manutenção concluída.\nDescrição: %s\nOrientações: %s",
-                                req.descricaoManutencao(), req.orientacoesCliente()
+                EstadoSolicitacao estadoAnterior = solicitacao.getEstadoAtual();
+
+                solicitacao.setEstadoAtual(estadoRejeitada.get());
+                repository.save(solicitacao);
+
+                String observacao = String.format(
+                        "🔄 Estado alterado manualmente: %s → %s. Motivo: %s",
+                        estadoAnterior != null ? estadoAnterior.getNome() : "Nenhum",
+                        estadoRejeitada.get().getNome(),
+                        motivoRejeicao != null ? motivoRejeicao : "Não informado"
+                );
+
+                HistoricoSolicitacao historico = HistoricoSolicitacao.builder()
+                        .solicitacao(solicitacao)
+                        .deEstado(estadoAnterior)
+                        .paraEstado(estadoRejeitada.get())
+                        .usuario(usuario)
+                        .observacao(observacao)
+                        .criadoEm(Instant.now())
+                        .build();
+
+                historicoRepo.save(historico);
+
+                return true;
+        }
+
+
+        @Transactional
+        public void deletar(Long id) {
+                if (!repository.existsById(id)) {
+                        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada");
+                }
+                try {
+                        repository.deleteById(id);
+                } catch (DataIntegrityViolationException ex) {
+                        throw new ResponseStatusException(
+                                HttpStatus.CONFLICT,
+                                "Solicitação vinculada a outros registros e não pode ser removida"
+                        );
+                }
+                }
+
+                @Transactional
+                public List<SolicitacaoResponse> listarEmAberto() {
+                return repository.findByEstadoAtual_NomeIgnoreCase("Aberta")
+                        .stream()
+                        .map(SolicitacaoResponse::from)
+                        .toList();
+        }
+
+        @Transactional
+        public boolean resgatarSolicitacao(Long solicitacaoId) {
+                var solicitacaoOpt = repository.findById(solicitacaoId);
+                if (solicitacaoOpt.isEmpty()) return false;
+
+                var solicitacao = solicitacaoOpt.get();
+
+                if (!"Rejeitada".equalsIgnoreCase(solicitacao.getEstadoAtual().getNome())) {
+                        return false;
+                }
+
+                var estadoAprovada = estadoRepo.findByNomeIgnoreCase("Aprovada")
+                        .orElseThrow(() -> new IllegalStateException("Estado 'Aprovada' não encontrado no banco."));
+
+                var estadoAnterior = solicitacao.getEstadoAtual();
+
+                solicitacao.setEstadoAtual(estadoAprovada);
+                repository.save(solicitacao);
+
+                var historico = HistoricoSolicitacao.builder()
+                        .solicitacao(solicitacao)
+                        .deEstado(estadoAnterior)
+                        .paraEstado(estadoAprovada)
+                        .observacao("Solicitação resgatada manualmente e reativada em " + Instant.now())
+                        .criadoEm(Instant.now())
+                        .build();
+
+                historicoRepo.save(historico);
+
+                return true;
+        }
+
+        @Transactional
+        public SolicitacaoResponse efetuarManutencao(ManutencaoRequest req) {
+                Solicitacao solicitacao = repository.findByIdComFetch(req.solicitacaoId());
+                if (solicitacao == null) {
+                        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada.");
+                }
+
+                EstadoSolicitacao estadoArrumada = estadoRepo.findByNomeIgnoreCase("Arrumada")
+                        .orElseThrow(() -> new IllegalStateException("Estado 'Arrumada' não configurado."));
+
+                Usuario funcionario = usuarioRepo.findById(req.funcionarioId())
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Funcionário não encontrado."));
+
+                EstadoSolicitacao estadoAnterior = solicitacao.getEstadoAtual();
+
+                solicitacao.setDescricaoManutencao(req.descricaoManutencao());
+                solicitacao.setOrientacoesCliente(req.orientacoesCliente());
+                solicitacao.setEstadoAtual(estadoArrumada);
+                repository.save(solicitacao);
+
+                HistoricoSolicitacao historico = HistoricoSolicitacao.builder()
+                        .solicitacao(solicitacao)
+                        .deEstado(estadoAnterior)
+                        .paraEstado(estadoArrumada)
+                        .usuario(funcionario)
+                        .observacao(
+                                String.format(
+                                        "🛠️ Manutenção concluída.\nDescrição: %s\nOrientações: %s",
+                                        req.descricaoManutencao(), req.orientacoesCliente()
+                                )
                         )
-                )
-                .criadoEm(Instant.now())
-                .build();
+                        .criadoEm(Instant.now())
+                        .build();
 
-        historicoRepo.save(historico);
+                historicoRepo.save(historico);
 
-        return SolicitacaoResponse.from(solicitacao);
-    }
-
+                return SolicitacaoResponse.from(solicitacao);
+        }
 
 
-    @Transactional
-    public SolicitacaoResponse redirecionarManutencao(Long solicitacaoId, Long destinoFuncionarioId, String motivo) {
+
+        @Transactional
+        public SolicitacaoResponse redirecionarManutencao(Long solicitacaoId, Long destinoFuncionarioId, String motivo) {
         //  Busca a solicitação
         Solicitacao solicitacao = repository.findByIdComFetch(solicitacaoId);
         if (solicitacao == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada");
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada");
         }
 
         // Estado "Redirecionada"
@@ -258,8 +297,8 @@ public class SolicitacaoService {
 
         // Formata data de registro
         String dataFormatada = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
-            .withLocale(new Locale("pt", "BR"))
-            .format(java.time.LocalDateTime.now());
+                .withLocale(new Locale("pt", "BR"))
+                .format(java.time.LocalDateTime.now());
 
         // Cria histórico detalhado
         HistoricoSolicitacao hist = HistoricoSolicitacao.builder()
@@ -277,15 +316,15 @@ public class SolicitacaoService {
         historicoRepo.save(hist);
 
         return SolicitacaoResponse.from(solicitacao);
-    }
+        }
 
 
 
-    @Transactional
-    public boolean pagarSolicitacao(Long solicitacaoId) {
+        @Transactional
+        public boolean pagarSolicitacao(Long solicitacaoId) {
         Solicitacao solicitacao = repository.findByIdComFetch(solicitacaoId);
         if (solicitacao == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada.");
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada.");
         }
 
         // Estado "Paga"
@@ -317,5 +356,5 @@ public class SolicitacaoService {
         historicoRepo.save(historico);
 
         return true;
-    }
+        }
 }

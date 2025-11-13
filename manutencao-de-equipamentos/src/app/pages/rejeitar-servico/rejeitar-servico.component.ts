@@ -6,6 +6,7 @@ import { Observable } from 'rxjs';
 import { SolicitacoesService } from '../../services/solicitacoes.service';
 import { Solicitacao,SolicitacaoResponse } from '../../models/solicitacao.model';
 import { Orcamento } from '../../models/orcamento.model';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-rejeitar-servico',
@@ -18,6 +19,7 @@ export class RejeitarServicoComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly service = inject(SolicitacoesService);
   private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
 
   solicitacao$?: Observable<SolicitacaoResponse>;
   orcamento$?: Observable<Orcamento>;
@@ -36,20 +38,28 @@ export class RejeitarServicoComponent implements OnInit {
     }
   }
 
-  confirmarRejeicao(): void {
-    if (!this.motivoRejeicao.trim()) {
-      alert('Por favor, informe o motivo da rejeição.');
-      return;
-    }
+ confirmarRejeicao(): void {
+  if (!this.motivoRejeicao.trim()) {
+    alert('Por favor, informe o motivo da rejeição.');
+    return;
+  }
 
-    if (!this.solicitacaoId) {
-      alert('Solicitação inválida.');
-      return;
-    }
+  if (!this.solicitacaoId) {
+    alert('Solicitação inválida.');
+    return;
+  }
 
-    this.isProcessing = true;
+  const usuarioId = this.auth.getUsuarioId();
+  if (!usuarioId) {
+    alert('Usuário não identificado.');
+    return;
+  }
 
-    this.service.rejeitarOrcamento(this.solicitacaoId, this.motivoRejeicao.trim()).subscribe({
+  this.isProcessing = true;
+
+  this.service
+    .rejeitarOrcamento(this.solicitacaoId, usuarioId, this.motivoRejeicao.trim())
+    .subscribe({
       next: (success: boolean) => {
         this.isProcessing = false;
         if (success) {
@@ -65,7 +75,8 @@ export class RejeitarServicoComponent implements OnInit {
         alert('Erro ao rejeitar o serviço. Tente novamente.');
       }
     });
-  }
+}
+
 
   cancelar(): void {
     this.router.navigate(['/home']);

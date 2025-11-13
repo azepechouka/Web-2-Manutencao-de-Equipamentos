@@ -104,24 +104,4 @@ export class SolicitacaoComponent implements OnInit {
       }
     });
   }
-
-
-  rejeitarOrcamento() {
-    if (!this.solicitacaoEnviada?.id) {
-      this.mensagem = 'Solicitação inválida para rejeição.';
-      return;
-    }
-
-    const motivo = prompt('Por favor, informe o motivo da rejeição:');
-    if (!motivo || motivo.trim() === '') {
-      this.mensagem = 'Motivo da rejeição é obrigatório.';
-      return;
-    }
-
-    this.solicitacoesService
-      .rejeitarOrcamento(this.solicitacaoEnviada.id, motivo.trim())
-      .subscribe((ok) => {
-        this.mensagem = ok ? 'Serviço rejeitado com sucesso.' : 'Não foi possível rejeitar o serviço.';
-      });
-  }
 }

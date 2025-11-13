@@ -64,7 +64,8 @@ public class SolicitacaoController {
 
     @PostMapping("/{id}/rejeitar")
     public ResponseEntity<Boolean> rejeitar(@PathVariable Long id, @RequestBody MotivoRejeicao req) {
-        boolean ok = solicitacaoService.trocarEstado(id, "REJEITADA", req.usuarioId());
+        boolean ok = solicitacaoService.rejeitar(id, req.usuarioId(), req.motivo());
+
         return ResponseEntity.ok(ok);
     }
 

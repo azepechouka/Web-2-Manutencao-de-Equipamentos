@@ -73,9 +73,9 @@ export class SolicitacoesService {
     );
   }
 
-  rejeitarOrcamento(solicitacaoId: number, motivo: string): Observable<boolean> {
-    return this.http.post<boolean>(`${this.SOLICITACOES}/${solicitacaoId}/rejeitar`, { motivo });}
-
+  rejeitarOrcamento(solicitacaoId: number, usuarioId: number, motivo: string): Observable<boolean> {
+    return this.http.post<boolean>(`${this.SOLICITACOES}/${solicitacaoId}/rejeitar`, { motivo, usuarioId });
+  }
 
   getDetalhesCompletos(id: number): Observable<Solicitacao> {
     return this.http.get<Solicitacao>(`${this.SOLICITACOES}/${id}/detalhes`);
