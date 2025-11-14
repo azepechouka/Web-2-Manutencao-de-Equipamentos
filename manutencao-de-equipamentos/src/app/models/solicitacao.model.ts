@@ -37,7 +37,7 @@ export interface SolicitacaoResponse {
   descricaoManutencao?: string;
   orientacoesCliente?: string;
   nomeFunc?: string;
-  funcionarioDirecionadoId?: number; // Campo adicionado
+  funcionarioDirecionadoId?: number;
 }
 
 export interface ManutencaoRequest {

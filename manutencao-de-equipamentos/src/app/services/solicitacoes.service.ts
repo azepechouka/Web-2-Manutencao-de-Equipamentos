@@ -5,6 +5,7 @@ import { ManutencaoRequest, Solicitacao, SolicitacaoCreateDto,SolicitacaoRespons
 import { Orcamento } from '../models/orcamento.model';
 import { AuthService } from './auth.service';
 import { HistoricoStatus, HistoricoStatusDTO  } from '../models/historico-status.model';
+import {ReceitaDia} from '../dtos/Receita-dia.dto';
 
 @Injectable({ providedIn: 'root' })
 export class SolicitacoesService {
@@ -127,5 +128,14 @@ export class SolicitacoesService {
       `${this.SOLICITACOES}/${id}/finalizar`,
       { usuarioId }
     );
+  }
+
+  relatorioReceita(dataIni: string | null, dataFim: string | null): Observable<ReceitaDia[]> {
+    const params: any = {};
+
+    if (dataIni) params.dataIni = dataIni;
+    if (dataFim) params.dataFim = dataFim;
+
+    return this.http.get<ReceitaDia[]>(`${this.API}/relatorios/receita`, { params });
   }
 }
