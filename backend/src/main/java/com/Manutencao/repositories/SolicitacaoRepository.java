@@ -2,9 +2,9 @@ package com.Manutencao.repositories;
 
 import com.Manutencao.models.Solicitacao;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
@@ -48,4 +48,16 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
         JOIN FETCH s.estadoAtual
     """)
     List<Solicitacao> findAllWithFetch();
+
+    // MÉTODO CORRIGIDO - usando JPQL com JOIN FETCH
+    @Query("""
+        SELECT s FROM Solicitacao s
+        JOIN FETCH s.estadoAtual ea
+        JOIN FETCH s.cliente
+        JOIN FETCH s.categoria
+        LEFT JOIN FETCH s.funcionarioDirecionado fd
+        WHERE (ea.nome != 'Redirecionada'
+               OR (ea.nome = 'Redirecionada' AND fd.id = :usuarioId))
+    """)
+    List<Solicitacao> findSolicitacoesByUsuario(@Param("usuarioId") Long usuarioId);
 }

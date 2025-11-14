@@ -34,21 +34,22 @@ public class SolicitacaoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<SolicitacaoResponse>> listarTodas(@RequestParam(required = false) Long clienteId) {
-        List<SolicitacaoResponse> lista;
-        
-        if (clienteId != null) {
-            // Filtra as solicitações pelo clienteId
-            lista = solicitacaoService.buscarPorCliente(clienteId)
-                    .stream().map(SolicitacaoResponse::from).toList();
-        } else {
-            // Retorna todas as solicitações
-            lista = solicitacaoService.listarTodas()
-                    .stream().map(SolicitacaoResponse::from).toList();
-        }
+    public ResponseEntity<List<SolicitacaoResponse>> listarTodas(@RequestParam Long usuarioId) {
+        // Log para verificar se o usuarioId está chegando corretamente
+        System.out.println("usuarioId recebido: " + usuarioId);
+
+        // Chama o serviço para listar as solicitações com o usuarioId
+        List<SolicitacaoResponse> lista = solicitacaoService.listarTodas(usuarioId)
+                .stream()
+                .map(SolicitacaoResponse::from)
+                .toList();
+
+        // Log para verificar o número de solicitações retornadas
+        System.out.println("Solicitações retornadas: " + lista.size());
 
         return ResponseEntity.ok(lista);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<SolicitacaoResponse> buscarPorId(@PathVariable Long id) {

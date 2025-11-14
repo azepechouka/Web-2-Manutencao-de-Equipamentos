@@ -26,24 +26,37 @@ export class EfetuarManutencaoComponent implements OnInit {
   mensagem = '';
 
   ngOnInit(): void {
-    const idParam = this.route.snapshot.paramMap.get('id');
-    const id = Number(idParam);
-    if (!id || isNaN(id)) {
-      this.router.navigate(['/home']);
-      return;
-    }
-
-    this.svc.getById(id).subscribe({
-      next: (resp) => {
-        this.solicitacao = resp;
-        this.carregando = false;
-      },
-      error: () => {
-        this.erro = 'Falha ao carregar solicitação.';
-        this.carregando = false;
-      },
-    });
+  const idParam = this.route.snapshot.paramMap.get('id');
+  const id = Number(idParam);
+  if (!id || isNaN(id)) {
+    this.router.navigate(['/home']);
+    return;
   }
+
+  this.svc.getById(id).subscribe({
+    next: (resp) => {
+      this.solicitacao = resp;
+      
+      if (resp.estadoAtual === 'Redirecionada') {
+        const usuarioId = this.auth.getUsuarioId();
+        const funcionarioDirecionadoId = resp.funcionarioDirecionadoId;
+
+        if ( usuarioId !== funcionarioDirecionadoId) {
+          this.erro = 'Você não tem permissão para acessar esta solicitação redirecionada.';
+          this.carregando = false;
+          setTimeout(() => this.router.navigate(['/home']), 2000);
+          return;
+        }
+      }
+      
+      this.carregando = false;
+    },
+    error: () => {
+      this.erro = 'Falha ao carregar solicitação.';
+      this.carregando = false;
+    },
+  });
+}
 
   iniciarManutencao(): void {
     this.exibirCamposManutencao = true;

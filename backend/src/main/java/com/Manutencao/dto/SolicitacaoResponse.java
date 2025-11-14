@@ -14,13 +14,19 @@ public record SolicitacaoResponse(
     Instant criadoEm,
     String descricaoManutencao,
     String orientacoesCliente,
-    String nomeFunc 
+    String nomeFunc,
+    Long funcionarioDirecionadoId
 ) {
     public static SolicitacaoResponse from(Solicitacao s) {
         return from(s, null);
     }
 
     public static SolicitacaoResponse from(Solicitacao s, String nomeFunc) {
+        Long funcionarioDirecionadoId = null;
+        if (s.getFuncionarioDirecionado() != null) {
+            funcionarioDirecionadoId = s.getFuncionarioDirecionado().getId();
+        }
+        
         return new SolicitacaoResponse(
             s.getId(),
             s.getDescricaoEquipamento(),
@@ -32,7 +38,8 @@ public record SolicitacaoResponse(
             s.getCriadoEm(),
             s.getDescricaoManutencao(),
             s.getOrientacoesCliente(),
-            nomeFunc
+            nomeFunc,
+            funcionarioDirecionadoId
         );
     }
 }

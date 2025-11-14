@@ -58,11 +58,12 @@
                         .build();
 
                 return repository.save(nova);
-                }
-
-                public List<Solicitacao> listarTodas() {
-                return repository.findAllWithFetch();
         }
+
+        public List<Solicitacao> listarTodas(Long usuarioId) {
+                return repository.findSolicitacoesByUsuario(usuarioId);
+        }
+
 
         @Transactional
         public SolicitacaoResponse buscarPorId(Long id) {

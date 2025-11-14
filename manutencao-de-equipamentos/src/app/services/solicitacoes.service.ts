@@ -17,8 +17,15 @@ export class SolicitacoesService {
   private readonly CLIENTES = `${this.API}/usuario`;
 
   listTodas(): Observable<SolicitacaoResponse[]> {
-    return this.http.get<SolicitacaoResponse[]>(this.SOLICITACOES);
+    const usuarioId = this.auth.getUsuarioId();  // Obtém o ID do usuário autenticado
+
+    if (!usuarioId) {
+      throw new Error('Nenhum usuário autenticado');
+    }
+
+    return this.http.get<SolicitacaoResponse[]>(`${this.SOLICITACOES}?usuarioId=${usuarioId}`);
   }
+
 
   getById(id: number): Observable<SolicitacaoResponse> {
     return this.http.get<SolicitacaoResponse>(`${this.SOLICITACOES}/${id}`);
@@ -90,7 +97,7 @@ export class SolicitacoesService {
   }
 
   redirecionarManutencao(solicitacaoId: number, motivo: string, destinoFuncionarioId: number): Observable<boolean> {
-    const usuarioId = this.auth.getUsuarioId();
+    const usuarioId = this.auth.getUsuarioId();  // Obtém o ID do usuário logado
 
     if (!usuarioId) {
       throw new Error('Usuário não autenticado');
@@ -99,7 +106,7 @@ export class SolicitacoesService {
     const payload = {
       motivo,
       destinoFuncionarioId,
-      usuarioId  
+      funcionarioRequisitanteId: usuarioId  // Envie o usuarioId como funcionarioRequisitanteId
     };
 
     return this.http.post<boolean>(
