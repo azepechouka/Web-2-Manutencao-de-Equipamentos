@@ -1,7 +1,5 @@
 <section class="container-fluid mt-4 px-4">
   <h2 class="mb-4 fw-semibold">Relatório de Receita</h2>
-
-  <!-- Filtro -->
   <div class="card shadow-sm mb-4">
     <div class="card-body">
       <form [formGroup]="filtro" (ngSubmit)="gerarRelatorio()">
@@ -44,7 +42,6 @@
     </div>
   </div>
 
-  <!-- Botão PDF -->
   <div class="mb-3" *ngIf="dadosReceita().length > 0">
     <button 
       type="button" 
@@ -55,7 +52,6 @@
     </button>
   </div>
 
-  <!-- Relatório -->
   <div *ngIf="carregando()" class="text-center py-4">
     <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Carregando...</span>
@@ -64,7 +60,6 @@
   </div>
 
   <div *ngIf="!carregando() && dadosReceita().length > 0">
-    <!-- Resumo Geral -->
     <div class="alert alert-info mb-4">
       <h5 class="alert-heading">Resumo Geral</h5>
       <p class="mb-0">
@@ -73,7 +68,6 @@
       </p>
     </div>
 
-    <!-- Dados por Dia -->
     <div class="card shadow-sm mb-3" *ngFor="let dia of dadosReceita()">
       <div class="card-header bg-light">
         <h5 class="card-title mb-0">

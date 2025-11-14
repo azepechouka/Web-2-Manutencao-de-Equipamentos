@@ -136,6 +136,6 @@ export class SolicitacoesService {
     if (dataIni) params.dataIni = dataIni;
     if (dataFim) params.dataFim = dataFim;
 
-    return this.http.get<ReceitaDia[]>(`${this.API}/relatorios/receita`, { params });
+    return this.http.get<ReceitaDia[]>(`${this.SOLICITACOES}/relatorio/receita`, { params });
   }
 }

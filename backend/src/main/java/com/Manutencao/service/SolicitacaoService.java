@@ -1,7 +1,19 @@
         package com.Manutencao.services;
+
+        import java.util.ArrayList;
+        import java.util.Comparator;
+        import java.util.List;
+        import java.util.Map;
+        import java.util.stream.Collectors;
+        import java.time.LocalDate;
+        import java.time.LocalDateTime;
+        import java.time.ZoneOffset;
+        import java.time.ZoneId;
+
         import com.Manutencao.api.dto.ManutencaoRequest;
         import com.Manutencao.api.dto.SolicitacaoCreateRequest;
         import com.Manutencao.api.dto.SolicitacaoResponse;
+        import com.Manutencao.api.dto.ReceitaDia;
         import com.Manutencao.models.*;
         import com.Manutencao.repositories.*;
         import jakarta.transaction.Transactional;
@@ -326,39 +338,85 @@
 
         @Transactional
         public boolean pagarSolicitacao(Long solicitacaoId) {
-        Solicitacao solicitacao = repository.findByIdComFetch(solicitacaoId);
-        if (solicitacao == null) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada.");
+                Solicitacao solicitacao = repository.findByIdComFetch(solicitacaoId);
+                if (solicitacao == null) {
+                        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Solicitação não encontrada.");
+                }
+
+                // Estado "Paga"
+                EstadoSolicitacao estadoPaga = estadoRepo.findByNomeIgnoreCase("Paga")
+                        .orElseThrow(() -> new IllegalStateException("Estado 'Paga' não configurado."));
+
+                // Guarda o estado anterior
+                EstadoSolicitacao estadoAnterior = solicitacao.getEstadoAtual();
+
+                // Atualiza o estado
+                solicitacao.setEstadoAtual(estadoPaga);
+                repository.save(solicitacao);
+
+                Usuario cliente = solicitacao.getCliente();
+
+                String dataFormatada = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
+                        .withLocale(new Locale("pt", "BR"))
+                        .format(Instant.now().atZone(java.time.ZoneId.systemDefault()));
+
+                HistoricoSolicitacao historico = HistoricoSolicitacao.builder()
+                        .solicitacao(solicitacao)
+                        .deEstado(estadoAnterior)
+                        .paraEstado(estadoPaga)
+                        .usuario(cliente) 
+                        .observacao(String.format(" Solicitação paga por %s em %s", cliente.getNome(), dataFormatada))
+                        .criadoEm(Instant.now())
+                        .build();
+
+                        historicoRepo.save(historico);
+
+                return true;
         }
 
-        // Estado "Paga"
-        EstadoSolicitacao estadoPaga = estadoRepo.findByNomeIgnoreCase("Paga")
-                .orElseThrow(() -> new IllegalStateException("Estado 'Paga' não configurado."));
+        public List<ReceitaDia> gerarRelatorioReceita(String dataIni, String dataFim) {
 
-        // Guarda o estado anterior
-        EstadoSolicitacao estadoAnterior = solicitacao.getEstadoAtual();
+                ZoneId zone = ZoneId.systemDefault();
 
-        // Atualiza o estado
-        solicitacao.setEstadoAtual(estadoPaga);
-        repository.save(solicitacao);
+                Instant ini = (dataIni == null)
+                        ? null
+                        : LocalDate.parse(dataIni).atStartOfDay(zone).toInstant();
 
-        Usuario cliente = solicitacao.getCliente();
+                Instant fim = (dataFim == null)
+                        ? null
+                        : LocalDate.parse(dataFim).atTime(23, 59, 59).atZone(zone).toInstant();
 
-        String dataFormatada = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
-                .withLocale(new Locale("pt", "BR"))
-                .format(Instant.now().atZone(java.time.ZoneId.systemDefault()));
+                List<Solicitacao> solicitacoes = repository.buscarParaRelatorio(ini, fim);
 
-        HistoricoSolicitacao historico = HistoricoSolicitacao.builder()
-                .solicitacao(solicitacao)
-                .deEstado(estadoAnterior)
-                .paraEstado(estadoPaga)
-                .usuario(cliente) 
-                .observacao(String.format(" Solicitação paga por %s em %s", cliente.getNome(), dataFormatada))
-                .criadoEm(Instant.now())
-                .build();
+                Map<String, List<Solicitacao>> agrupado =
+                        solicitacoes.stream().collect(Collectors.groupingBy(
+                                s -> LocalDateTime.ofInstant(s.getCriadoEm(), zone)
+                                                .toLocalDate()
+                                                .toString()
+                        ));
 
-        historicoRepo.save(historico);
+                List<ReceitaDia> relatorio = new ArrayList<>();
 
-        return true;
+                for (var entry : agrupado.entrySet()) {
+
+                        String data = entry.getKey();
+                        List<Solicitacao> lista = entry.getValue();
+
+                        double totalDia = lista.size(); // receita provisória
+
+                        relatorio.add(
+                                new ReceitaDia(
+                                        data,
+                                        totalDia,
+                                        lista.size(),
+                                        lista.stream().map(SolicitacaoResponse::from).toList()
+                                )
+                        );
+                }
+
+                relatorio.sort(Comparator.comparing(ReceitaDia::data));
+
+                return relatorio;
         }
+
 }

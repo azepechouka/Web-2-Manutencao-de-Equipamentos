@@ -10,6 +10,7 @@ import com.Manutencao.api.dto.SolicitacaoResponse;
 import com.Manutencao.dto.HistoricoStatusResponse;
 import com.Manutencao.api.dto.ManutencaoRequest;
 import com.Manutencao.api.dto.RedirecionamentoRequest;
+import com.Manutencao.api.dto.ReceitaDia;
 
 import java.util.List;
 
@@ -138,4 +139,14 @@ public class SolicitacaoController {
         boolean ok = solicitacaoService.trocarEstado(id, "FINALIZADA", req.usuarioId());
         return ResponseEntity.ok(ok);
     }
+
+    @GetMapping("/relatorio/receita")
+    public ResponseEntity<List<ReceitaDia>> relatorioReceita(
+            @RequestParam(required = false) String dataIni,
+            @RequestParam(required = false) String dataFim
+    ) {
+        List<ReceitaDia> resultado = solicitacaoService.gerarRelatorioReceita(dataIni, dataFim);
+        return ResponseEntity.ok(resultado);
+    }
+
 }

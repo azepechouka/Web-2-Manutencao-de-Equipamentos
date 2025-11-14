@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.time.Instant;
 
 @Repository
 public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> {
@@ -60,4 +61,21 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
                OR (ea.nome = 'Redirecionada' AND fd.id = :usuarioId))
     """)
     List<Solicitacao> findSolicitacoesByUsuario(@Param("usuarioId") Long usuarioId);
+
+@Query("""
+    SELECT s FROM Solicitacao s
+            JOIN FETCH s.estadoAtual ea
+            JOIN FETCH s.cliente c
+            JOIN FETCH s.categoria cat
+            LEFT JOIN FETCH s.funcionarioDirecionado fd
+        WHERE (ea.nome = 'Finalizada' OR ea.nome = 'Paga')
+            AND (:dataIni IS NULL OR s.criadoEm >= :dataIni)
+            AND (:dataFim IS NULL OR s.criadoEm <= :dataFim)
+    """)
+List<Solicitacao> buscarParaRelatorio(
+        @Param("dataIni") java.time.Instant dataIni,
+        @Param("dataFim") java.time.Instant dataFim
+);
+
+
 }
