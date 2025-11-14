@@ -86,34 +86,38 @@ export class HomeComponent implements OnInit {
     return mapa[estado] ?? '#999999';
   }
 
-  getAcoes(item: SolicitacaoResponse): { texto: string; tipo: string; acao: () => void } | null {
+  getAcoes(item: SolicitacaoResponse): { texto: string; tipo: string; acao: () => void }[] {
+    const acoes = [];
+
     switch (item.estadoAtual) {
       case 'Orçada':
-        return {
-          texto: 'Aprovar / Rejeitar Serviço', 
+        acoes.push({
+          texto: 'Aprovar / Rejeitar Serviço',
           tipo: 'btn-warning text-dark fw-semibold',
           acao: () => this.abrirOrcamento(item.id),
-        };
+        });
+        break;
       case 'Rejeitada':
-        return {
+        acoes.push({
           texto: 'Resgatar Serviço',
           tipo: 'btn-danger',
           acao: () => this.resgatarServico(item.id),
-        };
+        });
+        break;
       case 'Arrumada':
-        return {
+        acoes.push({
           texto: 'Pagar Serviço',
           tipo: 'btn-primary',
           acao: () => this.pagarServico(item.id),
-        };
+        });
+        break;
       case 'Aprovada':
-        return null;
+        break;
       default:
-        return {
-          texto: 'Visualizar Serviço',
-          tipo: 'btn-secondary',
-          acao: () => this.verSolicitacao(item.id),
-        };
+        break;
     }
+
+    return acoes;
   }
+
 }
