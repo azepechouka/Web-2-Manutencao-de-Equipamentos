@@ -54,27 +54,41 @@ public class SolicitacaoService {
         this.orcamentoRepository = orcamentoRepository;
     }
 
-    public Solicitacao criar(SolicitacaoCreateRequest req) {
-        Usuario cliente = usuarioRepo.findById(req.clienteId())
-                .orElseThrow(() -> new IllegalArgumentException("Cliente inexistente: " + req.clienteId()));
+       public Solicitacao criar(SolicitacaoCreateRequest req) {
+                Usuario cliente = usuarioRepo.findById(req.clienteId())
+                        .orElseThrow(() -> new IllegalArgumentException("Cliente inexistente: " + req.clienteId()));
 
-        Categoria categoria = categoriaRepo.findById(req.categoriaId())
-                .orElseThrow(() -> new IllegalArgumentException("Categoria inexistente: " + req.categoriaId()));
+                Categoria categoria = categoriaRepo.findById(req.categoriaId())
+                        .orElseThrow(() -> new IllegalArgumentException("Categoria inexistente: " + req.categoriaId()));
 
-        EstadoSolicitacao estadoInicial = estadoRepo.findByNomeIgnoreCase("ABERTA")
-                .orElseThrow(() -> new IllegalStateException("Estado 'ABERTA' não configurado."));
+                EstadoSolicitacao estadoInicial = estadoRepo.findByNomeIgnoreCase("ABERTA")
+                        .orElseThrow(() -> new IllegalStateException("Estado 'ABERTA' não configurado."));
 
-        Solicitacao nova = Solicitacao.builder()
-                .id(null)
-                .cliente(cliente)
-                .categoria(categoria)
-                .descricaoEquipamento(req.descricaoEquipamento())
-                .descricaoDefeito(req.descricaoDefeito())
-                .estadoAtual(estadoInicial)
-                .build();
+                Solicitacao nova = Solicitacao.builder()
+                        .id(null)
+                        .cliente(cliente)
+                        .categoria(categoria)
+                        .descricaoEquipamento(req.descricaoEquipamento())
+                        .descricaoDefeito(req.descricaoDefeito())
+                        .estadoAtual(estadoInicial)
+                        .build();
 
-        return repository.save(nova);
-    }
+                Solicitacao solicitacaoCriada = repository.save(nova);
+
+                // Log de histórico para criação
+                Usuario usuarioCriacao = cliente;  
+                HistoricoSolicitacao historicoCriacao = HistoricoSolicitacao.builder()
+                        .solicitacao(solicitacaoCriada)
+                        .deEstado(null) 
+                        .paraEstado(estadoInicial)
+                        .usuario(usuarioCriacao)
+                        .observacao("Solicitação criada")
+                        .criadoEm(Instant.now())
+                        .build();
+                historicoRepo.save(historicoCriacao);
+
+                return solicitacaoCriada;
+        }
 
     public List<Solicitacao> listarTodas(Long usuarioId) {
         return repository.findSolicitacoesByUsuario(usuarioId);
@@ -123,28 +137,21 @@ public class SolicitacaoService {
         solicitacao.setEstadoAtual(estadoNovo.get());
         repository.save(solicitacao);
 
-        HistoricoSolicitacao historico = HistoricoSolicitacao.builder()
+        // Log de histórico para troca de estado
+        HistoricoSolicitacao historicoTrocaEstado = HistoricoSolicitacao.builder()
                 .solicitacao(solicitacao)
                 .deEstado(estadoAnterior)
                 .paraEstado(estadoNovo.get())
                 .usuario(usuario)
-                .observacao(
-                        String.format(
-                                "🔄 Estado alterado manualmente: %s → %s",
-                                estadoAnterior != null ? estadoAnterior.getNome() : "Nenhum",
-                                estadoNovo.get().getNome()
-                        )
-                )
+                .observacao(String.format("Estado alterado manualmente: %s → %s", 
+                        estadoAnterior != null ? estadoAnterior.getNome() : "Nenhum", 
+                        estadoNovo.get().getNome()))
                 .criadoEm(Instant.now())
                 .build();
 
-        historicoRepo.save(historico);
+        historicoRepo.save(historicoTrocaEstado);
 
         return true;
-    }
-
-    public Solicitacao salvar(Solicitacao s) {
-        return repository.save(s);
     }
 
     @Transactional
@@ -164,7 +171,7 @@ public class SolicitacaoService {
         repository.save(solicitacao);
 
         String observacao = String.format(
-                "🔄 Estado alterado manualmente: %s → %s. Motivo: %s",
+                "Estado alterado manualmente: %s → %s. Motivo: %s",
                 estadoAnterior != null ? estadoAnterior.getNome() : "Nenhum",
                 estadoRejeitada.get().getNome(),
                 motivoRejeicao != null ? motivoRejeicao : "Não informado"
