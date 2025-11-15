@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { map, tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { UsuarioCreateDto } from '../dtos/usuario-create.dto';
@@ -29,7 +30,7 @@ interface RegisterRequest {
   cpf?: string | null;
   telefone?: string | null;
   dataNascimento?: string | null;
-  perfil?: 'USER' | 'ADMIN';
+  perfil?: string;  // Mudado para string para aceitar '1'
   endereco: {
     cep: string;
     logradouro: string;
@@ -44,6 +45,7 @@ interface RegisterRequest {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
+  private readonly router = inject(Router); // Adicionado Router
   private readonly STORAGE_KEY = 'auth.usuario';
   private readonly API = 'http://localhost:8080';
   private readonly AUTH = `${this.API}/api/auth`;
@@ -61,7 +63,7 @@ export class AuthService {
     );
   }
 
-  registrar(dto: UsuarioCreateDto): Observable<UsuarioLogado> {
+  registrar(dto: UsuarioCreateDto): Observable<any> {
     const first = dto.enderecos?.[0];
     const req: RegisterRequest = {
       nome: dto.nome,
@@ -69,7 +71,7 @@ export class AuthService {
       cpf: dto.cpf ?? null,
       telefone: dto.telefone ?? null,
       dataNascimento: dto.dataNascimento ?? null,
-      perfil: 'USER',
+      perfil: '1', // Mudado para '1' (ID do perfil CLIENTE)
       endereco: {
         cep: first?.cep ?? '',
         logradouro: first?.logradouro ?? '',
@@ -82,14 +84,18 @@ export class AuthService {
     };
 
     return this.http.post<AuthResponse>(`${this.AUTH}/register`, req).pipe(
-      map(res => ({
-        id: String(res?.id ?? ''),
-        nome: String(res?.nome ?? ''),
-        email: res?.email ?? undefined,
-        perfis: (res?.perfil?.toUpperCase() === 'ADMIN') ? (['FUNCIONARIO'] as Perfil[]) : (['USUARIO'] as Perfil[]),
-        token: res?.token
-      })),
-      tap(user => this.persist(user))
+      tap({
+        next: (res) => {
+          alert('Cadastro realizado com sucesso! Verifique seu e-mail para a senha temporária.');
+          // Redireciona para a home sem fazer login
+          this.router.navigate(['/home']);
+        },
+        error: (err) => {
+          console.error('Erro no cadastro:', err);
+          const errorMessage = err?.error?.message || err?.message || 'Erro ao realizar cadastro. Tente novamente.';
+          alert(`Erro: ${errorMessage}`);
+        }
+      })
     );
   }
 

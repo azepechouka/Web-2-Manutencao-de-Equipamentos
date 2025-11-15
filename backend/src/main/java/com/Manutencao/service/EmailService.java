@@ -13,7 +13,7 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
 
-    @Value("${app.mail.from:no-reply@localhost}")
+    @Value("${spring.mail.username}")
     private String from;
 
     public EmailService(JavaMailSender mailSender) {
