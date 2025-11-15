@@ -23,12 +23,12 @@ public class EmailService {
     public void sendTemporaryPassword(@NonNull String to, @NonNull String nome, @NonNull String senhaPlano)
             throws MessagingException {
 
-        String subject = "Sua senha temporária";
+        String subject = "Sua senha";
         String html = """
                 <div style="font-family:Arial,sans-serif;max-width:520px">
                   <h2>Olá, %s!</h2>
                   <p>Seu cadastro foi realizado com sucesso.</p>
-                  <p><b>Sua senha temporária:</b></p>
+                  <p><b>Sua senha :</b></p>
                   <div style="font-size:22px;padding:12px 16px;border:1px solid #ddd;border-radius:8px;display:inline-block">
                     <code>%s</code>
                   </div>
