@@ -50,7 +50,6 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
     """)
     List<Solicitacao> findAllWithFetch();
 
-    // MÉTODO CORRIGIDO - usando JPQL com JOIN FETCH
     @Query("""
         SELECT s FROM Solicitacao s
         JOIN FETCH s.estadoAtual ea
@@ -62,20 +61,50 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
     """)
     List<Solicitacao> findSolicitacoesByUsuario(@Param("usuarioId") Long usuarioId);
 
-@Query("""
-    SELECT s FROM Solicitacao s
-            JOIN FETCH s.estadoAtual ea
-            JOIN FETCH s.cliente c
-            JOIN FETCH s.categoria cat
-            LEFT JOIN FETCH s.funcionarioDirecionado fd
-        WHERE (ea.nome = 'Finalizada' OR ea.nome = 'Paga')
-            AND (:dataIni IS NULL OR s.criadoEm >= :dataIni)
-            AND (:dataFim IS NULL OR s.criadoEm <= :dataFim)
+    @Query("""
+        SELECT s FROM Solicitacao s
+                JOIN FETCH s.estadoAtual ea
+                JOIN FETCH s.cliente c
+                JOIN FETCH s.categoria cat
+                LEFT JOIN FETCH s.funcionarioDirecionado fd
+            WHERE (ea.nome = 'Finalizada' OR ea.nome = 'Paga')
+                AND (:dataIni IS NULL OR s.criadoEm >= :dataIni)
+                AND (:dataFim IS NULL OR s.criadoEm <= :dataFim)
+        """)
+    List<Solicitacao> buscarParaRelatorio(
+            @Param("dataIni") Instant dataIni,
+            @Param("dataFim") Instant dataFim
+    );
+
+
+    public interface ReceitaCategoriaProjection {
+        String getCategoriaNome();
+        Long getTotalReceita();
+        Long getQuantidadeSolicitacoes();
+    }
+    
+    @Query(value = """
+        SELECT cat.nome AS categoriaNome,
+               COALESCE(SUM(o.valor), 0) AS totalReceita,
+               COUNT(s.id) AS quantidadeSolicitacoes
+        FROM solicitacoes s
+        JOIN estados_solicitacao ea ON ea.id = s.estado_atual_id
+        JOIN categorias cat ON cat.id = s.categoria_id
+        LEFT JOIN orcamentos o ON o.solicitacao_id = s.id
+        WHERE ea.nome IN ('Finalizada', 'Paga')
+        GROUP BY cat.id, cat.nome
+        ORDER BY cat.nome
+    """, nativeQuery = true)
+    List<ReceitaCategoriaProjection> findReceitaPorCategoria();
+    
+    @Query("""
+        SELECT s FROM Solicitacao s 
+        JOIN s.estadoAtual ea 
+        JOIN s.categoria cat 
+        WHERE cat.nome = :categoriaNome 
+        AND ea.nome IN ('Finalizada', 'Paga')
     """)
-List<Solicitacao> buscarParaRelatorio(
-        @Param("dataIni") java.time.Instant dataIni,
-        @Param("dataFim") java.time.Instant dataFim
-);
-
-
+    List<Solicitacao> findByCategoriaNomeAndEstado(@Param("categoriaNome") String categoriaNome);
+    
+    List<Solicitacao> findByEstadoAtualNomeIn(List<String> estados);
 }

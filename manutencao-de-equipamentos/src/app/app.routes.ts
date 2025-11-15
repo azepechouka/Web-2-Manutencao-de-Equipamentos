@@ -17,7 +17,7 @@ import { FuncHomeComponent } from './pages/func-home/func-home.component';
 import { EfetuarOrcamentoComponent } from './pages/efetuar-orcamento/efetuar-orcamento.component';
 import { SolicitacoesListaComponent } from './pages/solicitacoes-lista/solicitacoes-lista.component';
 import { CategoriasEquipamentoComponent } from './pages/categorias-equipamento/categorias-equipamento.component';
-import { RelatorioCategoriasComponent } from './pages/relatorio-categorias/relatorio-categorias.component';
+import { RelatorioCategoriaComponent } from './pages/relatorio-categorias/relatorio-categorias.component';
 import { MostrarOrcamentoComponent } from './pages/mostrar-orcamento/mostrar-orcamento.component';
 import { ResgatarServicoComponent } from './pages/resgatar-servico/resgatar-servico.component';
 import { PagarServicoComponent } from './pages/pagar-servico/pagar-servico.component';
@@ -44,7 +44,7 @@ export const routes: Routes = [
     { path: 'redirecionar-manutencao/:solicitacao', component: RedirecionarManutencaoComponent, canActivate: [authGuard, funcionarioGuard] },
     { path: 'crudFuncionario', component: CrudFuncionarioComponent, canActivate: [authGuard, funcionarioGuard] },
     { path: 'relatorioReceita', component: RelatorioReceitaComponent, canActivate: [authGuard, funcionarioGuard] },
-    { path: 'relatorio-categoria', component: RelatorioCategoriasComponent, canActivate: [authGuard, funcionarioGuard] },
+    { path: 'relatorio-categoria', component: RelatorioCategoriaComponent, canActivate: [authGuard, funcionarioGuard] },
     { path: 'listaSolicitacoes', component: SolicitacoesListaComponent, canActivate: [authGuard, funcionarioGuard] },
     { path: 'cadastrarcategoria', component: CategoriasEquipamentoComponent, canActivate: [authGuard, funcionarioGuard] },
 ];

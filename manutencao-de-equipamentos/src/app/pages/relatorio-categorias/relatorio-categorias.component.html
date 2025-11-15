@@ -1,0 +1,74 @@
+<section class="container mt-4 p-4">
+  <h2 class="h3 mb-4 font-weight-bold">Relatório de Receita por Categoria</h2>
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="d-flex gap-2">
+        <button
+          type="button"
+          (click)="atualizarRelatorio()"
+          [disabled]="carregando()"
+          class="btn btn-primary px-4 py-2 rounded"
+        >
+          {{ carregando() ? 'Carregando...' : 'Atualizar Dados' }}
+        </button>
+        
+        <button
+          *ngIf="dadosCategoria().length > 0"
+          (click)="gerarPDF()"
+          class="btn btn-success px-4 py-2 rounded"
+        >
+          Exportar PDF
+        </button>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="dadosCategoria().length > 0" class="card shadow-sm mb-4">
+    <div class="card-header">
+      <h5 class="card-title mb-0">
+        Total Geral: R$ {{ totalGeral().toFixed(2) }}
+      </h5>
+      <p class="text-muted">
+        Atualizado em: {{ today | date:'dd/MM/yyyy HH:mm' }}
+      </p>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead class="thead-light">
+            <tr>
+              <th class="text-left">Categoria</th>
+              <th class="text-left">Receita Total</th>
+              <th class="text-left">Percentual</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let categoria of dadosCategoria()">
+              <td>{{ categoria.categoriaNome }}</td>
+              <td>R$ {{ categoria.totalReceita.toFixed(2) }}</td>
+              <td>{{ calcularPercentual(categoria.totalReceita) }}%</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td class="font-weight-bold">TOTAL GERAL</td>
+              <td class="font-weight-bold">R$ {{ totalGeral().toFixed(2) }}</td>
+              <td class="font-weight-bold">100%</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="carregando()" class="card p-4 text-center">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Carregando...</span>
+    </div>
+    <p class="mt-2 text-muted">Carregando dados...</p>
+  </div>
+  <div 
+    *ngIf="!carregando() && dadosCategoria().length === 0"
+    class="alert alert-warning text-center"
+  >
+    Nenhum dado encontrado.
+  </div>
+</section>

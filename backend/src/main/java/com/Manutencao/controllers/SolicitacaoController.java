@@ -11,6 +11,7 @@ import com.Manutencao.dto.HistoricoStatusResponse;
 import com.Manutencao.api.dto.ManutencaoRequest;
 import com.Manutencao.api.dto.RedirecionamentoRequest;
 import com.Manutencao.api.dto.ReceitaDia;
+import com.Manutencao.api.dto.ReceitaPorCategoria;
 
 import java.util.List;
 
@@ -36,17 +37,12 @@ public class SolicitacaoController {
 
     @GetMapping
     public ResponseEntity<List<SolicitacaoResponse>> listarTodas(@RequestParam Long usuarioId) {
-        // Log para verificar se o usuarioId está chegando corretamente
-        System.out.println("usuarioId recebido: " + usuarioId);
 
-        // Chama o serviço para listar as solicitações com o usuarioId
         List<SolicitacaoResponse> lista = solicitacaoService.listarTodas(usuarioId)
                 .stream()
                 .map(SolicitacaoResponse::from)
                 .toList();
 
-        // Log para verificar o número de solicitações retornadas
-        System.out.println("Solicitações retornadas: " + lista.size());
 
         return ResponseEntity.ok(lista);
     }
@@ -149,4 +145,8 @@ public class SolicitacaoController {
         return ResponseEntity.ok(resultado);
     }
 
+    @GetMapping("/relatorio/receita-categoria")
+    public List<ReceitaPorCategoria> gerarRelatorioReceitaPorCategoria() {
+        return solicitacaoService.gerarRelatorioReceitaPorCategoria();
+    }
 }

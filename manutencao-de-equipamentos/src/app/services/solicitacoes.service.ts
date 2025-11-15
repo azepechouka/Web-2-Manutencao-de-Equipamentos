@@ -6,6 +6,7 @@ import { Orcamento } from '../models/orcamento.model';
 import { AuthService } from './auth.service';
 import { HistoricoStatus, HistoricoStatusDTO  } from '../models/historico-status.model';
 import {ReceitaDia} from '../dtos/Receita-dia.dto';
+import { ReceitaCategoria } from '../dtos/receita-categoria.dto';
 
 @Injectable({ providedIn: 'root' })
 export class SolicitacoesService {
@@ -18,7 +19,7 @@ export class SolicitacoesService {
   private readonly CLIENTES = `${this.API}/usuario`;
 
   listTodas(): Observable<SolicitacaoResponse[]> {
-    const usuarioId = this.auth.getUsuarioId();  // Obtém o ID do usuário autenticado
+    const usuarioId = this.auth.getUsuarioId(); 
 
     if (!usuarioId) {
       throw new Error('Nenhum usuário autenticado');
@@ -107,7 +108,7 @@ export class SolicitacoesService {
     const payload = {
       motivo,
       destinoFuncionarioId,
-      funcionarioRequisitanteId: usuarioId  // Envie o usuarioId como funcionarioRequisitanteId
+      funcionarioRequisitanteId: usuarioId 
     };
 
     return this.http.post<boolean>(
@@ -137,5 +138,8 @@ export class SolicitacoesService {
     if (dataFim) params.dataFim = dataFim;
 
     return this.http.get<ReceitaDia[]>(`${this.SOLICITACOES}/relatorio/receita`, { params });
+  }
+  relatorioReceitaPorCategoria(): Observable<ReceitaCategoria[]> {
+    return this.http.get<ReceitaCategoria[]>(`${this.SOLICITACOES}/relatorio/receita-categoria`);
   }
 }
