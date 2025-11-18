@@ -79,14 +79,14 @@ export class VisualizarServicoComponent implements OnInit {
 
   getStatusCor(estado: string): string {
     const mapa: Record<string, string> = {
-      'Aberta': '#6c757d',        // Cinza
-      'Orçada': '#8B4513',        // Marrom
-      'Aprovada': '#FFD700',      // Amarelo
-      'Rejeitada': '#DC3545',     // Vermelho
-      'Redirecionada': '#800080', // Roxo
-      'Arrumada': '#0D6EFD',      // Azul
-      'Paga': '#FF8C00',          // Alaranjado
-      'Finalizada': '#28A745'     // Verde
+      'Aberta': '#6c757d',       
+      'Orçada': '#8B4513',        
+      'Aprovada': '#FFD700',      
+      'Rejeitada': '#DC3545',     
+      'Redirecionada': '#800080', 
+      'Arrumada': '#0D6EFD',      
+      'Paga': '#FF8C00',          
+      'Finalizada': '#28A745'     
     };
     return mapa[estado] ?? '#999999';
   }

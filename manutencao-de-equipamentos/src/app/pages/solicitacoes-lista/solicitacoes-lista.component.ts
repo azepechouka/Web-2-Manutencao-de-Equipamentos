@@ -54,7 +54,7 @@ export class SolicitacoesListaComponent implements OnInit {
 
     this.svc.listTodas().subscribe({
       next: (solicitacoes: SolicitacaoResponse[]) => {
-        // Converte DTO -> ViewItem
+        
         const viewItems: ViewItem[] = solicitacoes.map((s) => ({
           id: s.id,
           criadoEm: s.criadoEm,

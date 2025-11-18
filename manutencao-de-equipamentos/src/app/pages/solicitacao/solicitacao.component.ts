@@ -5,8 +5,6 @@ import { Solicitacao, SolicitacaoCreateDto } from '../../models/solicitacao.mode
 import { SolicitacoesService } from '../../services/solicitacoes.service';
 import { Orcamento } from '../../models/orcamento.model';
 import { AuthService } from '../../services/auth.service';
-
-// categorias
 import { CategoriaEquipamentoService } from '../../services/categoria-equipamento.service';
 import { CategoriaEquipamento } from '../../models/categoria-equipamento.model';
 

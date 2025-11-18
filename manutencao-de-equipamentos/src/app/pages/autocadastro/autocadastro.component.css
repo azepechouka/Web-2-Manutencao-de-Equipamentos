@@ -1,24 +1,23 @@
-/* Ajusta o card */
+
 .card {
   border-radius: 12px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
 }
 
-/* Padroniza labels */
+
 .form-label {
   font-weight: 600;
   margin-bottom: 6px;
   display: block;
 }
 
-/* Uniformiza inputs */
 .form-control {
   height: 44px;
   border-radius: 8px;
   font-size: 15px;
 }
 
-/* Espaçamento consistente entre colunas */
+
 .row .col-md-3,
 .row .col-md-4,
 .row .col-md-5,
@@ -29,20 +28,20 @@
   justify-content: flex-start;
 }
 
-/* Ajusta seção Endereço */
 h5 {
   margin-top: 10px;
   font-weight: 700;
 }
 
-/* Ajusta botão */
+
 button.btn-primary {
   height: 50px;
   border-radius: 10px;
   font-size: 18px;
 }
 
-/* Alinha a divisão da página */
+
+
 .container {
   max-width: 1000px;
 }

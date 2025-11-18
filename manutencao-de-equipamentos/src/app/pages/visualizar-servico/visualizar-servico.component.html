@@ -7,7 +7,7 @@
 
     <div class="card-body">
       <div class="row">
-        <!-- Informações do Equipamento -->
+        
         <div class="col-md-12">
           <h5 class="mb-3">Informações do Equipamento</h5>
           <table class="table table-borderless table-sm">
@@ -17,7 +17,7 @@
                 <td>{{ s.criadoEm | date: 'dd/MM/yyyy, HH:mm' }}</td>
               </tr>
 
-              <!-- Status Atual com cor e texto -->
+              
               <tr>
                 <th scope="row">Status Atual:</th>
                 <td>
@@ -59,7 +59,7 @@
 
       <hr class="my-4" />
 
-      <!-- Histórico -->
+      
       <h5 class="mb-3">Histórico de Atualizações</h5>
       <ng-container *ngIf="historico.length > 0; else semHistorico">
         <div class="timeline">
@@ -88,7 +88,7 @@
   </div>
 </div>
 
-<!-- Loading -->
+
 <ng-template #loading>
   <p class="text-center mt-5">Carregando detalhes da solicitação...</p>
 </ng-template>

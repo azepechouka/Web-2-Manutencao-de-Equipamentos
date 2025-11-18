@@ -36,23 +36,23 @@
   color: #dc3545 !important;
 }
 
-/* Estilo para o textarea */
+
 textarea.form-control {
   resize: vertical;
   min-height: 120px;
 }
 
-/* Estilo para o contador de caracteres */
+
 .form-text {
   font-size: 0.875rem;
 }
 
-/* Estilo para os botões */
+
 .btn {
   min-width: 120px;
 }
 
-/* Responsividade */
+
 @media (max-width: 768px) {
   .d-flex.gap-2 {
     flex-direction: column;

@@ -1,5 +1,5 @@
 <div class="container-lg py-4">
-  <!-- Cabeçalho -->
+  
   <div class="text-center mb-4">
     <h2 class="fw-bold">Efetuar Manutenção</h2>
     <p class="text-muted">
@@ -7,7 +7,7 @@
     </p>
   </div>
 
-  <!-- Estado de carregamento -->
+  
   <div *ngIf="carregando" class="text-center my-5">
     <div
       class="spinner-border text-primary mb-3"
@@ -16,10 +16,10 @@
     <p class="text-muted">Carregando dados da solicitação...</p>
   </div>
 
-  <!-- Mensagem de erro -->
+  
   <div *ngIf="erro" class="alert alert-danger text-center">{{ erro }}</div>
 
-  <!-- Dados da solicitação -->
+  
   <div *ngIf="!carregando && solicitacao" class="row justify-content-center">
     <div class="col-12 col-md-10 col-lg-8">
       <div class="card shadow-sm border-0">
@@ -78,7 +78,7 @@
     </div>
   </div>
 
-  <!-- Botões principais -->
+  
   <div
     *ngIf="!carregando && solicitacao && !exibirCamposManutencao"
     class="mt-4 d-flex flex-column flex-sm-row justify-content-center gap-3"
@@ -100,7 +100,7 @@
     </button>
   </div>
 
-  <!-- Campos de manutenção -->
+  
   <div
     *ngIf="exibirCamposManutencao"
     class="card border-0 shadow-sm mt-4 mx-auto"
@@ -165,7 +165,7 @@
     </div>
   </div>
 
-  <!-- Mensagem final -->
+  
   <div
     *ngIf="mensagem"
     class="alert alert-info mt-4 text-center mx-auto"
